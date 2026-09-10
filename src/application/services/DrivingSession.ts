@@ -2,7 +2,7 @@ import type { EngineSoundOutput } from "../ports/EngineSoundOutput";
 import { updateGreenScore, type GreenScore } from "../../domain/scoring/greenScore";
 import { stepVehicle } from "../../domain/vehicle/vehiclePhysics";
 import type { VehicleProfile, VehicleState } from "../../domain/vehicle/types";
-import type { DriveAction } from "../../infrastructure/input/KeyboardInput";
+import type { DriveAction } from "../../domain/vehicle/controls";
 
 /** Coordinates one driving session without knowing about Vue, DOM, GPS, or Web Audio. */
 export class DrivingSession {
@@ -11,7 +11,7 @@ export class DrivingSession {
   constructor(
     private readonly vehicle: VehicleState,
     private readonly greenScore: GreenScore,
-    private readonly soundOutput: EngineSoundOutput
+    private readonly soundOutput: EngineSoundOutput,
   ) {}
 
   setControl(action: DriveAction, active: boolean): void {
@@ -35,7 +35,25 @@ export class DrivingSession {
     this.vehicle.speedKph = speedKph;
   }
 
-  clearGpsSpeed(): void { this.vehicle.gpsSpeedKph = null; }
+  clearGpsSpeed(): void {
+    this.vehicle.gpsSpeedKph = null;
+  }
+
+  reset(): void {
+    this.activeControls.clear();
+    this.vehicle.rpm = this.vehicle.profile.idleRpm;
+    this.vehicle.gear = 1;
+    this.vehicle.throttle = 0;
+    this.vehicle.brake = 0;
+    this.vehicle.speedKph = 0;
+    this.vehicle.gpsSpeedKph = null;
+    this.greenScore.points = 100;
+    this.greenScore.earned = 0;
+    this.greenScore.penalties.harshBrake = 0;
+    this.greenScore.penalties.highRpm = 0;
+    this.greenScore.penalties.harshThrottle = 0;
+    this.greenScore.previousThrottle = 0;
+  }
 
   step(dt: number): void {
     this.vehicle.throttle = this.activeControls.has("accelerate") ? 1 : 0;

@@ -5,7 +5,9 @@ import { createGreenScore } from "../../../src/domain/scoring/greenScore";
 import { CAR_PROFILES } from "../../../src/domain/vehicle/carProfiles";
 import { createVehicleState } from "../../../src/domain/vehicle/vehiclePhysics";
 
-function createSoundOutput(): EngineSoundOutput { return { setProfile: vi.fn(), update: vi.fn() }; }
+function createSoundOutput(): EngineSoundOutput {
+  return { setProfile: vi.fn(), update: vi.fn() };
+}
 
 describe("DrivingSession", () => {
   it("keeps UI-independent driving controls and sound output coordinated", () => {
@@ -27,5 +29,33 @@ describe("DrivingSession", () => {
     session.selectProfile(CAR_PROFILES.f1);
     expect(vehicle).toMatchObject({ gear: 1, rpm: CAR_PROFILES.f1.idleRpm, profile: CAR_PROFILES.f1 });
     expect(sound.setProfile).toHaveBeenCalledWith(CAR_PROFILES.f1);
+  });
+
+  it("resets controls, telemetry state, and score to a clean drive", () => {
+    const vehicle = createVehicleState(CAR_PROFILES.brezza);
+    const score = createGreenScore();
+    const session = new DrivingSession(vehicle, score, createSoundOutput());
+    session.setControl("accelerate", true);
+    session.setGpsSpeed(35);
+    vehicle.gear = 3;
+    score.points = 67;
+    score.penalties.highRpm = 12;
+
+    session.reset();
+
+    expect(vehicle).toMatchObject({
+      rpm: 800,
+      gear: 1,
+      throttle: 0,
+      brake: 0,
+      speedKph: 0,
+      gpsSpeedKph: null,
+    });
+    expect(score).toMatchObject({
+      points: 100,
+      earned: 0,
+      previousThrottle: 0,
+      penalties: { harshBrake: 0, highRpm: 0, harshThrottle: 0 },
+    });
   });
 });
