@@ -1,1 +1,321 @@
-:root{color-scheme:dark;font-family:Inter,system-ui,sans-serif;background:#101216;color:#f3f5f8}*{box-sizing:border-box}body{margin:0;min-width:320px}button,select{font:inherit}.shell{max-width:720px;min-height:100vh;margin:auto;padding:clamp(20px,5vw,48px);background:linear-gradient(145deg,#171b22,#101216 65%)}header{display:flex;align-items:center;justify-content:space-between;gap:16px}h1{margin:2px 0;font-size:clamp(1.8rem,6vw,2.8rem)}.eyebrow{color:#99a3b3;text-transform:uppercase;font-size:.72rem;letter-spacing:.12em;margin:0}.primary,.controls button{border:0;border-radius:12px;color:#fff;cursor:pointer}.primary{padding:12px 16px;background:#e84c32;font-weight:700}.telemetry{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:32px 0 16px}.telemetry div,.panel{border:1px solid #2a313d;background:#171b22;border-radius:14px;padding:18px}.telemetry span{display:block;color:#99a3b3;font-size:.78rem;text-transform:uppercase;letter-spacing:.08em}.telemetry strong{display:block;margin-top:7px;font-size:clamp(1.25rem,5vw,2rem)}.green-score{border-color:#2e7d55!important}.panel{margin:16px 0}label{display:block;color:#c4cbd6;margin-bottom:8px}select{width:100%;border-radius:8px;border:1px solid #3a4352;padding:10px;color:inherit;background:#101216}.panel p{color:#99a3b3;line-height:1.5;font-size:.9rem;margin:12px 0 0}.compact{margin-top:24px}.compact label{margin:0}.controls{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:24px}.controls button{min-height:105px;background:#28303c;font-size:1.7rem;font-weight:800;touch-action:none}.controls button small{font-size:.68rem;text-transform:uppercase;letter-spacing:.08em}.controls .accelerate{background:#23744b}.controls .brake{background:#aa3737}.controls button:active{transform:translateY(2px);filter:brightness(1.2)}@media(max-width:600px){.telemetry,.controls{grid-template-columns:repeat(2,1fr)}header{align-items:flex-start;flex-direction:column}}
+:root {
+  color-scheme: dark;
+  font-family: Inter, system-ui, sans-serif;
+  background: #101216;
+  color: #f3f5f8;
+}
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+  min-width: 320px;
+}
+button,
+select {
+  font: inherit;
+}
+.shell {
+  max-width: 720px;
+  min-height: 100vh;
+  margin: auto;
+  padding: clamp(20px, 5vw, 48px);
+  background: linear-gradient(145deg, #171b22, #101216 65%);
+}
+header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+h1 {
+  margin: 2px 0;
+  font-size: clamp(1.8rem, 6vw, 2.8rem);
+}
+.eyebrow {
+  color: #99a3b3;
+  text-transform: uppercase;
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  margin: 0;
+}
+.primary,
+.controls button {
+  border: 0;
+  border-radius: 12px;
+  color: #fff;
+  cursor: pointer;
+}
+.primary {
+  padding: 12px 16px;
+  background: #e84c32;
+  font-weight: 700;
+}
+.status {
+  margin: 14px 0 -16px;
+  color: #99a3b3;
+  font-size: 0.9rem;
+}
+.telemetry {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  margin: 32px 0 16px;
+}
+.telemetry div,
+.panel {
+  border: 1px solid #2a313d;
+  background: #171b22;
+  border-radius: 14px;
+  padding: 18px;
+}
+.telemetry span {
+  display: block;
+  color: #99a3b3;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+.telemetry strong {
+  display: block;
+  margin-top: 7px;
+  font-size: clamp(1.25rem, 5vw, 2rem);
+}
+.green-score {
+  border-color: #2e7d55 !important;
+}
+.panel {
+  margin: 16px 0;
+}
+label {
+  display: block;
+  color: #c4cbd6;
+  margin-bottom: 8px;
+}
+select {
+  width: 100%;
+  border-radius: 8px;
+  border: 1px solid #3a4352;
+  padding: 10px;
+  color: inherit;
+  background: #101216;
+}
+.panel p {
+  color: #99a3b3;
+  line-height: 1.5;
+  font-size: 0.9rem;
+  margin: 12px 0 0;
+}
+.compact {
+  margin-top: 24px;
+}
+.compact label {
+  margin: 0;
+}
+.controls {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 10px;
+  margin-top: 24px;
+}
+.controls button {
+  min-height: 105px;
+  background: #28303c;
+  font-size: 1.7rem;
+  font-weight: 800;
+  touch-action: none;
+}
+.controls button small {
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+.controls .accelerate {
+  background: #23744b;
+}
+.controls .brake {
+  background: #aa3737;
+}
+.controls .reset {
+  background: #4b5563;
+}
+.controls button:active,
+.controls button.active {
+  transform: translateY(2px);
+  filter: brightness(1.2);
+  outline: 2px solid #f3f5f8;
+}
+.controls button:focus-visible,
+.primary:focus-visible,
+select:focus-visible,
+input:focus-visible {
+  outline: 3px solid #f7b955;
+  outline-offset: 3px;
+}
+@media (max-width: 600px) {
+  .telemetry,
+  .controls {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
+
+:root {
+  --surface: #090a0d;
+  --panel: #12151b;
+  --line: #2a313d;
+  --text: #f3f5f8;
+  --muted: #99a3b3;
+  --red: #e73333;
+  --green: #31a566;
+}
+
+body {
+  background: var(--surface);
+}
+.shell {
+  background-color: var(--surface);
+  background-image:
+    repeating-linear-gradient(125deg, rgba(255, 255, 255, 0.025) 0 1px, transparent 1px 5px),
+    linear-gradient(145deg, #171b22, #090a0d 65%);
+}
+.instrument-cluster {
+  position: relative;
+  display: grid;
+  place-items: center;
+  margin: 24px auto 10px;
+  max-width: 470px;
+}
+.tachometer {
+  width: min(88vw, 410px);
+  filter: drop-shadow(0 12px 26px rgba(0, 0, 0, 0.6));
+}
+.tachometer svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.tachometer__outer {
+  fill: #050609;
+  stroke: #373d48;
+  stroke-width: 3;
+}
+.tachometer__face {
+  fill: #101216;
+  stroke: #1f252f;
+  stroke-width: 2;
+}
+.tachometer__redline {
+  fill: none;
+  stroke: var(--red);
+  stroke-width: 8;
+  stroke-linecap: round;
+}
+.tachometer__tick {
+  stroke: #d1d6df;
+  stroke-width: 2;
+}
+.tachometer__label {
+  fill: #d9dde3;
+  font-size: 14px;
+  font-weight: 700;
+  text-anchor: middle;
+  dominant-baseline: middle;
+}
+.tachometer__needle {
+  stroke: var(--red);
+  stroke-width: 3;
+  stroke-linecap: round;
+  transform-origin: center;
+  transition: transform 120ms ease-out;
+}
+.tachometer__hub {
+  fill: #282e39;
+  stroke: #727b89;
+  stroke-width: 2;
+}
+.tachometer__rpm {
+  fill: var(--text);
+  font-size: 22px;
+  font-weight: 800;
+  text-anchor: middle;
+}
+.tachometer__rpm-caption {
+  fill: var(--muted);
+  font-size: 8px;
+  letter-spacing: 2px;
+  text-anchor: middle;
+}
+.gear-display {
+  position: absolute;
+  right: 5%;
+  bottom: 10%;
+  display: grid;
+  min-width: 96px;
+  padding: 10px;
+  border: 1px solid rgba(231, 51, 51, 0.65);
+  border-radius: 10px;
+  background: rgba(9, 10, 13, 0.92);
+  box-shadow: 0 0 18px rgba(231, 51, 51, 0.15);
+}
+.gear-display span,
+.gear-display small {
+  color: var(--muted);
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+.gear-display strong {
+  color: var(--red);
+  font-size: 2.6rem;
+  line-height: 1;
+}
+.status-indicators {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  max-width: 470px;
+  margin: 0 auto 24px;
+}
+.status-indicators p {
+  margin: 0;
+  padding: 9px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: rgba(18, 21, 27, 0.86);
+  text-align: center;
+}
+.status-indicators span {
+  display: block;
+  color: var(--muted);
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+.status-indicators strong {
+  font-size: 0.8rem;
+  text-transform: capitalize;
+}
+.panel {
+  background: rgba(18, 21, 27, 0.9);
+}
+@media (prefers-reduced-motion: reduce) {
+  .tachometer__needle {
+    transition: none;
+  }
+}
+@media (max-width: 600px) {
+  .gear-display {
+    right: 2%;
+    bottom: 8%;
+  }
+  .status-indicators {
+    gap: 6px;
+  }
+  .status-indicators p {
+    padding: 8px 4px;
+  }
+}
