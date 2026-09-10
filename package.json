@@ -9,6 +9,7 @@
     "preview": "vite preview --host 0.0.0.0",
     "check": "vue-tsc --noEmit",
     "lint": "eslint src --ext .ts,.vue"
+    ,"test": "vitest run"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^6.0.0",
@@ -19,6 +20,7 @@
     "vite": "^7.0.0",
     "vue-tsc": "^3.0.0",
     "typescript-eslint": "^8.0.0"
+    ,"vitest": "^3.0.0"
   },
   "dependencies": {
     "vue": "^3.5.0"
