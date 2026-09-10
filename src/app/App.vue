@@ -5,7 +5,7 @@ import DriveControls from "../presentation/components/DriveControls.vue";
 import TelemetryPanel from "../presentation/components/TelemetryPanel.vue";
 const simulator = useVehicleSimulator();
 const profileDetails = computed(() => `${simulator.vehicle.profile.cylinders}-cylinder · ${simulator.vehicle.profile.gears}-speed manual · suggested shift ${simulator.vehicle.profile.shiftRpm.toLocaleString()} RPM`);
-function onProfileChange(event: Event): void { simulator.selectProfile(simulator.profiles[(event.target as HTMLSelectElement).value]); }
+function onProfileChange(event: Event): void { simulator.selectProfile((event.target as HTMLSelectElement).value); }
 function onGpsChange(event: Event): void { simulator.setGps((event.target as HTMLInputElement).checked); }
 </script>
 <template>

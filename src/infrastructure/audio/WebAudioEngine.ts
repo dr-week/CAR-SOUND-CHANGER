@@ -1,7 +1,8 @@
 import type { VehicleProfile, VehicleState } from "../../domain/vehicle/types";
+import type { EngineSoundOutput } from "../../application/ports/EngineSoundOutput";
 type Voice = { oscillator: OscillatorNode; harmonic: number };
 
-export class WebAudioEngine {
+export class WebAudioEngine implements EngineSoundOutput {
   private context: AudioContext | null = null;
   private voices: Voice[] = [];
   private output: GainNode | null = null;
