@@ -5,6 +5,7 @@ Complete guide for organizing code in a modular, maintainable structure.
 ## Overview
 
 The project follows a **feature-based modular architecture** where each module is:
+
 - **Self-contained**: Has its own logic, state, and UI
 - **Reusable**: Can be used independently
 - **Testable**: Easy to test in isolation
@@ -195,11 +196,11 @@ module-name/
 // src/modules/audio/index.ts
 // Public API - only export what's needed outside
 
-export { AudioService } from './services/AudioService';
-export { useAudioPlayer } from './hooks/useAudioPlayer';
-export { AudioControls } from './components/AudioControls';
-export type { AudioState, SoundPack } from './types';
-export { AudioOutput, EngineSound } from './types';
+export { AudioService } from "./services/AudioService";
+export { useAudioPlayer } from "./hooks/useAudioPlayer";
+export { AudioControls } from "./components/AudioControls";
+export type { AudioState, SoundPack } from "./types";
+export { AudioOutput, EngineSound } from "./types";
 ```
 
 ### GPS Module Structure
@@ -207,11 +208,11 @@ export { AudioOutput, EngineSound } from './types';
 ```typescript
 // src/modules/gps/index.ts
 
-export { GPSService } from './services/GPSService';
-export { useGPSTracking } from './hooks/useGPSTracking';
-export { useSpeed } from './hooks/useSpeed';
-export { SpeedDisplay } from './components/SpeedDisplay';
-export type { GPSState, LocationData } from './types';
+export { GPSService } from "./services/GPSService";
+export { useGPSTracking } from "./hooks/useGPSTracking";
+export { useSpeed } from "./hooks/useSpeed";
+export { SpeedDisplay } from "./components/SpeedDisplay";
+export type { GPSState, LocationData } from "./types";
 ```
 
 ### Vehicle Module Structure
@@ -219,13 +220,13 @@ export type { GPSState, LocationData } from './types';
 ```typescript
 // src/modules/vehicle/index.ts
 
-export { GearLogicService } from './services/GearLogicService';
-export { RPMCalculator } from './services/RPMCalculator';
-export { useVehicleState } from './hooks/useVehicleState';
-export { useGearShift } from './hooks/useGearShift';
-export { GearIndicator } from './components/GearIndicator';
-export { RPMGauge } from './components/RPMGauge';
-export type { VehicleState, GearRatio } from './types';
+export { GearLogicService } from "./services/GearLogicService";
+export { RPMCalculator } from "./services/RPMCalculator";
+export { useVehicleState } from "./hooks/useVehicleState";
+export { useGearShift } from "./hooks/useGearShift";
+export { GearIndicator } from "./components/GearIndicator";
+export { RPMGauge } from "./components/RPMGauge";
+export type { VehicleState, GearRatio } from "./types";
 ```
 
 ## Code Division Rules
@@ -249,7 +250,7 @@ const HomeScreen = () => {
   const { speed } = useGPSTracking();
   const { rpm, gear } = useVehicleState(speed);
   const { play } = useAudioPlayer();
-  
+
   return <HomeView speed={speed} rpm={rpm} gear={gear} />;
 };
 ```
@@ -290,6 +291,7 @@ export class GearLogicService {
 - **Utils**: Max 50 lines per function
 
 **If exceeded, split into:**
+
 - Multiple smaller components
 - Helper functions
 - Separate services
@@ -314,6 +316,7 @@ export class GearLogicService {
 ```
 
 **Rules:**
+
 - Lower layers CANNOT depend on upper layers
 - Modules should NOT depend on each other directly
 - Use dependency injection for cross-module communication
@@ -327,7 +330,7 @@ class AudioService {
 // ✅ GOOD: Service is independent
 class AudioService {
   constructor(private config: AudioConfig) {}
-  
+
   onRPMChange(callback: (rpm: number) => void) {
     this.callbacks.push(callback);
   }
@@ -341,7 +344,7 @@ Modules should be **loosely coupled**:
 ```typescript
 // ❌ BAD: Tight coupling
 // audio/AudioService.ts
-import { GPSService } from '../gps/GPSService'; // Direct dependency
+import { GPSService } from "../gps/GPSService"; // Direct dependency
 
 class AudioService {
   constructor() {
@@ -361,7 +364,7 @@ class AudioService {
 const App = () => {
   const { speed } = useGPSTracking();
   const audioService = useAudioService();
-  
+
   useEffect(() => {
     audioService.playForSpeed(speed);
   }, [speed]);
@@ -440,27 +443,33 @@ export const useAudioStore = create<AudioState>((set) => ({
 ## File Naming Conventions
 
 ### Components
+
 - **PascalCase**: `RPMGauge.tsx`, `AudioControls.tsx`
 - **Test files**: `RPMGauge.test.tsx`
 - **Styles**: `RPMGauge.styles.ts` or `styles.ts`
 
 ### Services
+
 - **PascalCase**: `AudioService.ts`, `GPSService.ts`
 - **Suffix**: Always end with `Service`
 
 ### Hooks
+
 - **camelCase**: `useAudioPlayer.ts`, `useGPSTracking.ts`
 - **Prefix**: Always start with `use`
 
 ### Utils
+
 - **camelCase**: `calculateRPM.ts`, `formatSpeed.ts`
 - **Descriptive**: Name after what they do
 
 ### Types
+
 - **PascalCase**: `VehicleState.ts`, `AudioConfig.ts`
 - **Group by domain**: `types/audio/`, `types/gps/`
 
 ### Constants
+
 - **UPPER_SNAKE_CASE**: `MAX_RPM`, `GEAR_RATIOS`
 - **File**: `constants.ts` or `config.ts`
 
@@ -469,27 +478,27 @@ export const useAudioStore = create<AudioState>((set) => ({
 ```typescript
 // ✅ GOOD: Organized imports
 // 1. External libraries
-import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import React, { useState, useEffect } from "react";
+import { View, Text, StyleSheet } from "react-native";
 
 // 2. Internal modules (by feature)
-import { useGPSTracking } from '@/modules/gps';
-import { useAudioPlayer } from '@/modules/audio';
-import { useVehicleState } from '@/modules/vehicle';
+import { useGPSTracking } from "@/modules/gps";
+import { useAudioPlayer } from "@/modules/audio";
+import { useVehicleState } from "@/modules/vehicle";
 
 // 3. Components
-import { RPMGauge } from '@/modules/vehicle/components';
-import { Button } from '@/modules/ui/components';
+import { RPMGauge } from "@/modules/vehicle/components";
+import { Button } from "@/modules/ui/components";
 
 // 4. Types
-import type { VehicleState } from '@/modules/vehicle/types';
+import type { VehicleState } from "@/modules/vehicle/types";
 
 // 5. Constants & Utils
-import { MAX_RPM, SHIFT_RPM } from '@/constants';
-import { formatSpeed } from '@/utils';
+import { MAX_RPM, SHIFT_RPM } from "@/constants";
+import { formatSpeed } from "@/utils";
 
 // 6. Styles (last)
-import styles from './styles';
+import styles from "./styles";
 ```
 
 ## Module Communication
@@ -501,25 +510,25 @@ import styles from './styles';
 // services/EventBus.ts
 class EventBus {
   private listeners: Map<string, Function[]> = new Map();
-  
+
   on(event: string, callback: Function) {
     if (!this.listeners.has(event)) {
       this.listeners.set(event, []);
     }
     this.listeners.get(event)!.push(callback);
   }
-  
+
   emit(event: string, data: any) {
-    this.listeners.get(event)?.forEach(cb => cb(data));
+    this.listeners.get(event)?.forEach((cb) => cb(data));
   }
 }
 
 // Usage
 // gps/GPSService.ts
-eventBus.emit('speed:changed', speed);
+eventBus.emit("speed:changed", speed);
 
 // audio/AudioService.ts
-eventBus.on('speed:changed', (speed) => {
+eventBus.on("speed:changed", (speed) => {
   this.updateSound(speed);
 });
 ```

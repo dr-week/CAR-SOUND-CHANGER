@@ -13,13 +13,13 @@ Drivers who want an engaging engine-audio experience usually need bespoke hardwa
 
 ## Demonstrated engineering decisions
 
-| Challenge | Decision | Benefit |
-| --- | --- | --- |
-| Browser audio latency | Web Audio synthesis on-device | Works offline; no audio streaming cost. |
-| Future device variability | Infrastructure adapters behind application contracts | GPS, keyboard, and future OBD-II can change independently. |
-| Product safety/privacy | Local-first state and explicit permission | No account, telemetry vendor, or trip-data leak. |
-| Framework change risk | Pure TypeScript domain layer | Vehicle and score rules are testable without Vue/browser runtime. |
-| Release confidence | CI quality gate and unit tests | Every pull request is type-checked, linted, tested, and built. |
+| Challenge                 | Decision                                             | Benefit                                                           |
+| ------------------------- | ---------------------------------------------------- | ----------------------------------------------------------------- |
+| Browser audio latency     | Web Audio synthesis on-device                        | Works offline; no audio streaming cost.                           |
+| Future device variability | Infrastructure adapters behind application contracts | GPS, keyboard, and future OBD-II can change independently.        |
+| Product safety/privacy    | Local-first state and explicit permission            | No account, telemetry vendor, or trip-data leak.                  |
+| Framework change risk     | Pure TypeScript domain layer                         | Vehicle and score rules are testable without Vue/browser runtime. |
+| Release confidence        | CI quality gate and unit tests                       | Every pull request is type-checked, linted, tested, and built.    |
 
 ## Portfolio talking points
 

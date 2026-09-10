@@ -36,12 +36,14 @@ Complete system architecture for the Car Sound Changer Android app.
 ### 1. UI Layer
 
 #### Screens
+
 - **HomeScreen**: Main dashboard with gauges and controls
 - **SettingsScreen**: Configuration and preferences
 - **AudioDeviceScreen**: Bluetooth device selection and management
 - **CalibrationScreen**: Gear ratio and shift point tuning
 
 #### Components
+
 - **RPMGauge**: Circular RPM gauge (0-6000 RPM range)
 - **SpeedoMeter**: Digital/analog speedometer
 - **GearIndicator**: Current gear display (1-5)
@@ -54,36 +56,37 @@ Complete system architecture for the Car Sound Changer Android app.
 ```typescript
 interface AppState {
   // Vehicle State
-  speed: number;              // km/h
-  currentGear: number;        // 1-5
-  rpm: number;                // Current RPM
+  speed: number; // km/h
+  currentGear: number; // 1-5
+  rpm: number; // Current RPM
   isMoving: boolean;
-  
+
   // Audio State
-  volume: number;             // 0-1
+  volume: number; // 0-1
   isMuted: boolean;
   connectedDevice: BluetoothDevice | null;
-  audioOutput: 'phone' | 'bluetooth' | 'wired';
-  
+  audioOutput: "phone" | "bluetooth" | "wired";
+
   // GPS State
   gpsEnabled: boolean;
   gpsAccuracy: number;
   latitude: number;
   longitude: number;
-  
+
   // App State
   isRunning: boolean;
   isBackgroundMode: boolean;
-  
+
   // Settings
-  shiftRPM: number;           // 1500-2000
-  gearRatios: number[];       // Speed thresholds for each gear
+  shiftRPM: number; // 1500-2000
+  gearRatios: number[]; // Speed thresholds for each gear
 }
 ```
 
 ### 3. Service Layer
 
 #### GPS Service
+
 ```typescript
 class GPSService {
   - startTracking()
@@ -95,6 +98,7 @@ class GPSService {
 ```
 
 **Flow**:
+
 1. Request location permissions
 2. Start GPS tracking with high accuracy
 3. Calculate speed from position changes
@@ -102,6 +106,7 @@ class GPSService {
 5. Filter noise with moving average
 
 #### Audio Service
+
 ```typescript
 class AudioService {
   - loadSounds(gear: number): Promise<void>
@@ -114,6 +119,7 @@ class AudioService {
 ```
 
 **Flow**:
+
 1. Load sound files for all gears
 2. Play appropriate gear sound based on current gear
 3. Adjust pitch/playback rate based on RPM
@@ -121,6 +127,7 @@ class AudioService {
 5. Route to selected audio output
 
 #### Bluetooth Service
+
 ```typescript
 class BluetoothService {
   - scanDevices(): Promise<BluetoothDevice[]>
@@ -134,6 +141,7 @@ class BluetoothService {
 ```
 
 **Flow**:
+
 1. Scan for paired Bluetooth devices
 2. Filter for audio-capable devices
 3. Connect to selected device
@@ -141,6 +149,7 @@ class BluetoothService {
 5. Monitor connection status
 
 #### Gear Logic Service
+
 ```typescript
 class GearLogicService {
   - calculateGear(speed: number): number
@@ -151,27 +160,29 @@ class GearLogicService {
 ```
 
 **Gear Calculation** (Suzuki Brezza):
+
 ```typescript
 const GEAR_SPEED_THRESHOLDS = {
-  1: [0, 15],      // 0-15 km/h
-  2: [15, 30],     // 15-30 km/h
-  3: [30, 50],     // 30-50 km/h
-  4: [50, 70],     // 50-70 km/h
-  5: [70, 999]     // 70+ km/h
+  1: [0, 15], // 0-15 km/h
+  2: [15, 30], // 15-30 km/h
+  3: [30, 50], // 30-50 km/h
+  4: [50, 70], // 50-70 km/h
+  5: [70, 999], // 70+ km/h
 };
 
-const SHIFT_RPM = 1750;  // Average of 1500-2000
+const SHIFT_RPM = 1750; // Average of 1500-2000
 const IDLE_RPM = 900;
 ```
 
 **RPM Calculation**:
+
 ```typescript
 function calculateRPM(speed: number, gear: number): number {
   const [minSpeed, maxSpeed] = GEAR_SPEED_THRESHOLDS[gear];
   const speedRange = maxSpeed - minSpeed;
   const speedInGear = speed - minSpeed;
   const rpmRange = SHIFT_RPM - IDLE_RPM;
-  
+
   return IDLE_RPM + (speedInGear / speedRange) * rpmRange;
 }
 ```
@@ -241,17 +252,18 @@ Auto-reconnect on next launch
 ```typescript
 // Background task for continuous operation
 BackgroundService.start({
-  taskName: 'CarSoundEngine',
-  taskTitle: 'Car Sound Mod Running',
-  taskDesc: 'Simulating engine sounds',
-  taskIcon: { name: 'ic_launcher', type: 'mipmap' },
+  taskName: "CarSoundEngine",
+  taskTitle: "Car Sound Mod Running",
+  taskDesc: "Simulating engine sounds",
+  taskIcon: { name: "ic_launcher", type: "mipmap" },
   parameters: {
-    delay: 100 // Update every 100ms
-  }
+    delay: 100, // Update every 100ms
+  },
 });
 ```
 
 **Capabilities**:
+
 - Runs when app is minimized
 - Continues GPS tracking
 - Maintains audio playback
@@ -261,18 +273,21 @@ BackgroundService.start({
 ## Performance Optimizations
 
 ### Audio Optimization
+
 1. **Pre-load all sound files** on app start
 2. **Use native audio** (not JS bridge for playback)
 3. **Buffer management**: Small buffers for low latency
 4. **Pitch shifting**: Native implementation for smooth RPM changes
 
 ### GPS Optimization
+
 1. **High accuracy mode** only when moving
 2. **Batch updates**: Process every 100ms, not per GPS update
 3. **Kalman filtering**: Smooth speed calculations
 4. **Distance threshold**: Ignore updates < 1 meter
 
 ### UI Optimization
+
 1. **RequestAnimationFrame** for gauge updates
 2. **Memoization**: React.memo for expensive components
 3. **Virtualization**: For device lists
@@ -296,6 +311,7 @@ BackgroundService.start({
 ## Scalability
 
 ### Future Enhancements
+
 - Multiple vehicle profiles
 - Custom sound pack support
 - Cloud sync for settings
@@ -305,6 +321,7 @@ BackgroundService.start({
 ---
 
 See also:
+
 - [GPS_INTEGRATION.md](./GPS_INTEGRATION.md)
 - [AUDIO_SYSTEM.md](./AUDIO_SYSTEM.md)
 - [BLUETOOTH_AUDIO.md](./BLUETOOTH_AUDIO.md)

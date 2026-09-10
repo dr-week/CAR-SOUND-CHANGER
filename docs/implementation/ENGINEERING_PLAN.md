@@ -6,14 +6,14 @@ This is a local-first, installable Vue 3 + TypeScript application designed as a 
 
 ## Required stack
 
-| Concern | Decision | Reason |
-| --- | --- | --- |
-| UI | Vue 3 Composition API, TypeScript strict mode | Mature component system with typed business boundaries. |
-| Build | Vite | Fast, standard Vue development/build workflow. |
-| Audio | Web Audio API | Low-latency local synthesis with no sound-hosting cost. |
-| GPS | Browser Geolocation API | Permission-based local speed source. |
-| Installation | PWA manifest + service worker | Installable browser app on supported mobile and desktop platforms. |
-| Quality | ESLint + TypeScript checks | Automated, repeatable quality gate. |
+| Concern      | Decision                                      | Reason                                                             |
+| ------------ | --------------------------------------------- | ------------------------------------------------------------------ |
+| UI           | Vue 3 Composition API, TypeScript strict mode | Mature component system with typed business boundaries.            |
+| Build        | Vite                                          | Fast, standard Vue development/build workflow.                     |
+| Audio        | Web Audio API                                 | Low-latency local synthesis with no sound-hosting cost.            |
+| GPS          | Browser Geolocation API                       | Permission-based local speed source.                               |
+| Installation | PWA manifest + service worker                 | Installable browser app on supported mobile and desktop platforms. |
+| Quality      | ESLint + TypeScript checks                    | Automated, repeatable quality gate.                                |
 
 ## Dependency direction
 
@@ -25,16 +25,16 @@ The domain never imports Vue or browser APIs. The application composable is the 
 
 ## Module responsibilities
 
-| Module | Public responsibility | Must not contain |
-| --- | --- | --- |
-| `domain/vehicle` | Profiles, state contracts, deterministic physics | Vue, DOM, network code |
-| `domain/scoring` | Green-score policy | Rendering, telemetry access |
-| `application/composables` | Lifecycle and module coordination | Audio DSP or HTML strings |
-| `infrastructure/audio` | Web Audio adapter | Vehicle physics |
-| `infrastructure/input` | Keyboard adapter | UI rendering |
-| `infrastructure/telemetry` | Geolocation and future OBD-II adapters | Score policy |
-| `presentation/components` | Focused reusable Vue views | Direct browser API calls |
-| `app` | Feature composition/root screen | Business calculations |
+| Module                     | Public responsibility                            | Must not contain            |
+| -------------------------- | ------------------------------------------------ | --------------------------- |
+| `domain/vehicle`           | Profiles, state contracts, deterministic physics | Vue, DOM, network code      |
+| `domain/scoring`           | Green-score policy                               | Rendering, telemetry access |
+| `application/composables`  | Lifecycle and module coordination                | Audio DSP or HTML strings   |
+| `infrastructure/audio`     | Web Audio adapter                                | Vehicle physics             |
+| `infrastructure/input`     | Keyboard adapter                                 | UI rendering                |
+| `infrastructure/telemetry` | Geolocation and future OBD-II adapters           | Score policy                |
+| `presentation/components`  | Focused reusable Vue views                       | Direct browser API calls    |
+| `app`                      | Feature composition/root screen                  | Business calculations       |
 
 ## Delivery phases
 

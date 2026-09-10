@@ -43,21 +43,21 @@ carSOUNDMOD/
 
 ## Micro-module inventory
 
-| Macro module | Micro module | Contract |
-| --- | --- | --- |
-| `domain/vehicle` | `types.ts` | Shared typed vehicle contracts. |
-| `domain/vehicle` | `carProfiles.ts` | Immutable car-profile catalog. |
-| `domain/vehicle` | `vehiclePhysics.ts` | State construction and deterministic motion/RPM update. |
-| `domain/scoring` | `greenScore.ts` | Pure eco-score state and calculation policy. |
-| `application/composables` | `useVehicleSimulator.ts` | Vue lifecycle orchestration; composes dependencies. |
-| `application/ports` | `EngineSoundOutput.ts` | Stable contract for an engine-sound implementation. |
-| `application/services` | `DrivingSession.ts` | UI-independent driving use case and state coordination. |
-| `infrastructure/audio` | `WebAudioEngine.ts` | Browser sound-output adapter. |
-| `infrastructure/input` | `KeyboardInput.ts` | Keyboard-to-driving-action adapter. |
-| `infrastructure/telemetry` | `BrowserGeolocation.ts` | Permissioned, local GPS-speed adapter. |
-| `presentation/components` | `TelemetryPanel.vue` | Read-only telemetry display. |
-| `presentation/components` | `DriveControls.vue` | Typed control-event emitter. |
-| `app` | `App.vue` | Screen composition only. |
+| Macro module               | Micro module             | Contract                                                |
+| -------------------------- | ------------------------ | ------------------------------------------------------- |
+| `domain/vehicle`           | `types.ts`               | Shared typed vehicle contracts.                         |
+| `domain/vehicle`           | `carProfiles.ts`         | Immutable car-profile catalog.                          |
+| `domain/vehicle`           | `vehiclePhysics.ts`      | State construction and deterministic motion/RPM update. |
+| `domain/scoring`           | `greenScore.ts`          | Pure eco-score state and calculation policy.            |
+| `application/composables`  | `useVehicleSimulator.ts` | Vue lifecycle orchestration; composes dependencies.     |
+| `application/ports`        | `EngineSoundOutput.ts`   | Stable contract for an engine-sound implementation.     |
+| `application/services`     | `DrivingSession.ts`      | UI-independent driving use case and state coordination. |
+| `infrastructure/audio`     | `WebAudioEngine.ts`      | Browser sound-output adapter.                           |
+| `infrastructure/input`     | `KeyboardInput.ts`       | Keyboard-to-driving-action adapter.                     |
+| `infrastructure/telemetry` | `BrowserGeolocation.ts`  | Permissioned, local GPS-speed adapter.                  |
+| `presentation/components`  | `TelemetryPanel.vue`     | Read-only telemetry display.                            |
+| `presentation/components`  | `DriveControls.vue`      | Typed control-event emitter.                            |
+| `app`                      | `App.vue`                | Screen composition only.                                |
 
 ## Folder creation rule
 
@@ -65,9 +65,9 @@ Create a child folder only when it owns at least one concrete responsibility and
 
 ## Quality commands
 
-| Command | Gate |
-| --- | --- |
-| `npm run check` | Strict Vue/TypeScript type check. |
-| `npm run lint` | TypeScript and Vue static analysis. |
-| `npm run test` | Deterministic unit tests for domain rules. |
-| `npm run build` | Production PWA bundle. |
+| Command         | Gate                                       |
+| --------------- | ------------------------------------------ |
+| `npm run check` | Strict Vue/TypeScript type check.          |
+| `npm run lint`  | TypeScript and Vue static analysis.        |
+| `npm run test`  | Deterministic unit tests for domain rules. |
+| `npm run build` | Production PWA bundle.                     |

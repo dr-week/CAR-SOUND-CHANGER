@@ -78,18 +78,18 @@ class BluetoothService {
 ```typescript
 // Automatic routing priority
 const AUDIO_ROUTING_PRIORITY = [
-  'BLUETOOTH_A2DP',      // Bluetooth speakers/headphones
-  'BLUETOOTH_SCO',       // Bluetooth car kits
-  'WIRED_HEADSET',       // Wired headphones
-  'USB_DEVICE',          // USB audio
-  'SPEAKER'              // Phone speaker (fallback)
+  "BLUETOOTH_A2DP", // Bluetooth speakers/headphones
+  "BLUETOOTH_SCO", // Bluetooth car kits
+  "WIRED_HEADSET", // Wired headphones
+  "USB_DEVICE", // USB audio
+  "SPEAKER", // Phone speaker (fallback)
 ];
 
 async function routeAudioToPreferredDevice() {
   const devices = await getAvailableAudioDevices();
-  
+
   for (const priority of AUDIO_ROUTING_PRIORITY) {
-    const device = devices.find(d => d.type === priority);
+    const device = devices.find((d) => d.type === priority);
     if (device && device.isConnected) {
       await setAudioOutput(device);
       return;
@@ -104,12 +104,12 @@ async function routeAudioToPreferredDevice() {
 
 ```typescript
 const BLUETOOTH_AUDIO_CONFIG = {
-  sampleRate: 44100,        // CD quality
-  bitDepth: 16,             // 16-bit audio
-  channels: 2,              // Stereo
-  codec: 'AAC',             // AAC or SBC
-  bufferSize: 2048,         // Balance latency/quality
-  latencyMode: 'LOW',       // Minimize delay
+  sampleRate: 44100, // CD quality
+  bitDepth: 16, // 16-bit audio
+  channels: 2, // Stereo
+  codec: "AAC", // AAC or SBC
+  bufferSize: 2048, // Balance latency/quality
+  latencyMode: "LOW", // Minimize delay
 };
 ```
 
@@ -117,12 +117,12 @@ const BLUETOOTH_AUDIO_CONFIG = {
 
 ```typescript
 const CAR_AUDIO_CONFIG = {
-  sampleRate: 48000,        // Higher quality for car systems
-  bitDepth: 24,             // 24-bit for better dynamics
-  channels: 2,              // Stereo
-  codec: 'APTX',            // Lower latency if supported
-  bufferSize: 1024,         // Lower latency
-  latencyMode: 'ULTRA_LOW', // Critical for sync
+  sampleRate: 48000, // Higher quality for car systems
+  bitDepth: 24, // 24-bit for better dynamics
+  channels: 2, // Stereo
+  codec: "APTX", // Lower latency if supported
+  bufferSize: 1024, // Lower latency
+  latencyMode: "ULTRA_LOW", // Critical for sync
 };
 ```
 
@@ -166,11 +166,13 @@ const CAR_AUDIO_CONFIG = {
 ## Latency Optimization
 
 ### Problem: Audio Lag
+
 Bluetooth introduces ~150-300ms latency, which is noticeable with GPS speed changes.
 
 ### Solutions
 
 1. **Predictive Audio Pre-loading**
+
    ```typescript
    // Pre-load next likely gear sound
    async function preloadNextGear(currentGear: number, acceleration: number) {
@@ -181,13 +183,14 @@ Bluetooth introduces ~150-300ms latency, which is noticeable with GPS speed chan
    ```
 
 2. **Latency Compensation**
+
    ```typescript
    const BLUETOOTH_LATENCY_MS = 200;
-   
+
    function compensateLatency(speed: number): number {
      // Predict speed 200ms in future
      const acceleration = calculateAcceleration();
-     return speed + (acceleration * BLUETOOTH_LATENCY_MS / 1000);
+     return speed + (acceleration * BLUETOOTH_LATENCY_MS) / 1000;
    }
    ```
 
@@ -205,7 +208,7 @@ Bluetooth introduces ~150-300ms latency, which is noticeable with GPS speed chan
 export const AudioDeviceSelector = () => {
   const [devices, setDevices] = useState<BluetoothDevice[]>([]);
   const [connected, setConnected] = useState<string | null>(null);
-  
+
   return (
     <View>
       <Text>Available Audio Devices</Text>
@@ -252,7 +255,7 @@ async function requestBluetoothPermissions() {
       PermissionsAndroid.PERMISSIONS.BLUETOOTH_CONNECT,
       PermissionsAndroid.PERMISSIONS.BLUETOOTH_SCAN,
     ]);
-    return granted['android.permission.BLUETOOTH_CONNECT'] === 'granted';
+    return granted["android.permission.BLUETOOTH_CONNECT"] === "granted";
   }
   return true; // Below Android 12, granted at install time
 }
@@ -275,6 +278,7 @@ async function requestBluetoothPermissions() {
 ### Test Devices
 
 Recommended test devices:
+
 - JBL Flip/Charge speakers
 - Car Bluetooth systems
 - Bluetooth headphones

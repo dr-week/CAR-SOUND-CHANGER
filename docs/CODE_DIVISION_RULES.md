@@ -56,16 +56,16 @@ const HomeScreen = () => {
   const [gear, setGear] = useState(1);
   const [volume, setVolume] = useState(1);
   const [device, setDevice] = useState(null);
-  
+
   // 100 lines of GPS logic
   useEffect(() => { /* ... */ }, []);
-  
+
   // 100 lines of audio logic
   useEffect(() => { /* ... */ }, []);
-  
+
   // 100 lines of Bluetooth logic
   useEffect(() => { /* ... */ }, []);
-  
+
   // 200 lines of JSX
   return ( /* ... */ );
 };
@@ -134,7 +134,7 @@ class VehicleService {
 const RPMGauge = ({ speed }: Props) => {
   const [rpm, setRPM] = useState(0);
   const [gear, setGear] = useState(1);
-  
+
   useEffect(() => {
     // Complex gear calculation (50 lines)
     let calculatedGear = 1;
@@ -143,15 +143,15 @@ const RPMGauge = ({ speed }: Props) => {
     else if (speed < 50) calculatedGear = 3;
     else if (speed < 70) calculatedGear = 4;
     else calculatedGear = 5;
-    
+
     // Complex RPM calculation (50 lines)
     const gearRatios = { /* ... */ };
     const calculatedRPM = /* complex math */;
-    
+
     setGear(calculatedGear);
     setRPM(calculatedRPM);
   }, [speed]);
-  
+
   return <Gauge value={rpm} />;
 };
 ```
@@ -169,7 +169,7 @@ export class GearLogicService {
     if (speed < 70) return 4;
     return 5;
   }
-  
+
   static calculateRPM(speed: number, gear: number): number {
     const gearRange = GEAR_SPEED_RANGES[gear];
     const speedInGear = speed - gearRange.min;
@@ -180,14 +180,14 @@ export class GearLogicService {
 
 // hooks/useVehicleState.ts
 export const useVehicleState = (speed: number) => {
-  const gear = useMemo(() => 
+  const gear = useMemo(() =>
     GearLogicService.calculateGear(speed), [speed]
   );
-  
-  const rpm = useMemo(() => 
+
+  const rpm = useMemo(() =>
     GearLogicService.calculateRPM(speed, gear), [speed, gear]
   );
-  
+
   return { gear, rpm };
 };
 
@@ -211,27 +211,27 @@ const useAppStore = create((set) => ({
   longitude: 0,
   accuracy: 0,
   gpsEnabled: false,
-  
+
   // Audio
   volume: 1,
   isMuted: false,
   currentSound: null,
   isPlaying: false,
-  
+
   // Bluetooth
   connectedDevice: null,
   availableDevices: [],
   isScanning: false,
-  
+
   // Vehicle
   gear: 1,
   rpm: 0,
   isMoving: false,
-  
+
   // UI
   isDarkMode: false,
   showSettings: false,
-  
+
   // Actions (100+ lines)
   setSpeed: (speed) => set({ speed }),
   setVolume: (volume) => set({ volume }),
@@ -250,7 +250,7 @@ export const useGPSStore = create<GPSState>((set) => ({
   longitude: 0,
   accuracy: 0,
   isTracking: false,
-  
+
   startTracking: () => set({ isTracking: true }),
   stopTracking: () => set({ isTracking: false }),
   updateLocation: (location) => set(location),
@@ -261,7 +261,7 @@ export const useAudioStore = create<AudioState>((set) => ({
   volume: 1,
   isMuted: false,
   isPlaying: false,
-  
+
   setVolume: (volume) => set({ volume }),
   toggleMute: () => set((state) => ({ isMuted: !state.isMuted })),
   play: () => set({ isPlaying: true }),
@@ -272,7 +272,7 @@ export const useAudioStore = create<AudioState>((set) => ({
 export const useVehicleStore = create<VehicleState>((set) => ({
   gear: 1,
   rpm: 0,
-  
+
   updateVehicleState: (state) => set(state),
 }));
 ```
@@ -284,18 +284,18 @@ export const useVehicleStore = create<VehicleState>((set) => ({
 const AudioControls = () => {
   const [volume, setVolume] = useState(1);
   const [device, setDevice] = useState(null);
-  
+
   // Business logic in component
   const handleVolumeChange = (value: number) => {
     setVolume(value);
     AudioService.setVolume(value);
     AsyncStorage.setItem('volume', value.toString());
-    
+
     if (value > 0.8) {
       Alert.alert('Warning', 'High volume!');
     }
   };
-  
+
   const connectBluetooth = async () => {
     const devices = await BluetoothService.scan();
     if (devices.length > 0) {
@@ -303,7 +303,7 @@ const AudioControls = () => {
       setDevice(devices[0]);
     }
   };
-  
+
   return (
     <View>
       <Slider value={volume} onChange={handleVolumeChange} />
@@ -317,28 +317,28 @@ const AudioControls = () => {
 export const useAudioControls = () => {
   const { volume, setVolume } = useAudioStore();
   const { device, connect } = useBluetoothStore();
-  
+
   const handleVolumeChange = useCallback((value: number) => {
     setVolume(value);
     AudioService.setVolume(value);
     StorageService.saveVolume(value);
-    
+
     if (value > 0.8) {
       AlertService.showWarning('High volume!');
     }
   }, [setVolume]);
-  
+
   const connectDevice = useCallback(async () => {
     await BluetoothService.connectBest();
   }, []);
-  
+
   return { volume, handleVolumeChange, device, connectDevice };
 };
 
 // Component: Pure UI
 const AudioControls = () => {
   const { volume, handleVolumeChange, device, connectDevice } = useAudioControls();
-  
+
   return (
     <View>
       <Slider value={volume} onChange={handleVolumeChange} />
@@ -411,16 +411,16 @@ const HomeScreen = () => {
     <ScrollView>
       {/* 50 lines: Header */}
       <View>{/* ... */}</View>
-      
+
       {/* 100 lines: Gauges */}
       <View>{/* ... */}</View>
-      
+
       {/* 100 lines: Audio controls */}
       <View>{/* ... */}</View>
-      
+
       {/* 100 lines: Settings */}
       <View>{/* ... */}</View>
-      
+
       {/* 150 lines: Bottom navigation */}
       <View>{/* ... */}</View>
     </ScrollView>
@@ -445,7 +445,7 @@ const HomeScreen = () => {
 export const GaugeSection = () => {
   const { speed } = useGPSTracking();
   const { rpm, gear } = useVehicleState(speed);
-  
+
   return (
     <View style={styles.gauges}>
       <RPMGauge rpm={rpm} />
@@ -458,7 +458,7 @@ export const GaugeSection = () => {
 // screens/HomeScreen/components/AudioSection.tsx
 export const AudioSection = () => {
   const { volume, setVolume } = useAudioControls();
-  
+
   return (
     <View style={styles.audio}>
       <VolumeSlider value={volume} onChange={setVolume} />
@@ -491,14 +491,14 @@ export function normalizeRPM(rpm: number): number {
 }
 
 // utils/formatting/speed.ts
-export function formatSpeed(speed: number, unit: 'kmh' | 'mph'): string {
-  const converted = unit === 'mph' ? speed * 0.621371 : speed;
+export function formatSpeed(speed: number, unit: "kmh" | "mph"): string {
+  const converted = unit === "mph" ? speed * 0.621371 : speed;
   return `${converted.toFixed(1)} ${unit}`;
 }
 
 // utils/bluetooth/parser.ts
 export function parseDeviceName(name: string): string {
-  return name.replace(/[^a-zA-Z0-9\s]/g, '').trim();
+  return name.replace(/[^a-zA-Z0-9\s]/g, "").trim();
 }
 
 // utils/audio/validator.ts
@@ -517,10 +517,18 @@ export function convertLatLng(lat: number, lng: number): Coordinate {
 ```typescript
 // ❌ BAD: All types in one file
 // types.ts (500 lines)
-export interface VehicleState { /* ... */ }
-export interface AudioState { /* ... */ }
-export interface GPSState { /* ... */ }
-export interface BluetoothDevice { /* ... */ }
+export interface VehicleState {
+  /* ... */
+}
+export interface AudioState {
+  /* ... */
+}
+export interface GPSState {
+  /* ... */
+}
+export interface BluetoothDevice {
+  /* ... */
+}
 // ... 50 more types
 
 // ✅ GOOD: Types with their modules
@@ -567,17 +575,17 @@ export interface GPSState {
 ```typescript
 // ❌ BAD: One config file
 // config.ts (300 lines)
-export const GPS_CONFIG = { /* ... */ };
-export const AUDIO_CONFIG = { /* ... */ };
-export const BLUETOOTH_CONFIG = { /* ... */ };
-export const UI_CONFIG = { /* ... */ };
-export const APP_CONFIG = { /* ... */ };
+export const GPS_CONFIG = {/* ... */};
+export const AUDIO_CONFIG = {/* ... */};
+export const BLUETOOTH_CONFIG = {/* ... */};
+export const UI_CONFIG = {/* ... */};
+export const APP_CONFIG = {/* ... */};
 
 // ✅ GOOD: Separate configs
 // config/gps.config.ts
 export const GPS_CONFIG = {
   updateInterval: 100,
-  accuracy: 'high',
+  accuracy: "high",
   distanceFilter: 1,
 } as const;
 
@@ -603,6 +611,7 @@ export const VEHICLE_CONFIG = {
 ### Triggers for Splitting
 
 Split when:
+
 1. **File > 200 lines**: Break into smaller files
 2. **Function > 50 lines**: Extract helper functions
 3. **Component > 150 lines**: Extract child components

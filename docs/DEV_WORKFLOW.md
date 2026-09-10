@@ -79,6 +79,7 @@ main (production)
 ```
 
 **Types:**
+
 - `feat`: New feature
 - `fix`: Bug fix
 - `docs`: Documentation
@@ -88,6 +89,7 @@ main (production)
 - `chore`: Maintenance tasks
 
 **Examples:**
+
 ```bash
 feat(audio): add NFS-style engine sounds
 
@@ -160,27 +162,33 @@ git push origin feature/my-feature
 
 ```markdown
 ## Description
+
 Brief description of changes
 
 ## Type of Change
+
 - [ ] New feature
 - [ ] Bug fix
 - [ ] Breaking change
 - [ ] Documentation update
 
 ## Related Issues
+
 Closes #123
 
 ## Testing
+
 - [ ] Unit tests pass
 - [ ] Integration tests pass
 - [ ] Tested on physical device
 - [ ] Tested on emulator
 
 ## Screenshots (if UI changes)
+
 [Add screenshots]
 
 ## Checklist
+
 - [ ] Code follows style guide
 - [ ] Self-reviewed code
 - [ ] Commented complex code
@@ -216,6 +224,7 @@ Closes #123
 #### As Reviewer
 
 **Check for:**
+
 - [ ] Code correctness
 - [ ] Follows [DEV_RULES.md](./DEV_RULES.md)
 - [ ] Proper error handling
@@ -225,12 +234,14 @@ Closes #123
 - [ ] Documentation is clear
 
 **Review Priorities:**
+
 1. ⚠️ **Critical**: Security, crashes, data loss
 2. 🔴 **High**: Bugs, performance issues
 3. 🟡 **Medium**: Code quality, readability
 4. 🟢 **Low**: Style, minor improvements
 
 **Feedback Format:**
+
 ```markdown
 **[Priority] [Type]**: Description
 
@@ -272,13 +283,13 @@ npm run type-check
 
 ### Test Requirements
 
-| Change Type | Required Tests |
-|------------|----------------|
-| New Feature | Unit + Integration |
-| Bug Fix | Regression test |
-| Refactor | Existing tests pass |
-| UI Change | Manual + Screenshot |
-| API Change | API tests |
+| Change Type | Required Tests      |
+| ----------- | ------------------- |
+| New Feature | Unit + Integration  |
+| Bug Fix     | Regression test     |
+| Refactor    | Existing tests pass |
+| UI Change   | Manual + Screenshot |
+| API Change  | API tests           |
 
 ## Release Workflow
 
@@ -291,6 +302,7 @@ npm run type-check
 - `PATCH`: Bug fixes
 
 **Examples:**
+
 - `1.0.0` → `1.0.1` (bug fix)
 - `1.0.1` → `1.1.0` (new feature)
 - `1.1.0` → `2.0.0` (breaking change)
@@ -371,19 +383,19 @@ jobs:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v2
         with:
-          node-version: '18'
+          node-version: "18"
       - run: npm install
       - run: npm run lint
       - run: npm run type-check
       - run: npm test
-      
+
   build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-java@v2
         with:
-          java-version: '17'
+          java-version: "17"
       - run: npm install
       - run: cd android && ./gradlew assembleDebug
 ```
@@ -416,12 +428,14 @@ jobs:
 ## Daily Development Checklist
 
 ### Morning
+
 - [ ] Pull latest develop branch
 - [ ] Check CI/CD status
 - [ ] Review assigned PRs
 - [ ] Check task board (See [TASKS.md](./TASKS.md))
 
 ### During Development
+
 - [ ] Write tests for new code
 - [ ] Run tests frequently
 - [ ] Commit small, logical changes
@@ -429,6 +443,7 @@ jobs:
 - [ ] Update documentation
 
 ### Before Committing
+
 - [ ] Run `npm run lint`
 - [ ] Run `npm test`
 - [ ] Run `npm run type-check`
@@ -437,6 +452,7 @@ jobs:
 - [ ] Update relevant docs
 
 ### End of Day
+
 - [ ] Push all commits
 - [ ] Update task status
 - [ ] Document blockers

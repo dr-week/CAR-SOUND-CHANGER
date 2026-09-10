@@ -6,20 +6,20 @@ The app is a Vite-served, installable Progressive Web App built with Vue 3, Type
 
 ## Folder ownership
 
-| Folder | Responsibility |
-| --- | --- |
-| `src/domain/vehicle` | Pure vehicle profiles, state, and physics; no browser APIs. |
-| `src/domain/scoring` | Pure local eco-driving points rules; no browser APIs. |
-| `src/application/controllers` | Coordinates domain state and infrastructure. |
-| `src/application/bootstrap` | Creates and wires the application. |
-| `src/infrastructure/audio` | Web Audio implementation. |
-| `src/infrastructure/input` | Keyboard and future hardware input adapters. |
-| `src/infrastructure/telemetry` | GPS and future OBD-II/Bluetooth adapters. |
-| `src/presentation/dashboard` | DOM rendering and interactions. |
-| `src/presentation/styles` | Presentation-only CSS. |
-| `public` | PWA manifest, service worker, and static assets. |
-| `scripts/windows` | Windows operational tooling, isolated from the root. |
-| `docs/implementation` | Decisions and delivery plan. |
+| Folder                         | Responsibility                                              |
+| ------------------------------ | ----------------------------------------------------------- |
+| `src/domain/vehicle`           | Pure vehicle profiles, state, and physics; no browser APIs. |
+| `src/domain/scoring`           | Pure local eco-driving points rules; no browser APIs.       |
+| `src/application/controllers`  | Coordinates domain state and infrastructure.                |
+| `src/application/bootstrap`    | Creates and wires the application.                          |
+| `src/infrastructure/audio`     | Web Audio implementation.                                   |
+| `src/infrastructure/input`     | Keyboard and future hardware input adapters.                |
+| `src/infrastructure/telemetry` | GPS and future OBD-II/Bluetooth adapters.                   |
+| `src/presentation/dashboard`   | DOM rendering and interactions.                             |
+| `src/presentation/styles`      | Presentation-only CSS.                                      |
+| `public`                       | PWA manifest, service worker, and static assets.            |
+| `scripts/windows`              | Windows operational tooling, isolated from the root.        |
+| `docs/implementation`          | Decisions and delivery plan.                                |
 
 ## Current functional scope
 

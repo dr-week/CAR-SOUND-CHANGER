@@ -5,6 +5,7 @@ Complete audio system implementation with Need for Speed style engine sounds.
 ## Overview
 
 High-fidelity, dynamic engine sound system that recreates the iconic NFS audio experience with:
+
 - Realistic engine samples
 - Dynamic pitch shifting based on RPM
 - Smooth gear transitions
@@ -102,7 +103,7 @@ src/assets/sounds/
 **File**: `src/services/AudioService.ts`
 
 ```typescript
-import Sound from 'react-native-sound';
+import Sound from "react-native-sound";
 
 interface AudioLayer {
   engine: Sound | null;
@@ -115,13 +116,13 @@ export class AudioService {
   private currentGear: number = 1;
   private currentRPM: number = 900;
   private volume: number = 1.0;
-  
+
   constructor() {
-    Sound.setCategory('Playback');
+    Sound.setCategory("Playback");
     this.layers = {
       engine: null,
       turbo: null,
-      effects: null
+      effects: null,
     };
   }
 
@@ -134,13 +135,13 @@ export class AudioService {
   playEngineSound(gear: number, rpm: number): void {
     // Determine which sample to use
     const sample = this.selectSample(gear, rpm);
-    
+
     // Calculate pitch shift
     const pitch = this.calculatePitch(rpm, gear);
-    
+
     // Play with pitch shift
     this.playWithPitch(sample, pitch);
-    
+
     // Add turbo layer if RPM > 1500
     if (rpm > 1500) {
       this.playTurboLayer(rpm);
@@ -150,11 +151,11 @@ export class AudioService {
   // Smooth gear shift with crossfade
   async shiftGear(fromGear: number, toGear: number): Promise<void> {
     // Play shift sound effect
-    this.playShiftSound(toGear > fromGear ? 'up' : 'down');
-    
+    this.playShiftSound(toGear > fromGear ? "up" : "down");
+
     // Crossfade between gear sounds
     await this.crossfade(fromGear, toGear);
-    
+
     // Random backfire chance on upshift
     if (toGear > fromGear && Math.random() > 0.7) {
       this.playBackfire();
@@ -173,33 +174,29 @@ export class AudioService {
     const maxRPM = 2000;
     const minPitch = 0.8;
     const maxPitch = 1.5;
-    
+
     const normalized = (rpm - minRPM) / (maxRPM - minRPM);
-    return minPitch + (normalized * (maxPitch - minPitch));
+    return minPitch + normalized * (maxPitch - minPitch);
   }
 
-  private async crossfade(
-    fromGear: number,
-    toGear: number,
-    duration: number = 200
-  ): Promise<void> {
+  private async crossfade(fromGear: number, toGear: number, duration: number = 200): Promise<void> {
     const steps = 20;
     const stepDuration = duration / steps;
-    
+
     for (let i = 0; i <= steps; i++) {
       const progress = i / steps;
       const fadeOut = 1 - progress;
       const fadeIn = progress;
-      
+
       this.setGearVolume(fromGear, fadeOut);
       this.setGearVolume(toGear, fadeIn);
-      
+
       await this.sleep(stepDuration);
     }
   }
 
   private playBackfire(): void {
-    const backfire = new Sound('backfire.wav', Sound.MAIN_BUNDLE, (error) => {
+    const backfire = new Sound("backfire.wav", Sound.MAIN_BUNDLE, (error) => {
       if (!error) {
         backfire.setVolume(0.6);
         backfire.play(() => backfire.release());
@@ -210,14 +207,14 @@ export class AudioService {
   private playTurboLayer(rpm: number): void {
     // Turbo spool volume based on RPM
     const turboVolume = Math.max(0, (rpm - 1500) / 500);
-    
+
     if (!this.layers.turbo) {
-      this.layers.turbo = new Sound('turbo_spool.wav', Sound.MAIN_BUNDLE);
+      this.layers.turbo = new Sound("turbo_spool.wav", Sound.MAIN_BUNDLE);
       this.layers.turbo.setNumberOfLoops(-1); // Infinite loop
     }
-    
+
     this.layers.turbo.setVolume(Math.min(turboVolume, 0.4));
-    
+
     if (!this.layers.turbo.isPlaying()) {
       this.layers.turbo.play();
     }
@@ -279,12 +276,12 @@ function playShiftEffect(fromGear: number, toGear: number, rpm: number) {
   if (toGear > fromGear && rpm > 1800) {
     playBackfire();
   }
-  
+
   // Downshift: Blip (brief rev)
   if (toGear < fromGear) {
     playRevBlip();
   }
-  
+
   // Shift clunk
   playShiftClunk();
 }
@@ -309,7 +306,7 @@ function handleRevLimiter(rpm: number, maxRPM: number = 2000) {
 function playBOV(wasHighRPM: boolean, isShifting: boolean) {
   // Play BOV when lifting off at high RPM during shift
   if (wasHighRPM && isShifting) {
-    const bov = new Sound('turbo_bov.wav', Sound.MAIN_BUNDLE);
+    const bov = new Sound("turbo_bov.wav", Sound.MAIN_BUNDLE);
     bov.play(() => bov.release());
   }
 }
@@ -328,9 +325,9 @@ class AudioPool {
     if (!this.pools.has(filename)) {
       this.createPool(filename);
     }
-    
+
     const pool = this.pools.get(filename)!;
-    return pool.find(s => !s.isPlaying()) || pool[0];
+    return pool.find((s) => !s.isPlaying()) || pool[0];
   }
 
   private createPool(filename: string): void {
@@ -358,13 +355,13 @@ class AudioPool {
 function updateAudio(speed: number) {
   const gear = calculateGear(speed);
   const rpm = calculateRPM(speed, gear);
-  
+
   // Check for gear change
   if (gear !== previousGear) {
     audioService.shiftGear(previousGear, gear);
     previousGear = gear;
   }
-  
+
   // Update engine sound
   audioService.playEngineSound(gear, rpm);
 }
@@ -421,17 +418,17 @@ interface SoundPack {
 // Example: Different car sounds
 const SOUND_PACKS: SoundPack[] = [
   {
-    id: 'suzuki-brezza',
-    name: 'Suzuki Brezza Stock',
-    carModel: 'Suzuki Brezza',
-    sounds: { /* ... */ }
+    id: "suzuki-brezza",
+    name: "Suzuki Brezza Stock",
+    carModel: "Suzuki Brezza",
+    sounds: {/* ... */},
   },
   {
-    id: 'v8-muscle',
-    name: 'V8 Muscle Car',
-    carModel: 'Generic V8',
-    sounds: { /* ... */ }
-  }
+    id: "v8-muscle",
+    name: "V8 Muscle Car",
+    carModel: "Generic V8",
+    sounds: {/* ... */},
+  },
 ];
 ```
 
