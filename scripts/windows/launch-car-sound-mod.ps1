@@ -1,6 +1,6 @@
 [CmdletBinding()]
 param(
-  [ValidateSet('start', 'restart', 'stop', 'test', 'build', 'preview')]
+  [ValidateSet('start', 'start-lan', 'restart', 'stop', 'test', 'build', 'preview')]
   [string]$Action = 'start',
   [ValidateRange(1024, 65535)]
   [int]$Port = 5173
@@ -26,7 +26,7 @@ function Stop-CarSoundServer {
   $processDetails = Get-CimInstance Win32_Process -Filter "ProcessId = $processId" -ErrorAction SilentlyContinue
   $projectPathPattern = [regex]::Escape($ProjectRoot)
   if ($null -eq $processDetails -or $processDetails.CommandLine -notmatch $projectPathPattern) {
-    Write-Error "Refusing to stop process $processId: port $ListenerPort is not owned by this project."
+    Write-Error "Refusing to stop process ${processId}: port $ListenerPort is not owned by this project."
     return
   }
   Write-Host "Stopping process $processId ($($process.ProcessName)) on port $ListenerPort..."
@@ -39,6 +39,15 @@ function Invoke-Npm {
   try { & npm.cmd @Arguments; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE } }
   finally { Pop-Location }
 }
+
+function Ensure-Dependencies {
+  if (-not (Test-Path (Join-Path $ProjectRoot 'node_modules'))) {
+    Write-Host 'Installing locked dependencies...'
+    Invoke-Npm @('ci')
+  }
+}
+
+if ($Action -in @('start', 'start-lan', 'restart', 'test', 'build', 'preview')) { Ensure-Dependencies }
 
 switch ($Action) {
   'test' { Invoke-Npm @('run', 'check'); Invoke-Npm @('run', 'lint'); Invoke-Npm @('run', 'test'); exit 0 }
@@ -57,8 +66,8 @@ try {
     $existingProcessId = Get-ListenerProcessId -ListenerPort $Port
     if ($null -ne $existingProcessId) { Write-Host "A server is already listening on http://localhost:$Port (process $existingProcessId). Use restart to replace it." -ForegroundColor Yellow; exit 0 }
   }
-  if (-not (Test-Path (Join-Path $ProjectRoot 'node_modules'))) { Write-Host 'Installing locked dependencies...'; Invoke-Npm @('ci') }
-  if ($Action -eq 'preview') { Write-Host "Starting production preview at http://localhost:$Port"; Invoke-Npm @('run', 'preview', '--', '--port', $Port) }
-  else { Write-Host "Starting development server at http://localhost:$Port"; Invoke-Npm @('run', 'dev', '--', '--port', $Port) }
+  if ($Action -eq 'preview') { Write-Host "Starting production preview at http://localhost:$Port"; Invoke-Npm @('run', 'preview', '--', '--port', $Port, '--strictPort') }
+  elseif ($Action -eq 'start-lan') { Write-Host "Starting LAN development server on port $Port"; Invoke-Npm @('run', 'dev:lan', '--', '--port', $Port, '--strictPort') }
+  else { Write-Host "Starting development server at http://localhost:$Port"; Invoke-Npm @('run', 'dev', '--', '--port', $Port, '--strictPort') }
 }
 finally { if ($ownsMutex) { $mutex.ReleaseMutex() }; if ($mutex) { $mutex.Dispose() } }
