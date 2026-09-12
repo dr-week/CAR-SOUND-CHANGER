@@ -185,12 +185,15 @@ body {
 .instrument-cluster {
   position: relative;
   display: grid;
-  place-items: center;
-  margin: 24px auto 10px;
-  max-width: 470px;
+  grid-template-columns: minmax(0, 1fr) minmax(110px, 145px);
+  align-items: center;
+  gap: 14px;
+  margin: 12px auto 6px;
+  max-width: 510px;
 }
 .tachometer {
-  width: min(88vw, 410px);
+  width: 100%;
+  max-width: 300px;
   filter: drop-shadow(0 12px 26px rgba(0, 0, 0, 0.6));
 }
 .tachometer svg {
@@ -211,7 +214,7 @@ body {
 .tachometer__redline {
   fill: none;
   stroke: var(--red);
-  stroke-width: 8;
+  stroke-width: 5;
   stroke-linecap: round;
 }
 .tachometer__tick {
@@ -226,11 +229,9 @@ body {
   dominant-baseline: middle;
 }
 .tachometer__needle {
-  stroke: var(--red);
-  stroke-width: 3;
+  stroke: #ffffff;
+  stroke-width: 4;
   stroke-linecap: round;
-  transform-origin: center;
-  transition: transform 120ms ease-out;
 }
 .tachometer__hub {
   fill: #282e39;
@@ -239,30 +240,40 @@ body {
 }
 .tachometer__rpm {
   fill: var(--text);
-  font-size: 22px;
+  font-size: 20px;
   font-weight: 800;
   text-anchor: middle;
 }
 .tachometer__rpm-caption {
   fill: var(--muted);
-  font-size: 8px;
-  letter-spacing: 2px;
+  font-size: 7px;
+  letter-spacing: 1.3px;
   text-anchor: middle;
 }
-.gear-display {
-  position: absolute;
-  right: 5%;
-  bottom: 10%;
+.digital-displays {
   display: grid;
-  min-width: 96px;
-  padding: 10px;
-  border: 1px solid rgba(231, 51, 51, 0.65);
+  gap: 0;
+  width: 100%;
+  overflow: hidden;
+  border: 1px solid #3a4352;
   border-radius: 10px;
   background: rgba(9, 10, 13, 0.92);
-  box-shadow: 0 0 18px rgba(231, 51, 51, 0.15);
+  box-shadow: 0 0 18px rgba(231, 51, 51, 0.08);
+}
+.gear-display,
+.speed-display {
+  display: grid;
+  justify-items: start;
+  min-width: 0;
+  padding: 12px;
+  background: transparent;
+}
+.speed-display {
+  border-top: 1px solid #3a4352;
 }
 .gear-display span,
-.gear-display small {
+.speed-display span,
+.speed-display small {
   color: var(--muted);
   font-size: 0.68rem;
   text-transform: uppercase;
@@ -273,12 +284,24 @@ body {
   font-size: 2.6rem;
   line-height: 1;
 }
+.speed-display strong {
+  color: var(--text);
+  font-size: 2.1rem;
+  line-height: 1;
+}
+.speed-display em {
+  color: var(--muted);
+  font-size: 0.68rem;
+  font-style: normal;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
 .status-indicators {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(104px, 1fr));
   gap: 8px;
   max-width: 470px;
-  margin: 0 auto 24px;
+  margin: 0 auto 34px;
 }
 .status-indicators p {
   margin: 0;
@@ -308,9 +331,26 @@ body {
   }
 }
 @media (max-width: 600px) {
-  .gear-display {
-    right: 2%;
-    bottom: 8%;
+  .instrument-cluster {
+    grid-template-columns: minmax(0, 1fr) 100px;
+    gap: 8px;
+  }
+  .tachometer {
+    width: 100%;
+  }
+  .controls {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 5px;
+    margin-top: 12px;
+  }
+  .controls button {
+    min-height: 76px;
+    padding: 4px;
+    font-size: 1.25rem;
+  }
+  .controls button small {
+    font-size: 0.54rem;
+    letter-spacing: 0.02em;
   }
   .status-indicators {
     gap: 6px;
@@ -318,4 +358,14 @@ body {
   .status-indicators p {
     padding: 8px 4px;
   }
+}
+.controls button > span {
+  display: block;
+}
+.controls button:not(.brake):not(.accelerate) {
+  background: #1d2530;
+  font-size: 1.35rem;
+}
+.controls .reset {
+  background: #303947;
 }

@@ -16,7 +16,9 @@ function release(action: DriveAction): void {
 
 <template>
   <section class="controls" aria-label="Driving controls">
-    <button type="button" @click="emit('shift', 1)">1<br /><small>Upshift</small></button>
+    <button type="button" aria-label="Upshift, keyboard 1" @click="emit('shift', 1)">
+      <span aria-hidden="true">↑</span><small>1 · upshift</small>
+    </button>
     <button
       type="button"
       class="brake"
@@ -26,7 +28,7 @@ function release(action: DriveAction): void {
       @pointercancel="release('brake')"
       @lostpointercapture="release('brake')"
     >
-      S<br /><small>Brake</small>
+      <span>S</span><small>Brake</small>
     </button>
     <button
       type="button"
@@ -37,9 +39,11 @@ function release(action: DriveAction): void {
       @pointercancel="release('accelerate')"
       @lostpointercapture="release('accelerate')"
     >
-      W<br /><small>Accelerate</small>
+      <span>W</span><small>Accelerate</small>
     </button>
-    <button type="button" @click="emit('shift', -1)">2<br /><small>Downshift</small></button>
-    <button type="button" class="reset" @click="emit('reset')">Reset<br /><small>Drive</small></button>
+    <button type="button" aria-label="Downshift, keyboard 2" @click="emit('shift', -1)">
+      <span aria-hidden="true">↓</span><small>2 · downshift</small>
+    </button>
+    <button type="button" class="reset" @click="emit('reset')"><span>Reset</span><small>Drive</small></button>
   </section>
 </template>

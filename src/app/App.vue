@@ -3,6 +3,7 @@ import { computed } from "vue";
 import { useVehicleSimulator } from "../application/composables/useVehicleSimulator";
 import DriveControls from "../presentation/components/DriveControls.vue";
 import GearDisplay from "../presentation/components/GearDisplay.vue";
+import SpeedDisplay from "../presentation/components/SpeedDisplay.vue";
 import StatusIndicators from "../presentation/components/StatusIndicators.vue";
 import VehicleTachometer from "../presentation/components/VehicleTachometer.vue";
 const simulator = useVehicleSimulator();
@@ -45,28 +46,18 @@ function onGpsChange(event: Event): void {
         <h1>Car Sound Mod</h1>
       </div>
       <button class="primary" type="button" @click="simulator.enableAudio">
-        {{ simulator.audioEnabled.value ? "Audio enabled" : "Enable audio" }}
+        {{ simulator.audioEnabled.value ? "Mute audio" : "Enable audio" }}
       </button>
     </header>
-    <p class="status" role="status">{{ audioMessage }}</p>
     <section class="instrument-cluster">
       <VehicleTachometer :rpm="simulator.vehicle.rpm" :profile="simulator.vehicle.profile" />
-      <GearDisplay
-        :gear="simulator.vehicle.gear"
-        :speed-kph="simulator.vehicle.gpsSpeedKph ?? simulator.vehicle.speedKph"
-      />
-    </section>
-    <StatusIndicators
-      :audio-status="simulator.audioStatus.value"
-      :telemetry-status="simulator.telemetryStatus.value"
-      :green-score="simulator.greenScore.points"
-    />
-    <section class="panel">
-      <label for="profile">Vehicle profile</label
-      ><select id="profile" :value="simulator.vehicle.profile.id" @change="onProfileChange">
-        <option v-for="profile in simulator.profiles" :key="profile.id" :value="profile.id">{{ profile.name }}</option>
-      </select>
-      <p>{{ profileDetails }}</p>
+      <div class="digital-displays">
+        <GearDisplay :gear="simulator.vehicle.gear" />
+        <SpeedDisplay
+          :speed-kph="simulator.vehicle.gpsSpeedKph ?? simulator.vehicle.speedKph"
+          :source="simulator.telemetryStatus.value === 'active' ? 'GPS' : 'Simulation'"
+        />
+      </div>
     </section>
     <DriveControls
       :accelerating="simulator.vehicle.throttle > 0"
@@ -75,6 +66,27 @@ function onGpsChange(event: Event): void {
       @shift="simulator.shift"
       @reset="simulator.reset"
     />
+    <StatusIndicators
+      :audio-status="simulator.audioStatus.value"
+      :telemetry-status="simulator.telemetryStatus.value"
+      :green-score="simulator.greenScore.points"
+    />
+    <p
+      v-if="simulator.audioStatus.value === 'blocked' || simulator.audioStatus.value === 'unsupported'"
+      class="status"
+      role="alert"
+    >
+      {{ audioMessage }}
+    </p>
+    <section class="panel">
+      <label for="volume">Volume · {{ simulator.volume.value }}%</label>
+      <input id="volume" type="range" min="0" max="100" :value="simulator.volume.value" @input="simulator.setVolume(Number(($event.target as HTMLInputElement).value))" />
+      <label for="profile">Vehicle profile</label
+      ><select id="profile" :value="simulator.vehicle.profile.id" @change="onProfileChange">
+        <option v-for="profile in simulator.profiles" :key="profile.id" :value="profile.id">{{ profile.name }}</option>
+      </select>
+      <p>{{ profileDetails }}</p>
+    </section>
     <section class="panel compact">
       <label
         ><input type="checkbox" :checked="simulator.gpsEnabled.value" @change="onGpsChange" /> Use device GPS
