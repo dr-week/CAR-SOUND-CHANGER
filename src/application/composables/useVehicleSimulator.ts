@@ -12,6 +12,7 @@ export function useVehicleSimulator() {
   const vehicle = reactive(createVehicleState(CAR_PROFILES.brezza));
   const greenScore = reactive(createGreenScore());
   const audioEnabled = ref(false);
+  const volume = ref(50);
   const audioStatus = ref<AudioStatus>("inactive");
   const gpsEnabled = ref(false);
   const telemetryStatus = ref<TelemetryStatus>("inactive");
@@ -31,6 +32,12 @@ export function useVehicleSimulator() {
     if (isProfileId(id)) session.selectProfile(CAR_PROFILES[id as ProfileId]);
   }
   async function enableAudio(): Promise<void> {
+    if (audioEnabled.value) {
+      await audio.suspend();
+      audioEnabled.value = false;
+      audioStatus.value = "inactive";
+      return;
+    }
     if (!audio.isSupported) {
       audioStatus.value = "unsupported";
       return;
@@ -58,6 +65,10 @@ export function useVehicleSimulator() {
     gps.stop();
     gpsEnabled.value = false;
   }
+  function setVolume(value: number): void {
+    volume.value = Math.max(0, Math.min(100, value));
+    audio.setVolume(volume.value / 100);
+  }
   function frame(now: number): void {
     const dt = Math.min((now - previous) / 1000, 0.1);
     previous = now;
@@ -73,6 +84,7 @@ export function useVehicleSimulator() {
     cancelAnimationFrame(frameId);
     stopKeyboard();
     gps.stop();
+    void audio.dispose();
   });
   return {
     vehicle,
@@ -88,5 +100,7 @@ export function useVehicleSimulator() {
     enableAudio,
     setGps,
     reset,
+    volume,
+    setVolume,
   };
 }

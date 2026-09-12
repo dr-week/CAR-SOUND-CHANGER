@@ -20,6 +20,7 @@ export class DrivingSession {
   }
 
   shift(delta: number): void {
+    if (delta !== 1 && delta !== -1) return;
     this.vehicle.gear = Math.max(1, Math.min(this.vehicle.profile.gears, this.vehicle.gear + delta));
   }
 
@@ -31,6 +32,7 @@ export class DrivingSession {
   }
 
   setGpsSpeed(speedKph: number): void {
+    if (!Number.isFinite(speedKph) || speedKph < 0 || speedKph > 450) return;
     this.vehicle.gpsSpeedKph = speedKph;
     this.vehicle.speedKph = speedKph;
   }
@@ -56,6 +58,8 @@ export class DrivingSession {
   }
 
   step(dt: number): void {
+    if (!Number.isFinite(dt) || dt <= 0) return;
+    dt = Math.min(dt, 0.1);
     this.vehicle.throttle = this.activeControls.has("accelerate") ? 1 : 0;
     this.vehicle.brake = this.activeControls.has("brake") ? 1 : 0;
     stepVehicle(this.vehicle, dt);

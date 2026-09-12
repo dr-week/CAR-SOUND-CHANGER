@@ -10,6 +10,23 @@ function createSoundOutput(): EngineSoundOutput {
 }
 
 describe("DrivingSession", () => {
+  it.each([NaN, Infinity, -1, 451])("rejects invalid GPS speed %s", (speed) => {
+    const vehicle = createVehicleState(CAR_PROFILES.brezza);
+    const session = new DrivingSession(vehicle, createGreenScore(), createSoundOutput());
+    session.setGpsSpeed(speed);
+    expect(vehicle.gpsSpeedKph).toBeNull();
+    expect(vehicle.speedKph).toBe(0);
+  });
+  it("ignores invalid time steps and shift commands", () => {
+    const vehicle = createVehicleState(CAR_PROFILES.brezza);
+    const sound = createSoundOutput();
+    const session = new DrivingSession(vehicle, createGreenScore(), sound);
+    session.step(NaN);
+    session.step(-1);
+    session.shift(0.5);
+    expect(vehicle.gear).toBe(1);
+    expect(sound.update).not.toHaveBeenCalled();
+  });
   it("keeps UI-independent driving controls and sound output coordinated", () => {
     const vehicle = createVehicleState(CAR_PROFILES.brezza);
     const sound = createSoundOutput();

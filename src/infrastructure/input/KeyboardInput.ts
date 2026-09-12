@@ -9,6 +9,8 @@ export class KeyboardInput {
   start(): () => void {
     const down = (event: KeyboardEvent) => {
       if (event.repeat) return;
+      if (event.target instanceof HTMLElement && event.target.closest('input, select, textarea, [contenteditable="true"]')) return;
+      if (event.ctrlKey || event.altKey || event.metaKey) return;
       if (event.code === "Digit1" || event.code === "Numpad1") this.onShift(1);
       if (event.code === "Digit2" || event.code === "Numpad2") this.onShift(-1);
       const action = BINDINGS[event.code];

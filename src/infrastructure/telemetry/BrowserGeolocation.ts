@@ -17,15 +17,20 @@ export class BrowserGeolocation {
       return;
     }
     if (this.watchId !== null) return;
+    this.lastFixAt = Date.now();
     this.watchId = navigator.geolocation.watchPosition(
       (position) => {
         const speed = position.coords.speed;
+        if (speed === null || !Number.isFinite(speed) || speed < 0 || speed * 3.6 > 450 || Date.now() - position.timestamp > this.staleAfterMs) {
+          this.onStatus("stale");
+          return;
+        }
         this.lastFixAt = Date.now();
         this.onStatus("active");
         if (speed !== null && Number.isFinite(speed) && speed >= 0) this.onSpeed(speed * 3.6);
       },
       (error) => this.onStatus(error.code === error.PERMISSION_DENIED ? "denied" : "error"),
-      { enableHighAccuracy: true, maximumAge: 1_000 },
+      { enableHighAccuracy: true, maximumAge: 1_000, timeout: this.staleAfterMs },
     );
     this.staleTimer = window.setInterval(() => {
       if (this.lastFixAt !== null && Date.now() - this.lastFixAt > this.staleAfterMs) this.onStatus("stale");

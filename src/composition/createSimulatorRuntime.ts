@@ -13,7 +13,10 @@ export function createSimulatorRuntime(
 ) {
   const audio = new WebAudioEngine();
   const session = new DrivingSession(vehicle, greenScore, audio);
-  const gps = new BrowserGeolocation((speed) => session.setGpsSpeed(speed), onTelemetryStatus);
+  const gps = new BrowserGeolocation((speed) => session.setGpsSpeed(speed), (status) => {
+    if (status !== "active") session.clearGpsSpeed();
+    onTelemetryStatus(status);
+  });
   const keyboard = new KeyboardInput(
     (action, active) => session.setControl(action, active),
     (delta) => session.shift(delta),
