@@ -5,11 +5,11 @@
 ```text
 carSOUNDMOD/
 ├── src/                         # Product source code
-│   ├── app/                     # App composition root
+│   ├── app/                     # Root Vue screen composition
 │   ├── application/             # Use-case coordination / lifecycle
-│   │   └── composables/         # Vue-facing application orchestration
 │   │   ├── ports/               # Application-owned integration contracts
 │   │   └── services/            # Framework-independent use cases
+│   ├── composition/             # Concrete adapter wiring only
 │   ├── domain/                  # Framework-independent business rules
 │   │   ├── vehicle/             # Car profiles, types, physics
 │   │   └── scoring/             # Local green-points rules
@@ -22,10 +22,11 @@ carSOUNDMOD/
 │   │   └── styles/              # Application visual tokens/styles
 │   └── main.ts                  # Vue/PWA bootstrap only
 ├── tests/                       # Automated checks, mirrors source taxonomy
-│   └── unit/domain/
-│       ├── vehicle/
-│       └── scoring/
-│   └── unit/application/        # Application-service tests
+│   └── unit/
+│       ├── application/         # Application-service tests
+│       └── domain/
+│           ├── vehicle/
+│           └── scoring/
 ├── public/                      # Static PWA assets only
 │   ├── icons/
 │   ├── manifest.webmanifest
@@ -43,21 +44,26 @@ carSOUNDMOD/
 
 ## Micro-module inventory
 
-| Macro module               | Micro module             | Contract                                                |
-| -------------------------- | ------------------------ | ------------------------------------------------------- |
-| `domain/vehicle`           | `types.ts`               | Shared typed vehicle contracts.                         |
-| `domain/vehicle`           | `carProfiles.ts`         | Immutable car-profile catalog.                          |
-| `domain/vehicle`           | `vehiclePhysics.ts`      | State construction and deterministic motion/RPM update. |
-| `domain/scoring`           | `greenScore.ts`          | Pure eco-score state and calculation policy.            |
-| `application/composables`  | `useVehicleSimulator.ts` | Vue lifecycle orchestration; composes dependencies.     |
-| `application/ports`        | `EngineSoundOutput.ts`   | Stable contract for an engine-sound implementation.     |
-| `application/services`     | `DrivingSession.ts`      | UI-independent driving use case and state coordination. |
-| `infrastructure/audio`     | `WebAudioEngine.ts`      | Browser sound-output adapter.                           |
-| `infrastructure/input`     | `KeyboardInput.ts`       | Keyboard-to-driving-action adapter.                     |
-| `infrastructure/telemetry` | `BrowserGeolocation.ts`  | Permissioned, local GPS-speed adapter.                  |
-| `presentation/components`  | `TelemetryPanel.vue`     | Read-only telemetry display.                            |
-| `presentation/components`  | `DriveControls.vue`      | Typed control-event emitter.                            |
-| `app`                      | `App.vue`                | Screen composition only.                                |
+| Macro module               | Micro module                | Contract                                                |
+| -------------------------- | --------------------------- | ------------------------------------------------------- |
+| `domain/vehicle`           | `types.ts`                  | Shared typed vehicle contracts.                         |
+| `domain/vehicle`           | `controls.ts`               | Hardware-independent driving-control contract.          |
+| `domain/vehicle`           | `carProfiles.ts`            | Immutable car-profile catalog.                          |
+| `domain/vehicle`           | `vehiclePhysics.ts`         | State construction and deterministic motion/RPM update. |
+| `domain/scoring`           | `greenScore.ts`             | Pure eco-score state and calculation policy.            |
+| `application/ports`        | `EngineSoundOutput.ts`      | Stable contract for an engine-sound implementation.     |
+| `application/ports`        | `TelemetryStatus.ts`        | Typed local telemetry lifecycle status.                 |
+| `application/services`     | `DrivingSession.ts`         | UI-independent driving use case and state coordination. |
+| `composition`              | `createSimulatorRuntime.ts` | Wires browser adapters into application contracts.      |
+| `infrastructure/audio`     | `WebAudioEngine.ts`         | Browser sound-output adapter.                           |
+| `infrastructure/input`     | `KeyboardInput.ts`          | Keyboard-to-driving-action adapter.                     |
+| `infrastructure/telemetry` | `BrowserGeolocation.ts`     | Permissioned, local GPS-speed adapter.                  |
+| `presentation/components`  | `DriveControls.vue`         | Typed control-event emitter.                            |
+| `presentation/components`  | `VehicleTachometer.vue`     | Data-driven SVG RPM instrument.                         |
+| `presentation/components`  | `GearDisplay.vue`           | Dedicated gear readout.                                 |
+| `presentation/components`  | `SpeedDisplay.vue`          | Dedicated speed/source readout.                         |
+| `presentation/components`  | `StatusIndicators.vue`      | Compact audio, source, and green-score status.          |
+| `app`                      | `App.vue`                   | Screen composition only.                                |
 
 ## Folder creation rule
 

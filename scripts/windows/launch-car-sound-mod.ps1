@@ -31,6 +31,7 @@ function Stop-CarSoundServer {
   }
   Write-Host "Stopping process $processId ($($process.ProcessName)) on port $ListenerPort..."
   Stop-Process -Id $processId -Force
+  Wait-Process -Id $processId -Timeout 10 -ErrorAction SilentlyContinue
 }
 
 function Invoke-Npm {
@@ -60,7 +61,8 @@ switch ($Action) {
 $mutex = [System.Threading.Mutex]::new($false, $MutexName)
 $ownsMutex = $false
 try {
-  if (-not $mutex.WaitOne(0, $false)) { Write-Host 'Car Sound Mod is already running through this launcher.' -ForegroundColor Yellow; exit 0 }
+  $waitMs = if ($Action -eq 'restart') { 10000 } else { 0 }
+  if (-not $mutex.WaitOne($waitMs, $false)) { Write-Host 'Car Sound Mod is already running through this launcher.' -ForegroundColor Yellow; exit 0 }
   $ownsMutex = $true
   if ($Action -eq 'start') {
     $existingProcessId = Get-ListenerProcessId -ListenerPort $Port

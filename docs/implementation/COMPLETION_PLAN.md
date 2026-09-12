@@ -91,6 +91,52 @@ Deliver an installable, local-first car-sound simulator that runs in a browser/P
 
 **Visual exit gate:** the UI clearly communicates RPM, gear, speed source, audio state, and driving status at a glance; it remains accessible without color perception, motion, or pointer-only interaction.
 
+### UI correction backlog — instrument cluster review
+
+**Evidence:** screenshot supplied by the user after the initial instrument-cluster implementation. The following issues are implementation defects, not changes to product scope.
+
+#### P0 — correct before further visual work
+
+| Issue                       | Observed problem                                                                              | Required correction                                                                                                     | Acceptance criterion                                                                                                       |
+| --------------------------- | --------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| Gear display collision      | The gear/speed card overlays the dial, redline arc, and upper-scale labels.                   | Give gear and speed a reserved layout region outside the SVG dial; do not use an absolute overlay on desktop or mobile. | At 320 px and desktop widths, the gear/speed display does not overlap any gauge tick, numeral, needle, or redline segment. |
+| Missing visible needle      | The center RPM numeral is visible, but the needle is not perceptible at idle.                 | Increase needle contrast/length and ensure its idle angle is visible against the dial.                                  | At idle, mid-range, and redline, a tester can identify the needle position without relying on the numeric RPM text.        |
+| Driving controls below fold | The oversized dial pushes throttle, brake, and shift controls outside the first viewport.     | Reorder the screen and reduce dial height so controls precede profile configuration.                                    | On a 320×640 mobile viewport, throttle, brake, and both shift controls are visible without scrolling after initial load.   |
+| Speed is secondary          | Speed appears as small text within the gear card rather than as a primary driving instrument. | Add a dedicated digital speed display adjacent to gear, with its source label retained separately.                      | Speed is readable at a glance, independent of gear, and does not share its main visual area with the tachometer.           |
+
+#### P1 — correct in the same visual stabilization milestone
+
+| Issue                          | Observed problem                                                                                | Required correction                                                                                 | Acceptance criterion                                                                                |
+| ------------------------------ | ----------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| Ambiguous RPM scale            | Dial labels `0–7` have no `×1000 RPM` explanation.                                              | Add a persistent scale caption with accessible text.                                                | A new user can interpret `800 RPM` and the dial scale without prior product knowledge.              |
+| Overweight redline             | The redline arc is visually larger than the needle and distracts from live RPM.                 | Narrow the arc and derive its start/end precisely from the selected profile.                        | Redline is visible as a limit indicator but does not obscure labels, needle, or gear/speed display. |
+| Duplicate audio state          | Header text and status row communicate the same inactive-audio state.                           | Give each status element a unique role: one action/result message and one compact system indicator. | No repeated status phrase appears simultaneously; status row contains distinct system information.  |
+| Excess header whitespace       | The header pushes the primary instrument and controls down the page.                            | Reduce vertical spacing and keep header content compact.                                            | The primary driving controls remain above the fold in the target mobile viewport.                   |
+| Incorrect information priority | Vehicle configuration is visible before the driving controls required to operate the simulator. | Order content as: instrument/speed → primary controls → system status → vehicle configuration.      | A user can start, accelerate, brake, shift, and read feedback before encountering configuration.    |
+
+#### Verification checklist
+
+- Capture manual screenshots at 320×640, 390×844, and desktop widths after each layout change.
+- Test idle, acceleration, braking, and redline values for every vehicle profile.
+- Verify keyboard-only operation and visible focus states after visual reordering.
+- Verify `prefers-reduced-motion` retains a readable static needle position.
+- Add component tests for the displayed RPM value, `×1000 RPM` caption, gear, speed, and source label.
+
+### UI correction backlog — second visual review
+
+**Evidence:** follow-up screenshot supplied by the user after the first P0 layout pass.
+
+| Priority | Issue                              | Observed problem                                                                               | Required correction                                                                                                   | Acceptance criterion                                                                             |
+| -------- | ---------------------------------- | ---------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
+| P1       | Tachometer center collision        | The RPM caption competes with the hub and makes the needle’s idle position difficult to read.  | Reserve separate center zones for RPM value, unit/scale caption, hub, and needle; do not render text through the hub. | At idle and mid-range, RPM, scale caption, hub, and needle are independently legible.            |
+| P1       | Disconnected digital readouts      | Gear and speed are two unrelated cards with uneven visual hierarchy.                           | Treat gear and speed as one grouped digital readout with consistent label, value, unit, and border treatment.         | Gear and speed scan as one information group without reducing speed prominence.                  |
+| P1       | Excessively heavy controls         | The five large control tiles dominate the screen more than the driving instruments.            | Reduce non-primary key visual weight; preserve distinct brake/accelerator affordances and clear touch targets.        | RPM, gear, and speed remain the first visual scan target; controls are accessible but secondary. |
+| P1       | Status cards near viewport edge    | The status row appears compressed against the lower boundary after the controls.               | Add stable bottom spacing and allow status cards to wrap or stack gracefully on narrow screens.                       | At the target mobile viewports, all status cards are fully visible with spacing below them.      |
+| P2       | Ambiguous speed source label       | The speed card shows `Speed · Simulation`, mixing measurement and source in one cramped label. | Use `Speed` as the label and a separate concise source badge/secondary label.                                         | Measurement, unit, and source are readable without forced or awkward line wrapping.              |
+| P2       | Shift semantics rely on text alone | `1` and `2` are valid keyboard labels but lack directional visual meaning.                     | Add original up/down chevrons or accessible directional labels while retaining the keyboard key labels.               | A touch-only user understands which control raises or lowers gear without reading the help text. |
+
+**Second-review exit gate:** the instrument center, digital readouts, controls, and status row have clear visual hierarchy at mobile and desktop widths; no meaningful element is clipped, overlaps another, or relies on color alone.
+
 ## Milestone 2 — audio quality and realistic control model
 
 **Goal:** make the simulation feel intentional without copied recordings.
@@ -155,6 +201,27 @@ Deliver an installable, local-first car-sound simulator that runs in a browser/P
 | Add dependency-review process     | CI/documentation  | Production dependency audit is run in CI or release review; advisory upgrades are reviewed rather than applied automatically.    |
 
 **Exit gate:** a reviewer can clone, run one launcher command, understand boundaries, see a completed GitHub Actions run, and explain the architecture from the documentation.
+
+## Focused implementation checkpoint — 2026-09-12
+
+This checkpoint records implemented changes, not a claim that all milestone exit gates pass.
+
+| Area | Change implemented | Verification |
+| --- | --- | --- |
+| Tachometer | Removed conflicting CSS needle transform; constrained mobile gauge width; moved the digital RPM below the needle sweep; red zone now starts at the profile redline rather than 1,000 RPM early. | Type check and build pass; visual browser/device review remains open. |
+| Audio | Added mute/volume and teardown; replaced voices disconnect their oscillator and gain nodes; oscillators start at profile idle frequency instead of the browser's default 440 Hz; output starts silent. | New mocked Web Audio lifecycle regression test passes. Audible realism and physical output are not verified by this test. |
+| Input and simulation | Keyboard shortcuts ignore form editing/modifier shortcuts; invalid GPS values, time steps, and gear commands are rejected. | Application regression tests pass. |
+| GPS fallback | Stale/invalid/error status clears GPS speed so simulation can resume. | Device permission, freshness, and real GPS tests remain open. |
+| Offline build | Production build emits a service worker precaching hashed assets; registration is production-only and paths are relative. | Build emits service worker; installed/offline browser behavior remains unverified. |
+| Windows launcher | Waits for the stopped process and allows time to acquire the restart mutex. | Concurrent-launch/restart acceptance test remains open. |
+
+Checks completed: TypeScript check, ESLint, 14 unit tests across 4 files, and production build pass.
+
+Next required verification, in order:
+
+1. Browser-check the needle and readouts at idle, acceleration, braking, and each profile; check narrow-screen overflow and touch/keyboard releases.
+2. Listen at low volume through idle, gear changes, acceleration, deceleration, mute/resume, and profile changes. Synthetic output is not an exact recording of a named vehicle.
+3. Exercise GPS denial/stale recovery, Windows restart/concurrent launch, and installed offline startup. Keep these gates open until observed.
 
 ## Deferred intentionally
 
