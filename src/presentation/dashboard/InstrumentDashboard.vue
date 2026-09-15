@@ -54,12 +54,12 @@ const speedSource = computed<"GPS" | "Simulation">(() =>
 
 const bluetoothLabel = computed(() => {
   switch (props.bluetoothStatus) {
-    case "connected":     return "BT ●";
-    case "scanning":      return "BT …";
-    case "disconnected":  return "BT ○";
-    case "error":         return "BT ✕";
+    case "connected":     return "Bluetooth Active";
+    case "scanning":      return "Scanning...";
+    case "disconnected":  return "Connect Speaker";
+    case "error":         return "Connection Failed";
     case "unsupported":   return "";
-    default:              return "BT";
+    default:              return "Connect Speaker";
   }
 });
 
@@ -124,9 +124,12 @@ const bluetoothAriaLabel = computed(() => {
         }"
         :aria-label="bluetoothAriaLabel"
         :disabled="bluetoothStatus === 'scanning'"
-        @click="emit('bluetooth-toggle')"
+        @click="(e) => { (e.currentTarget as HTMLElement)?.blur(); emit('bluetooth-toggle'); }"
       >
-        {{ bluetoothLabel }}
+        <svg class="bluetooth-btn__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="m7 7 10 10-5 5V2l5 5L7 17"/>
+        </svg>
+        <span>{{ bluetoothLabel }}</span>
       </button>
       <p class="bluetooth-hint">
         <template v-if="bluetoothStatus === 'connected'">
@@ -167,6 +170,9 @@ const bluetoothAriaLabel = computed(() => {
 }
 
 .bluetooth-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
   flex-shrink: 0;
   border: 1px solid var(--line);
   border-radius: 8px;
@@ -175,10 +181,15 @@ const bluetoothAriaLabel = computed(() => {
   font: inherit;
   font-size: 0.82rem;
   font-weight: 700;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.04em;
   padding: 8px 14px;
   cursor: pointer;
   transition: background 0.15s, border-color 0.15s;
+}
+
+.bluetooth-btn__icon {
+  width: 14px;
+  height: 14px;
 }
 
 .bluetooth-btn:disabled {
