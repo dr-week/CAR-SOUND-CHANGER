@@ -77,17 +77,22 @@ const bluetoothAriaLabel = computed(() => {
 
 <template>
   <div class="instrument-dashboard">
-    <!-- ── Instrument cluster: tachometer + digital side panel ── -->
-    <section class="instrument-cluster" aria-label="Instrument cluster">
-      <VehicleTachometer :rpm="rpm" :profile="profile" />
+    <!-- ── Compact twin-gauge cluster: Tachometer + Gear + Speedometer ── -->
+    <section class="twin-cluster" aria-label="Instrument cluster">
+      <div class="tacho-wrapper">
+        <VehicleTachometer :rpm="rpm" :profile="profile" />
+      </div>
 
-      <div class="gauge-side">
+      <div class="gear-center-wrapper">
+        <GearDisplay :gear="gear" />
+      </div>
+
+      <div class="speedo-wrapper">
         <SpeedometerGauge
           :speed-kph="displaySpeed"
           :source="speedSource"
           :max-speed-kph="180"
         />
-        <GearDisplay :gear="gear" />
       </div>
     </section>
 
@@ -108,7 +113,7 @@ const bluetoothAriaLabel = computed(() => {
       @reset="emit('reset')"
     />
 
-    <!-- ── Bluetooth badge (hidden when unsupported) ── -->
+    <!-- ── Bluetooth bar ── -->
     <div
       v-if="bluetoothStatus !== 'unsupported'"
       class="bluetooth-row"
@@ -133,16 +138,16 @@ const bluetoothAriaLabel = computed(() => {
       </button>
       <p class="bluetooth-hint">
         <template v-if="bluetoothStatus === 'connected'">
-          Bluetooth audio active · tap to disconnect
+          Active · tap to disconnect
         </template>
         <template v-else-if="bluetoothStatus === 'scanning'">
-          Opening device picker…
+          Pairing…
         </template>
         <template v-else-if="bluetoothStatus === 'error'">
-          Could not connect — tap to retry
+          Error · tap to retry
         </template>
         <template v-else>
-          Tap to pair a Bluetooth speaker or headset
+          Pair Bluetooth speaker
         </template>
       </p>
     </div>
@@ -150,11 +155,38 @@ const bluetoothAriaLabel = computed(() => {
 </template>
 
 <style scoped>
-/* Dashboard wrapper — no visual decoration; children own their look */
+/* Dashboard wrapper — compact vertical stack */
 .instrument-dashboard {
   display: flex;
   flex-direction: column;
-  gap: 0;
+  gap: 12px;
+}
+
+/* ── Compact side-by-side twin-gauge cluster: Tachometer + Gear + Speedometer ── */
+.twin-cluster {
+  display: grid;
+  grid-template-columns: 1fr 100px 1fr;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background: rgba(14, 17, 23, 0.85);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+}
+
+.tacho-wrapper,
+.speedo-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+}
+
+.gear-center-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 /* ── Bluetooth row ─────────────────────────────────────────────── */
@@ -162,10 +194,10 @@ const bluetoothAriaLabel = computed(() => {
   display: flex;
   align-items: center;
   gap: 12px;
-  margin: 20px 0 0;
-  padding: 12px 16px;
+  margin: 4px 0 0;
+  padding: 8px 14px;
   border: 1px solid var(--line);
-  border-radius: 12px;
+  border-radius: 10px;
   background: rgba(18, 21, 27, 0.9);
 }
 
@@ -179,10 +211,10 @@ const bluetoothAriaLabel = computed(() => {
   background: #1d2530;
   color: var(--text);
   font: inherit;
-  font-size: 0.82rem;
+  font-size: 0.8rem;
   font-weight: 700;
   letter-spacing: 0.04em;
-  padding: 8px 14px;
+  padding: 6px 12px;
   cursor: pointer;
   transition: background 0.15s, border-color 0.15s;
 }
@@ -223,8 +255,8 @@ const bluetoothAriaLabel = computed(() => {
 .bluetooth-hint {
   margin: 0;
   color: var(--muted);
-  font-size: 0.82rem;
-  line-height: 1.4;
+  font-size: 0.78rem;
+  line-height: 1.3;
 }
 
 @keyframes bt-pulse {
@@ -233,10 +265,14 @@ const bluetoothAriaLabel = computed(() => {
 }
 
 @media (max-width: 600px) {
+  .twin-cluster {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
   .bluetooth-row {
     flex-direction: column;
     align-items: flex-start;
-    gap: 8px;
+    gap: 6px;
   }
 }
 </style>
