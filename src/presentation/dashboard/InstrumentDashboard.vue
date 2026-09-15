@@ -15,7 +15,7 @@ import type { VehicleProfile } from "../../domain/vehicle/types";
 import type { BluetoothStatus } from "../../infrastructure/bluetooth/BluetoothManager";
 import DriveControls from "../components/DriveControls.vue";
 import GearDisplay from "../components/GearDisplay.vue";
-import SpeedDisplay from "../components/SpeedDisplay.vue";
+import SpeedometerGauge from "../components/SpeedometerGauge.vue";
 import StatusIndicators from "../components/StatusIndicators.vue";
 import VehicleTachometer from "../components/VehicleTachometer.vue";
 import type { DriveAction } from "../../domain/vehicle/controls";
@@ -81,9 +81,13 @@ const bluetoothAriaLabel = computed(() => {
     <section class="instrument-cluster" aria-label="Instrument cluster">
       <VehicleTachometer :rpm="rpm" :profile="profile" />
 
-      <div class="digital-displays">
+      <div class="gauge-side">
+        <SpeedometerGauge
+          :speed-kph="displaySpeed"
+          :source="speedSource"
+          :max-speed-kph="180"
+        />
         <GearDisplay :gear="gear" />
-        <SpeedDisplay :speed-kph="displaySpeed" :source="speedSource" />
       </div>
     </section>
 

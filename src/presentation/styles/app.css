@@ -165,12 +165,13 @@ input:focus-visible {
 
 :root {
   --surface: #090a0d;
-  --panel: #12151b;
-  --line: #2a313d;
+  --panel: rgba(18, 21, 27, 0.85);
+  --line: rgba(255, 255, 255, 0.08);
   --text: #f3f5f8;
   --muted: #99a3b3;
   --red: #e73333;
   --green: #31a566;
+  --accent-glow: rgba(232, 76, 50, 0.25);
 }
 
 body {
@@ -179,8 +180,22 @@ body {
 .shell {
   background-color: var(--surface);
   background-image:
-    repeating-linear-gradient(125deg, rgba(255, 255, 255, 0.025) 0 1px, transparent 1px 5px),
-    linear-gradient(145deg, #171b22, #090a0d 65%);
+    radial-gradient(circle at 50% 0%, rgba(232, 76, 50, 0.08), transparent 45%),
+    repeating-linear-gradient(125deg, rgba(255, 255, 255, 0.015) 0 1px, transparent 1px 5px),
+    linear-gradient(145deg, #171b22, #090a0d 75%);
+  box-shadow: 0 0 60px rgba(0, 0, 0, 0.8);
+}
+.panel {
+  background: var(--panel);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.37);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.panel:hover {
+  border-color: rgba(255, 255, 255, 0.14);
 }
 .instrument-cluster {
   position: relative;

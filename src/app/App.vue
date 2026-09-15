@@ -3,11 +3,7 @@ import { computed, onMounted, onBeforeUnmount, ref } from "vue";
 import { useVehicleSimulator } from "../application/composables/useVehicleSimulator";
 import { BluetoothManager } from "../infrastructure/bluetooth/BluetoothManager";
 import type { BluetoothStatus } from "../infrastructure/bluetooth/BluetoothManager";
-import DriveControls from "../presentation/components/DriveControls.vue";
-import GearDisplay from "../presentation/components/GearDisplay.vue";
-import SpeedometerGauge from "../presentation/components/SpeedometerGauge.vue";
-import StatusIndicators from "../presentation/components/StatusIndicators.vue";
-import VehicleTachometer from "../presentation/components/VehicleTachometer.vue";
+import InstrumentDashboard from "../presentation/dashboard/InstrumentDashboard.vue";
 
 // ── Simulator ──────────────────────────────────────────────────────────────
 const simulator = useVehicleSimulator();
@@ -36,14 +32,6 @@ async function handleBluetoothToggle(): Promise<void> {
 }
 
 // ── Computed helpers ────────────────────────────────────────────────────────
-const displaySpeed = computed(
-  () => simulator.vehicle.gpsSpeedKph ?? simulator.vehicle.speedKph,
-);
-
-const speedSource = computed<"GPS" | "Simulation">(() =>
-  simulator.telemetryStatus.value === "active" ? "GPS" : "Simulation",
-);
-
 const profileDetails = computed(
   () =>
     `${simulator.vehicle.profile.cylinders}-cyl · ${simulator.vehicle.profile.gears}-speed · shift @ ${simulator.vehicle.profile.shiftRpm.toLocaleString()} RPM`,
@@ -75,17 +63,6 @@ const gpsMessage = computed(
     })[simulator.telemetryStatus.value],
 );
 
-const bluetoothLabel = computed(() => {
-  switch (bluetoothStatus.value) {
-    case "connected":    return "BT ●  " + (bluetooth.deviceName ?? "Connected");
-    case "scanning":     return "BT  Scanning…";
-    case "disconnected": return "BT ○  Disconnected";
-    case "error":        return "BT ✕  Error — retry";
-    case "unsupported":  return "";
-    default:             return "BT  Connect speaker";
-  }
-});
-
 function onProfileChange(event: Event): void {
   simulator.selectProfile((event.target as HTMLSelectElement).value);
 }
@@ -109,35 +86,6 @@ function onGpsChange(event: Event): void {
       </button>
     </header>
 
-    <!-- ── Gauge cluster ──────────────────────────────────────────────── -->
-    <section class="gauge-cluster" aria-label="Instrument cluster">
-      <!-- Tachometer (RPM) — main, larger gauge -->
-      <div class="gauge-tacho">
-        <VehicleTachometer
-          :rpm="simulator.vehicle.rpm"
-          :profile="simulator.vehicle.profile"
-        />
-      </div>
-
-      <!-- Speedometer + gear side panel -->
-      <div class="gauge-side">
-        <SpeedometerGauge
-          :speed-kph="displaySpeed"
-          :source="speedSource"
-          :max-speed-kph="180"
-        />
-        <GearDisplay :gear="simulator.vehicle.gear" />
-      </div>
-    </section>
-
-    <!-- ── Status row ─────────────────────────────────────────────────── -->
-    <StatusIndicators
-      :audio-status="simulator.audioStatus.value"
-      :telemetry-status="simulator.telemetryStatus.value"
-      :green-score="simulator.greenScore.points"
-      :bluetooth-status="bluetoothStatus"
-    />
-
     <!-- ── Status messages ────────────────────────────────────────────── -->
     <p
       v-if="audioMessage"
@@ -147,13 +95,23 @@ function onGpsChange(event: Event): void {
       {{ audioMessage }}
     </p>
 
-    <!-- ── Drive controls ─────────────────────────────────────────────── -->
-    <DriveControls
+    <!-- ── Main Instrument Dashboard ──────────────────────────────────── -->
+    <InstrumentDashboard
+      :rpm="simulator.vehicle.rpm"
+      :gear="simulator.vehicle.gear"
+      :speed-kph="simulator.vehicle.speedKph"
+      :gps-speed-kph="simulator.vehicle.gpsSpeedKph"
+      :profile="simulator.vehicle.profile"
       :accelerating="simulator.vehicle.throttle > 0"
       :braking="simulator.vehicle.brake > 0"
+      :audio-status="simulator.audioStatus.value"
+      :telemetry-status="simulator.telemetryStatus.value"
+      :green-score="simulator.greenScore.points"
+      :bluetooth-status="bluetoothStatus"
       @control="simulator.setControl"
       @shift="simulator.shift"
       @reset="simulator.reset"
+      @bluetooth-toggle="handleBluetoothToggle"
     />
 
     <!-- ── Settings panel ─────────────────────────────────────────────── -->
@@ -185,7 +143,7 @@ function onGpsChange(event: Event): void {
       <p>{{ profileDetails }}</p>
     </section>
 
-    <!-- ── GPS + Bluetooth panel ──────────────────────────────────────── -->
+    <!-- ── GPS & Controls summary ─────────────────────────────────────── -->
     <section class="panel compact">
       <label>
         <input
@@ -196,28 +154,6 @@ function onGpsChange(event: Event): void {
         Use device GPS speed
       </label>
       <p>{{ gpsMessage }}</p>
-
-      <!-- Bluetooth toggle — hidden when Web Bluetooth not supported -->
-      <div v-if="bluetoothStatus !== 'unsupported'" class="bluetooth-row">
-        <button
-          type="button"
-          class="bt-btn"
-          :class="{
-            'bt-btn--connected':  bluetoothStatus === 'connected',
-            'bt-btn--scanning':   bluetoothStatus === 'scanning',
-            'bt-btn--error':      bluetoothStatus === 'error',
-          }"
-          :disabled="bluetoothStatus === 'scanning'"
-          :aria-label="bluetoothLabel"
-          @click="handleBluetoothToggle"
-        >
-          {{ bluetoothLabel }}
-        </button>
-        <p class="bt-hint">
-          Audio routes through your OS output device. Connect your Bluetooth
-          speaker in system settings, then tap above to pair it here.
-        </p>
-      </div>
 
       <p class="key-hint">
         W accelerate · S brake · 1 upshift · 2 downshift
