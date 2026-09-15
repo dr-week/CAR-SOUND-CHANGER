@@ -1,58 +1,95 @@
 <script setup lang="ts">
+/**
+ * VehicleTachometer
+ *
+ * Renders a full-colour RPM tachometer using vue-speedometer v3.
+ * Zones:
+ *   0 – shiftRpm          → green  (cruise / eco)
+ *   shiftRpm – redline-1k → amber  (power band)
+ *   redline-1k – redline  → red    (danger / redline)
+ */
 import { computed } from "vue";
+import VueSpeedometer from "vue-speedometer";
 import type { VehicleProfile } from "../../domain/vehicle/types";
 
-const props = defineProps<{ rpm: number; profile: VehicleProfile }>();
+const props = defineProps<{
+  rpm: number;
+  profile: VehicleProfile;
+}>();
+
+/** Round redline up to the nearest 1 000 for a clean max label */
 const maxRpm = computed(() => Math.ceil(props.profile.redlineRpm / 1_000) * 1_000);
-const normalizedRpm = computed(() => Math.min(1, Math.max(0, props.rpm / maxRpm.value)));
-const needleAngle = computed(() => -135 + normalizedRpm.value * 270);
-const tickValues = computed(() => Array.from({ length: maxRpm.value / 1_000 + 1 }, (_, value) => value));
-const redlineStartAngle = computed(() => -135 + (props.profile.redlineRpm / maxRpm.value) * 270);
 
-function point(angle: number, radius: number): { x: number; y: number } {
-  const radians = ((angle - 90) * Math.PI) / 180;
-  return { x: 120 + Math.cos(radians) * radius, y: 120 + Math.sin(radians) * radius };
-}
+/**
+ * Three-zone colour stops:
+ *   Segment 0: idle → shiftRpm         (green)
+ *   Segment 1: shiftRpm → redline-1k   (amber)
+ *   Segment 2: redline-1k → maxRpm     (red)
+ */
+const segmentStops = computed(() => [
+  0,
+  props.profile.shiftRpm,
+  props.profile.redlineRpm - 1_000,
+  maxRpm.value,
+]);
 
-function tickTransform(value: number): string {
-  return `rotate(${-135 + (value / (maxRpm.value / 1_000)) * 270} 120 120)`;
-}
-
-function labelPosition(value: number): { x: number; y: number } {
-  return point(-135 + (value / (maxRpm.value / 1_000)) * 270, 80);
-}
-
-function arcPath(startAngle: number, endAngle: number, radius: number): string {
-  const start = point(startAngle, radius);
-  const end = point(endAngle, radius);
-  return `M ${start.x} ${start.y} A ${radius} ${radius} 0 0 1 ${end.x} ${end.y}`;
-}
+const currentValueText = computed(
+  () => `${Math.round(props.rpm).toLocaleString()} RPM`,
+);
 </script>
 
 <template>
-  <section class="tachometer" aria-label="Engine tachometer">
-    <svg viewBox="0 0 240 240" role="img" :aria-label="`Engine speed ${Math.round(rpm)} RPM of ${maxRpm} RPM`">
-      <circle class="tachometer__outer" cx="120" cy="120" r="112" />
-      <circle class="tachometer__face" cx="120" cy="120" r="101" />
-      <path class="tachometer__redline" :d="arcPath(redlineStartAngle, 135, 101)" />
-      <g v-for="value in tickValues" :key="value" :transform="tickTransform(value)">
-        <line class="tachometer__tick" x1="120" y1="19" x2="120" y2="31" />
-      </g>
-      <text
-        v-for="value in tickValues"
-        :key="`label-${value}`"
-        class="tachometer__label"
-        :x="labelPosition(value).x"
-        :y="labelPosition(value).y"
-      >
-        {{ value }}
-      </text>
-      <g :transform="`rotate(${needleAngle} 120 120)`">
-        <line class="tachometer__needle" x1="120" y1="120" x2="120" y2="35" />
-      </g>
-      <circle class="tachometer__hub" cx="120" cy="120" r="13" />
-      <text class="tachometer__rpm" x="120" y="174">{{ Math.round(rpm).toLocaleString() }}</text>
-      <text class="tachometer__rpm-caption" x="120" y="190">RPM · DIAL ×1000</text>
-    </svg>
+  <section class="tachometer" :aria-label="`Engine speed ${Math.round(rpm)} RPM`">
+    <VueSpeedometer
+      :fluid-width="true"
+      :value="rpm"
+      :min-value="0"
+      :max-value="maxRpm"
+      :segments="3"
+      :custom-segment-stops="segmentStops"
+      :segment-colors="['#31a566', '#f7b955', '#e73333']"
+      needle-color="#ffffff"
+      :ring-width="28"
+      :needle-height-ratio="0.82"
+      :needle-transition-duration="120"
+      needle-transition="easeQuadOut"
+      text-color="#c4cbd6"
+      :current-value-text="currentValueText"
+      value-text-font-size="15px"
+      value-text-font-weight="700"
+      label-font-size="11px"
+      :padding-horizontal="8"
+      :padding-vertical="6"
+      :force-render="true"
+    />
+    <p class="tacho-label" aria-hidden="true">
+      {{ profile.name }} · shift at {{ profile.shiftRpm.toLocaleString() }} RPM
+    </p>
   </section>
 </template>
+
+<style scoped>
+.tachometer {
+  width: 100%;
+  max-width: 320px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  filter: drop-shadow(0 10px 24px rgba(0, 0, 0, 0.55));
+}
+
+/* vue-speedometer renders an <svg> inside a wrapping div — let it fill */
+.tachometer :deep(> div) {
+  width: 100% !important;
+}
+
+.tacho-label {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  text-align: center;
+}
+</style>

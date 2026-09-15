@@ -1,6 +1,6 @@
 # Installation Guide
 
-Complete setup guide for the Car Sound Changer Android app.
+Complete setup guide for Car Sound Changer - Vue 3 + Vite + TypeScript web app.
 
 ## Prerequisites
 
@@ -9,296 +9,445 @@ Complete setup guide for the Car Sound Changer Android app.
 1. **Node.js** (v18 or higher)
    - Download from [nodejs.org](https://nodejs.org/)
    - Verify: `node --version`
+   - npm comes bundled with Node.js
 
-2. **Java Development Kit (JDK 17)**
-   - Download from [Oracle](https://www.oracle.com/java/technologies/downloads/)
-   - Set JAVA_HOME environment variable
+2. **Git** (optional, for version control)
+   - Download from [git-scm.com](https://git-scm.com/)
+   - Verify: `git --version`
 
-3. **Android Studio**
-   - Download from [developer.android.com](https://developer.android.com/studio)
-   - Install Android SDK (API Level 24-34)
-   - Install Android SDK Build-Tools
-   - Install Android Emulator (optional)
+3. **Code Editor** (recommended)
+   - [VS Code](https://code.visualstudio.com/) - Recommended
+   - [WebStorm](https://www.jetbrains.com/webstorm/)
+   - Or any text editor
 
-4. **React Native CLI**
-   ```bash
-   npm install -g react-native-cli
-   ```
+### Browser Support
 
-### Android SDK Setup
-
-1. Open Android Studio → SDK Manager
-2. Install required SDK platforms:
-   - Android 14.0 (API 34) - Target
-   - Android 7.0 (API 24) - Minimum
-
-3. Install SDK Build Tools (latest version)
-
-4. Set environment variables:
-   ```bash
-   # Windows (PowerShell)
-   $env:ANDROID_HOME = "C:\Users\YourUsername\AppData\Local\Android\Sdk"
-   $env:PATH += ";$env:ANDROID_HOME\platform-tools"
-   $env:PATH += ";$env:ANDROID_HOME\tools"
-   ```
+- Chrome/Edge 90+
+- Firefox 88+
+- Safari 14+
+- Mobile browsers with GPS support
 
 ## Project Setup
 
-### 1. Clone/Create Project
+### 1. Navigate to Project
 
 ```bash
 cd c:\Users\disha\Documents\CODES\studio\carSOUNDMOD
 ```
 
-### 2. Initialize React Native Project
+### 2. Install Dependencies
 
 ```bash
-# If starting fresh
-npx react-native init CarSoundMod --template react-native-template-typescript
+# Install all dependencies
+npm install
 
-# Or initialize in current directory
-npm init -y
+# Verify installation
+npm list
 ```
 
-### 3. Install Dependencies
-
-```bash
-# Core dependencies
-npm install react-native
-npm install typescript @types/react @types/react-native
-
-# Navigation
-npm install @react-navigation/native @react-navigation/stack
-npm install react-native-screens react-native-safe-area-context
-npm install react-native-gesture-handler react-native-reanimated
-
-# Audio
-npm install react-native-sound
-npm install react-native-track-player
-
-# GPS/Location
-npm install react-native-geolocation-service
-
-# Bluetooth & Audio Routing
-npm install react-native-audio-routing
-
-# State Management
-npm install zustand
-
-# UI Components
-npm install react-native-paper
-npm install react-native-vector-icons
-
-# Permissions
-npm install react-native-permissions
-
-# Background Service
-npm install react-native-background-actions
-
-# Keep Screen On
-npm install react-native-keep-awake
-
-# Charts/Gauges
-npm install react-native-svg
-npm install react-native-circular-progress
-
-# Dev Dependencies
-npm install -D @types/react-native-vector-icons
-npm install -D @react-native-community/eslint-config
-npm install -D prettier
-```
-
-### 4. Link Native Modules (if needed)
-
-```bash
-# For React Native < 0.60
-react-native link react-native-sound
-react-native link react-native-geolocation-service
-react-native link react-native-vector-icons
-
-# For React Native >= 0.60, auto-linking works
-cd android && ./gradlew clean && cd ..
-```
-
-### 5. Configure Android Permissions
-
-Edit `android/app/src/main/AndroidManifest.xml`:
-
-```xml
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
-    
-    <!-- GPS & Location -->
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
-    
-    <!-- Bluetooth -->
-    <uses-permission android:name="android.permission.BLUETOOTH" />
-    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
-    <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
-    <uses-permission android:name="android.permission.BLUETOOTH_SCAN" />
-    
-    <!-- Audio -->
-    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
-    
-    <!-- Background Service -->
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
-    <uses-permission android:name="android.permission.WAKE_LOCK" />
-    
-    <!-- Internet (for debugging) -->
-    <uses-permission android:name="android.permission.INTERNET" />
-    
-    <application>
-        <!-- Your app configuration -->
-    </application>
-</manifest>
-```
-
-### 6. Configure Gradle
-
-Edit `android/app/build.gradle`:
-
-```gradle
-android {
-    compileSdkVersion 34
-    
-    defaultConfig {
-        applicationId "com.carsoundmod"
-        minSdkVersion 24
-        targetSdkVersion 34
-        versionCode 1
-        versionName "1.0.0"
-    }
-    
-    buildTypes {
-        release {
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-        }
-    }
-}
-```
+This will install:
+- Vue 3 (UI framework)
+- Vite (build tool)
+- TypeScript (type safety)
+- Testing libraries (Vitest, Vue Test Utils)
+- Linting tools (ESLint, Prettier)
+- And more...
 
 ## Development Setup
 
-### 1. Start Metro Bundler
+### 1. Start Development Server
 
 ```bash
-npm start
+# Start Vite dev server on http://localhost:5173
+npm run dev
+
+# With custom port
+npm run dev -- --port 3000
 ```
 
-### 2. Run on Android Device/Emulator
+The browser will automatically reload when you save files.
+
+### 2. Access the App
+
+Open your browser and navigate to:
+```
+http://localhost:5173
+```
+
+You should see the Car Sound Changer app homepage.
+
+### 3. Enable GPS (Required for Testing)
+
+For the app to work properly, you need to enable location access:
+
+#### On Desktop
+- Google Chrome: 
+  1. Right-click page → Inspect
+  2. Sensors tab → Location
+  3. Set custom location (e.g., New Delhi: 28.6139, 77.2090)
+
+- Firefox:
+  1. Type `about:config`
+  2. Search for `geo.enabled`
+  3. Set to `true`
+
+#### On Mobile
+- Grant location permission when prompted
+- Ensure device has GPS enabled
+
+## Build & Production
+
+### Build for Production
 
 ```bash
-# Run on connected device
-npm run android
+# Create optimized production build
+npm run build
 
-# Or
-npx react-native run-android
+# Output goes to dist/ folder
 ```
 
-### 3. Enable USB Debugging on Device
+### Preview Production Build
 
-1. Go to Settings → About Phone
-2. Tap "Build Number" 7 times
-3. Go to Settings → Developer Options
-4. Enable "USB Debugging"
-5. Connect device via USB
-6. Verify: `adb devices`
+```bash
+# Test production build locally
+npm run preview
 
-## Bluetooth Speaker Setup
+# Open http://localhost:4173 in browser
+```
 
-### Physical Setup
+### Deploy to Production
 
-1. **Pair Bluetooth Speaker**
-   - Turn on Bluetooth speaker
-   - Go to Android Settings → Bluetooth
-   - Pair your speaker
+Choose one of these deployment options:
 
-2. **Car Audio System** (Alternative)
-   - Connect phone to car via Bluetooth
-   - Ensure "Media Audio" is enabled for the connection
+#### Option 1: Netlify (Recommended)
+```bash
+# Install Netlify CLI
+npm install -g netlify-cli
 
-### App Configuration
+# Deploy
+netlify deploy --prod --dir=dist
+```
 
-The app will automatically:
-- Detect connected Bluetooth devices
-- Route audio to Bluetooth when connected
-- Fall back to phone speaker when disconnected
+#### Option 2: Vercel
+```bash
+# Install Vercel CLI
+npm install -g vercel
+
+# Deploy
+vercel --prod
+```
+
+#### Option 3: GitHub Pages
+```bash
+# Add to vite.config.ts
+export default {
+  base: '/carSOUNDMOD/'
+}
+
+# Build
+npm run build
+
+# Push dist/ to gh-pages branch
+```
+
+#### Option 4: Traditional Web Server
+```bash
+# Build
+npm run build
+
+# Upload dist/ folder to your web server
+# Configure web server to serve index.html for all routes
+```
+
+## Development Commands
+
+### Code Quality
+
+```bash
+# Run linter
+npm run lint
+
+# Fix linting issues
+npm run lint -- --fix
+
+# Format code with Prettier
+npm run format
+
+# Check TypeScript
+npm run type-check
+```
+
+### Testing
+
+```bash
+# Run all tests
+npm run test
+
+# Run tests in watch mode
+npm run test:watch
+
+# Run tests with coverage
+npm run test:coverage
+
+# Run specific test file
+npm run test -- RPMGauge.test.ts
+
+# Run E2E tests (if configured)
+npm run test:e2e
+```
+
+### Other Useful Commands
+
+```bash
+# Start dev server
+npm run dev
+
+# Build for production
+npm run build
+
+# Preview production build
+npm run preview
+
+# View Vite configuration
+npm run config
+
+# Generate types
+npm run type-check
+```
+
+## Keyboard Testing Controls (Development Mode)
+
+When running in development, you can test without GPS:
+
+```
+Arrow Up    → Increase speed
+Arrow Down  → Decrease speed
+1-5         → Change gear (1-5)
+Space       → Accelerate (boost)
+M           → Mute/Unmute audio
+Escape      → Reset/Stop
+```
+
+These work only when the app has focus.
 
 ## Troubleshooting
 
 ### Common Issues
 
-#### 1. Metro Bundler Issues
+#### 1. Port 5173 Already in Use
 ```bash
-# Clear cache
-npm start -- --reset-cache
-
-# Clear watchman
-watchman watch-del-all
-
-# Clear gradle
-cd android && ./gradlew clean && cd ..
+# Use different port
+npm run dev -- --port 3000
 ```
 
-#### 2. Android Build Errors
+#### 2. GPS Not Working
+- Ensure you granted location permission
+- Check browser location settings
+- On desktop, use DevTools to set location
+- On mobile, enable GPS in device settings
+
+#### 3. Audio Not Playing
+- Check browser audio permissions
+- Ensure volume is not muted
+- Try different browser
+- Check browser's Web Audio API support
+
+#### 4. Build Fails
 ```bash
-# Clear build
-cd android
-./gradlew clean
-cd ..
+# Clear node_modules and reinstall
+rm -r node_modules package-lock.json
+npm install
 
 # Rebuild
-npm run android
+npm run build
 ```
 
-#### 3. GPS Not Working
-- Ensure location permissions are granted
-- Enable GPS in device settings
-- Test outdoors for better signal
+#### 5. TypeScript Errors
+```bash
+# Check TypeScript
+npm run type-check
 
-#### 4. Bluetooth Audio Not Working
-- Check Bluetooth permissions
-- Ensure "Media Audio" is enabled for Bluetooth device
-- Restart app after connecting Bluetooth
+# Regenerate types
+npm run type-check -- --force
+```
 
-#### 5. Audio Latency Issues
-- See [PERFORMANCE.md](./docs/PERFORMANCE.md) for optimization tips
-- Reduce audio buffer size in configuration
+#### 6. Dependencies Conflict
+```bash
+# Update dependencies
+npm update
 
-### Getting Help
+# Or install specific version
+npm install vue@latest vite@latest
+```
 
-- Check [TROUBLESHOOTING.md](./docs/TROUBLESHOOTING.md)
-- Review [FAQ](./docs/FAQ.md)
-- Check GitHub Issues
+### View Detailed Error Logs
+
+```bash
+# Verbose npm output
+npm run dev -- --debug
+
+# Or
+npm --verbose run build
+```
+
+## Project Structure for Development
+
+```
+carSOUNDMOD/
+├── src/
+│   ├── domain/              # Business logic (no Vue code)
+│   ├── application/         # Services and composables
+│   ├── infrastructure/      # API adapters (Audio, GPS, etc.)
+│   ├── presentation/        # Vue components
+│   ├── App.vue             # Root component
+│   └── main.ts             # Entry point
+│
+├── public/                  # Static files
+│   └── sounds/             # Audio files
+│
+├── __tests__/              # Test files
+├── dist/                   # Production build (created by npm run build)
+├── node_modules/           # Dependencies (created by npm install)
+├── package.json            # Project metadata
+├── tsconfig.json           # TypeScript config
+├── vite.config.ts          # Vite config
+└── index.html              # HTML template
+```
+
+## IDE Setup
+
+### VS Code (Recommended)
+
+1. **Install Extensions**:
+   - Volar (Vue official extension)
+   - TypeScript Vue Plugin
+   - ESLint
+   - Prettier
+   - REST Client
+
+2. **VS Code Settings** (`.vscode/settings.json`):
+```json
+{
+  "editor.formatOnSave": true,
+  "[vue]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "typescript.enablePromptUseWorkspaceTsdk": true
+}
+```
+
+### WebStorm
+
+1. Open project
+2. WebStorm automatically detects Vue 3
+3. Enable TypeScript strict mode
+4. Install Vue.js plugin
+
+## Performance Testing
+
+### Measure App Performance
+
+```bash
+# Start dev server
+npm run dev
+
+# Open DevTools (F12)
+# Go to Performance tab
+# Record and reload page
+# Analyze results
+```
+
+### Browser Compatibility Testing
+
+Test on different browsers:
+- Chrome DevTools (Ctrl+Shift+J)
+- Firefox DevTools (F12)
+- Safari DevTools (Cmd+Option+I)
+- Mobile browsers
+
+## Database & Storage (Optional)
+
+The app uses browser storage:
+
+```typescript
+// LocalStorage (for settings)
+localStorage.setItem('volume', '0.8');
+const volume = localStorage.getItem('volume');
+
+// IndexedDB (for sound files - optional)
+const db = new IDBDatabase();
+```
+
+No server/database required by default.
+
+## Environment Configuration
+
+Create `.env` file for environment variables:
+
+```bash
+# .env
+VITE_API_URL=http://localhost:3000
+VITE_AUDIO_BUFFER_SIZE=2048
+VITE_GPS_UPDATE_INTERVAL=100
+```
+
+Access in code:
+```typescript
+const apiUrl = import.meta.env.VITE_API_URL;
+```
+
+## SSL/HTTPS (for Geolocation on Web)
+
+Geolocation API requires HTTPS (except localhost). For production:
+
+```bash
+# Deploy to Netlify/Vercel (automatic HTTPS)
+# Or use self-signed certificate locally:
+
+# Generate certificate
+openssl req -x509 -newkey rsa:4096 -out cert.pem -keyout key.pem -days 365 -nodes
+
+# Update vite.config.ts
+export default {
+  server: {
+    https: {
+      key: fs.readFileSync('./key.pem'),
+      cert: fs.readFileSync('./cert.pem'),
+    }
+  }
+}
+```
+
+## First Run Checklist
+
+- [ ] Node.js v18+ installed (`node --version`)
+- [ ] Dependencies installed (`npm install`)
+- [ ] Dev server starts (`npm run dev`)
+- [ ] Browser opens to http://localhost:5173
+- [ ] GPS permission granted
+- [ ] Can see RPM gauge (test with keyboard controls)
+- [ ] Audio plays (if speakers connected)
+- [ ] No console errors (F12)
 
 ## Next Steps
 
-After installation:
+After setup:
 
-1. Read [ARCHITECTURE.md](./docs/ARCHITECTURE.md) to understand the system
-2. Review [CONFIGURATION.md](./docs/CONFIGURATION.md) to customize settings
-3. Check [UI_DESIGN.md](./docs/UI_DESIGN.md) for UI customization
-4. See [BLUETOOTH_AUDIO.md](./docs/BLUETOOTH_AUDIO.md) for audio setup details
+1. **Read Architecture**: [ARCHITECTURE.md](./docs/ARCHITECTURE.md)
+2. **Learn Code Division**: [CODE_DIVISION_RULES.md](./docs/CODE_DIVISION_RULES.md)
+3. **Understand Gear Logic**: [GEAR_LOGIC.md](./docs/GEAR_LOGIC.md)
+4. **Start Development**: See [DEV_WORKFLOW.md](./docs/DEV_WORKFLOW.md)
+5. **Run Tests**: `npm run test`
+6. **Build Project**: `npm run build`
 
-## Verification
+## Help & Support
 
-Test that everything works:
-
-```bash
-# Check dependencies
-npm list
-
-# Verify Android connection
-adb devices
-
-# Run tests
-npm test
-
-# Check TypeScript
-npx tsc --noEmit
-```
+- 📖 Read [TROUBLESHOOTING.md](./docs/TROUBLESHOOTING.md)
+- ❓ Check [FAQ.md](./docs/FAQ.md)
+- 🐛 Report issues on GitHub
+- 💬 Join discussions
 
 ---
 
-**Ready to develop!** Start with `npm run android` to launch the app.
+**Happy coding!** 🚗🔊
+
