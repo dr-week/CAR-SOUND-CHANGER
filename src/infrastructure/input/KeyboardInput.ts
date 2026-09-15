@@ -30,7 +30,6 @@ export class KeyboardInput {
 
   start(): () => void {
     const down = (event: KeyboardEvent) => {
-      if (event.repeat) return;
       if (
         typeof HTMLElement !== "undefined" &&
         event.target instanceof HTMLElement &&
@@ -43,37 +42,43 @@ export class KeyboardInput {
       const code = event.code;
       const key = event.key;
 
-      // Upshift: Digit1, Numpad1, KeyQ, '1', 'q', 'Q'
-      if (
+      const isUpshift =
         code === "Digit1" ||
         code === "Numpad1" ||
         code === "KeyQ" ||
         key === "1" ||
         key === "q" ||
-        key === "Q"
-      ) {
-        event.preventDefault();
-        this.onShift(1);
-        return;
-      }
+        key === "Q";
 
-      // Downshift: Digit2, Numpad2, KeyE, '2', 'e', 'E'
-      if (
+      const isDownshift =
         code === "Digit2" ||
         code === "Numpad2" ||
         code === "KeyE" ||
         key === "2" ||
         key === "e" ||
-        key === "E"
-      ) {
+        key === "E";
+
+      const action = CONTROL_BINDINGS[code] || CONTROL_BINDINGS[key];
+
+      // Prevent default page scroll for driving & shift controls (even during key repeat)
+      if (action || isUpshift || isDownshift) {
         event.preventDefault();
+      }
+
+      // Ignore repeated keydown events for state toggles
+      if (event.repeat) return;
+
+      if (isUpshift) {
+        this.onShift(1);
+        return;
+      }
+
+      if (isDownshift) {
         this.onShift(-1);
         return;
       }
 
-      const action = CONTROL_BINDINGS[code] || CONTROL_BINDINGS[key];
       if (action) {
-        event.preventDefault();
         this.onControl(action, true);
       }
     };
@@ -83,6 +88,7 @@ export class KeyboardInput {
       const key = event.key;
       const action = CONTROL_BINDINGS[code] || CONTROL_BINDINGS[key];
       if (action) {
+        event.preventDefault();
         this.onControl(action, false);
       }
     };

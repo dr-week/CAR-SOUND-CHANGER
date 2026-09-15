@@ -7,9 +7,13 @@
 * {
   box-sizing: border-box;
 }
-body {
+html, body {
   margin: 0;
-  min-width: 320px;
+  padding: 0;
+  height: 100%;
+  overflow: hidden;
+  user-select: none;
+  touch-action: manipulation;
 }
 button,
 select {
@@ -17,9 +21,11 @@ select {
 }
 .shell {
   max-width: 720px;
-  min-height: 100vh;
+  height: 100%;
+  max-height: 100vh;
+  overflow-y: auto;
   margin: auto;
-  padding: clamp(20px, 5vw, 48px);
+  padding: clamp(16px, 4vw, 36px);
   background: linear-gradient(145deg, #171b22, #101216 65%);
 }
 header {
