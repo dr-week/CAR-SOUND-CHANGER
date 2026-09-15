@@ -60,11 +60,13 @@ export class WebAudioEngine implements EngineSoundOutput {
       const oscillator = this.context!.createOscillator();
       const gain = this.context!.createGain();
 
-      oscillator.type = index === 0 ? "sawtooth" : index === 1 ? "triangle" : "sine";
-      const baseFreq = (profile.idleRpm / 60) * (profile.cylinders / 2) * (profile.baseTone / 58);
-      oscillator.frequency.value = Math.max(18, baseFreq * harmonic);
+      oscillator.type = index === 0 ? "sawtooth" : index === 1 ? "triangle" : index === 2 ? "sawtooth" : "sine";
+      
+      // Scale base frequency so idle fundamental is in audible range (~90Hz) across all speakers
+      const baseFreq = (profile.idleRpm / 60) * (profile.cylinders / 2) * (profile.baseTone / 58) * 3.5;
+      oscillator.frequency.value = Math.max(40, baseFreq * harmonic);
 
-      const harmonicVolume = index === 0 ? 0.45 : index === 1 ? 0.30 : index === 2 ? 0.15 : 0.08;
+      const harmonicVolume = index === 0 ? 0.50 : index === 1 ? 0.35 : index === 2 ? 0.20 : 0.10;
       gain.gain.value = harmonicVolume;
 
       oscillator.connect(gain).connect(this.output!);
@@ -88,20 +90,21 @@ export class WebAudioEngine implements EngineSoundOutput {
     }
     if (!this.output || this.voices.length === 0) return;
 
-    const firingFrequency = (state.rpm / 60) * (state.profile.cylinders / 2);
+    // Firing frequency scaled into rich audible engine roar spectrum (90Hz - 3500Hz)
+    const firingFrequency = (state.rpm / 60) * (state.profile.cylinders / 2) * 3.5;
     const profilePitch = state.profile.baseTone / 58;
-    const frequency = Math.max(18, firingFrequency * profilePitch);
+    const frequency = Math.max(40, firingFrequency * profilePitch);
 
     const now = this.context.currentTime;
     this.voices.forEach(({ oscillator, harmonic }) => {
       oscillator.frequency.setTargetAtTime(frequency * harmonic, now, 0.03);
     });
 
-    const targetGain = (0.25 + state.throttle * 0.55) * this.volume;
+    const targetGain = (0.30 + state.throttle * 0.60) * this.volume;
     this.output.gain.setTargetAtTime(targetGain, now, 0.04);
 
-    const cutoff = 450 + normalizedRpm(state) * 1800 + state.throttle * 600;
-    this.filter?.frequency.setTargetAtTime(cutoff, now, 0.05);
+    const cutoff = 600 + normalizedRpm(state) * 2800 + state.throttle * 900;
+    this.filter?.frequency.setTargetAtTime(cutoff, now, 0.04);
   }
 
   private clearVoices(): void {

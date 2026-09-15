@@ -57,8 +57,8 @@ describe("WebAudioEngine lifecycle", () => {
     expect(gains[0].gain.value).toBe(0);
 
     engine.setProfile(CAR_PROFILES.brezza);
-    // First oscillator frequency should reflect Brezza idle RPM
-    expect(oscillators[0].frequency.value).toBeCloseTo(800 / 30);
+    // First oscillator frequency should reflect Brezza idle RPM with multiplier
+    expect(oscillators[0].frequency.value).toBeCloseTo((800 / 30) * 3.5);
 
     engine.setProfile(CAR_PROFILES.mustang);
     // First 4 oscillators (Brezza) should be stopped and disconnected
