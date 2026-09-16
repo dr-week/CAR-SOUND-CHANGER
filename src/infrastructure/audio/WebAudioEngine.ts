@@ -56,17 +56,18 @@ export class WebAudioEngine implements EngineSoundOutput {
     if (!this.context || !this.output) return;
 
     this.clearVoices();
-    [1, 2, 4, 6].forEach((harmonic, index) => {
+    [1, 2, 3, 4].forEach((harmonic, index) => {
       const oscillator = this.context!.createOscillator();
       const gain = this.context!.createGain();
 
+      // Rich engine timbres: Sawtooth for cylinder pulses, Triangle for intake rumble, Sine for bass
       oscillator.type = index === 0 ? "sawtooth" : index === 1 ? "triangle" : index === 2 ? "sawtooth" : "sine";
       
-      // Scale base frequency so idle fundamental is in audible range (~90Hz) across all speakers
-      const baseFreq = (profile.idleRpm / 60) * (profile.cylinders / 2) * (profile.baseTone / 58) * 3.5;
-      oscillator.frequency.value = Math.max(40, baseFreq * harmonic);
+      // Fundamental firing frequency: (RPM / 60) * (cylinders / 2)
+      const baseFreq = (profile.idleRpm / 60) * (profile.cylinders / 2) * (profile.baseTone / 58);
+      oscillator.frequency.value = Math.max(20, baseFreq * harmonic);
 
-      const harmonicVolume = index === 0 ? 0.50 : index === 1 ? 0.35 : index === 2 ? 0.20 : 0.10;
+      const harmonicVolume = index === 0 ? 0.60 : index === 1 ? 0.35 : index === 2 ? 0.20 : 0.12;
       gain.gain.value = harmonicVolume;
 
       oscillator.connect(gain).connect(this.output!);
@@ -87,20 +88,21 @@ export class WebAudioEngine implements EngineSoundOutput {
     }
     if (!this.output || this.voices.length === 0) return;
 
-    // Firing frequency scaled into rich audible engine roar spectrum (90Hz - 3500Hz)
-    const firingFrequency = (state.rpm / 60) * (state.profile.cylinders / 2) * 3.5;
+    // Authentic engine firing frequency spectrum (25Hz - 800Hz)
+    const firingFrequency = (state.rpm / 60) * (state.profile.cylinders / 2);
     const profilePitch = state.profile.baseTone / 58;
-    const frequency = Math.max(40, firingFrequency * profilePitch);
+    const frequency = Math.max(20, firingFrequency * profilePitch);
 
     const now = this.context.currentTime;
     this.voices.forEach(({ oscillator, harmonic }) => {
       oscillator.frequency.setTargetAtTime(frequency * harmonic, now, 0.03);
     });
 
-    const targetGain = (0.30 + state.throttle * 0.60) * this.volume;
+    const targetGain = (0.35 + state.throttle * 0.55) * this.volume;
     this.output.gain.setTargetAtTime(targetGain, now, 0.04);
 
-    const cutoff = 600 + normalizedRpm(state) * 2800 + state.throttle * 900;
+    // Warm low-pass acoustic filter (250Hz - 1800Hz) to eliminate piercing high pitches
+    const cutoff = 250 + normalizedRpm(state) * 1200 + state.throttle * 500;
     this.filter?.frequency.setTargetAtTime(cutoff, now, 0.04);
   }
 
