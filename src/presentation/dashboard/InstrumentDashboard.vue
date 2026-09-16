@@ -84,7 +84,7 @@ const bluetoothAriaLabel = computed(() => {
       </div>
 
       <div class="gear-center-wrapper">
-        <GearDisplay :gear="gear" />
+        <GearDisplay :gear="gear" :rpm="rpm" :shift-rpm="profile.shiftRpm" />
       </div>
 
       <div class="speedo-wrapper">
