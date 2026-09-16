@@ -7,6 +7,7 @@ export interface VehicleProfile {
   redlineRpm: number;
   shiftRpm: number;
   baseTone: number;
+  topSpeedKph: number;
 }
 export interface VehicleState {
   profile: VehicleProfile;

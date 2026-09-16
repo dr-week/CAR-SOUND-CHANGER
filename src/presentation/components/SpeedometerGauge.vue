@@ -3,9 +3,9 @@
  * SpeedometerGauge
  *
  * Artistic pure SVG speedometer gauge.
- * Max speed defaults to 180 km/h.
- * Features 3 colored speed zones (Blue / Green / Amber), metallic bezel,
- * dynamic needle rotation (-125deg to +125deg), and digital speed readout.
+ * Max speed dynamically adjusts based on VehicleProfile (e.g. 180, 240, 280, 360 km/h).
+ * Features 3 dynamic colored speed zones (Blue city / Green cruise / Amber fast),
+ * metallic bezel, dynamic needle rotation (-125deg to +125deg), and digital speed readout.
  *
  * Uses pure SVG rendering without any D3 or DOM layout reflows,
  * guaranteeing zero scroll shifts and smooth 60fps performance.
@@ -31,9 +31,29 @@ const sourceColour = computed(() =>
   props.source === "GPS" ? "var(--green)" : "var(--muted)",
 );
 
+function polarToCartesian(centerX: number, centerY: number, radius: number, angleInDegrees: number) {
+  const angleInRadians = (angleInDegrees * Math.PI) / 180.0;
+  return {
+    x: centerX + radius * Math.sin(angleInRadians),
+    y: centerY - radius * Math.cos(angleInRadians),
+  };
+}
+
+function describeArc(x: number, y: number, radius: number, startAngle: number, endAngle: number) {
+  const start = polarToCartesian(x, y, radius, endAngle);
+  const end = polarToCartesian(x, y, radius, startAngle);
+  const largeArcFlag = endAngle - startAngle <= 180 ? "0" : "1";
+  return ["M", start.x, start.y, "A", radius, radius, 0, largeArcFlag, 0, end.x, end.y].join(" ");
+}
+
+/** 3 Dynamic speed zone arcs */
+const blueArc = computed(() => describeArc(100, 90, 78, -125, -125 + (1 / 3) * 250));
+const greenArc = computed(() => describeArc(100, 90, 78, -125 + (1 / 3) * 250, -125 + (2 / 3) * 250));
+const amberArc = computed(() => describeArc(100, 90, 78, -125 + (2 / 3) * 250, 125));
+
 /** Generate tick mark positions */
 const ticks = computed(() => {
-  const steps = 6; // 0, 30, 60, 90, 120, 150, 180
+  const steps = 6;
   const result = [];
   for (let i = 0; i <= steps; i++) {
     const value = Math.round((maxSpeed.value / steps) * i);
@@ -46,7 +66,7 @@ const ticks = computed(() => {
     const x2 = 100 + r2 * Math.sin(angleRad);
     const y2 = 90 - r2 * Math.cos(angleRad);
 
-    const labelR = 52;
+    const labelR = 50;
     const lx = 100 + labelR * Math.sin(angleRad);
     const ly = 90 - labelR * Math.cos(angleRad);
 
@@ -68,9 +88,9 @@ const ticks = computed(() => {
         stroke-linecap="round"
       />
 
-      <!-- Zone 1: City 0-60 (Blue) -->
+      <!-- Zone 1: City 0-33% (Blue) -->
       <path
-        d="M 22 90 A 78 78 0 0 1 54 36"
+        :d="blueArc"
         fill="none"
         stroke="#3b82f6"
         stroke-width="5"
@@ -78,9 +98,9 @@ const ticks = computed(() => {
         opacity="0.85"
       />
 
-      <!-- Zone 2: Cruising 60-120 (Green) -->
+      <!-- Zone 2: Cruising 33-66% (Green) -->
       <path
-        d="M 54 36 A 78 78 0 0 1 146 36"
+        :d="greenArc"
         fill="none"
         stroke="#31a566"
         stroke-width="5"
@@ -88,9 +108,9 @@ const ticks = computed(() => {
         opacity="0.85"
       />
 
-      <!-- Zone 3: Fast 120-180 (Amber/Red) -->
+      <!-- Zone 3: Fast 66-100% (Amber) -->
       <path
-        d="M 146 36 A 78 78 0 0 1 178 90"
+        :d="amberArc"
         fill="none"
         stroke="#f7b955"
         stroke-width="5"

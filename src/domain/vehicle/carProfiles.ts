@@ -10,6 +10,7 @@ export const CAR_PROFILES = {
     redlineRpm: 6500,
     shiftRpm: 1500,
     baseTone: 58,
+    topSpeedKph: 180,
   },
   mustang: {
     id: "mustang",
@@ -20,6 +21,7 @@ export const CAR_PROFILES = {
     redlineRpm: 7000,
     shiftRpm: 2800,
     baseTone: 42,
+    topSpeedKph: 240,
   },
   porsche: {
     id: "porsche",
@@ -30,6 +32,7 @@ export const CAR_PROFILES = {
     redlineRpm: 7800,
     shiftRpm: 3000,
     baseTone: 65,
+    topSpeedKph: 280,
   },
   f1: {
     id: "f1",
@@ -40,6 +43,7 @@ export const CAR_PROFILES = {
     redlineRpm: 12000,
     shiftRpm: 7000,
     baseTone: 95,
+    topSpeedKph: 360,
   },
 } satisfies Record<string, VehicleProfile>;
 

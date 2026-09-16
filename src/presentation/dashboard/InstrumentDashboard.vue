@@ -91,7 +91,7 @@ const bluetoothAriaLabel = computed(() => {
         <SpeedometerGauge
           :speed-kph="displaySpeed"
           :source="speedSource"
-          :max-speed-kph="180"
+          :max-speed-kph="profile.topSpeedKph"
         />
       </div>
     </section>
