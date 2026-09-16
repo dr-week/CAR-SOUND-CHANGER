@@ -132,31 +132,38 @@ const sourceColour = computed(() =>
 .status-indicators {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 8px;
-  margin: 10px auto 20px;
-  max-width: 560px;
+  gap: 10px;
+  width: 100%;
 }
 
 .badge {
   padding: 10px 8px;
   border: 1px solid var(--line);
-  border-radius: 10px;
-  background: rgba(18, 21, 27, 0.9);
+  border-radius: 12px;
+  background: rgba(18, 21, 27, 0.85);
   text-align: center;
   display: flex;
   flex-direction: column;
-  gap: 5px;
+  gap: 4px;
+  transition: transform 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+}
+
+.badge:hover {
+  transform: translateY(-1px);
+  border-color: rgba(255, 255, 255, 0.16);
+  background: rgba(24, 28, 36, 0.95);
 }
 
 .badge--score {
-  border-color: #2e7d55;
+  border-color: rgba(49, 165, 102, 0.4);
 }
 
 .badge__label {
   color: var(--muted);
-  font-size: 0.63rem;
+  font-size: 0.64rem;
+  font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.08em;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -164,14 +171,14 @@ const sourceColour = computed(() =>
 }
 
 .badge__icon {
-  width: 12px;
-  height: 12px;
-  opacity: 0.8;
+  width: 13px;
+  height: 13px;
+  opacity: 0.85;
 }
 
 .badge__value {
-  font-size: 0.9rem;
-  font-weight: 700;
+  font-size: 0.92rem;
+  font-weight: 800;
   letter-spacing: 0.02em;
   transition: color 0.3s;
 }

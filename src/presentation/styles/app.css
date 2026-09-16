@@ -1,12 +1,25 @@
 :root {
   color-scheme: dark;
-  font-family: Inter, system-ui, sans-serif;
-  background: #101216;
+  font-family: Inter, system-ui, -apple-system, sans-serif;
+  background: #090a0d;
   color: #f3f5f8;
+
+  --surface: #090a0d;
+  --panel: rgba(18, 21, 27, 0.85);
+  --panel-border: rgba(255, 255, 255, 0.08);
+  --line: rgba(255, 255, 255, 0.08);
+  --text: #f3f5f8;
+  --muted: #99a3b3;
+  --red: #e73333;
+  --green: #31a566;
+  --accent: #e84c32;
+  --accent-glow: rgba(232, 76, 50, 0.3);
 }
+
 * {
   box-sizing: border-box;
 }
+
 html, body {
   margin: 0;
   padding: 0;
@@ -14,398 +27,260 @@ html, body {
   background: var(--surface);
   user-select: none;
   touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
 }
-button,
-select {
+
+button, select, input {
   font: inherit;
 }
+
+/* ── App Shell ───────────────────────────────────────────────────────────── */
 .shell {
-  max-width: 760px;
+  max-width: 780px;
   min-height: 100vh;
-  margin: auto;
-  padding: clamp(12px, 3vw, 20px);
-  background: linear-gradient(145deg, #171b22, #101216 65%);
+  margin: 0 auto;
+  padding: clamp(14px, 3.5vw, 24px);
+  background-color: var(--surface);
+  background-image:
+    radial-gradient(circle at 50% 0%, rgba(232, 76, 50, 0.09), transparent 50%),
+    repeating-linear-gradient(125deg, rgba(255, 255, 255, 0.012) 0 1px, transparent 1px 5px),
+    linear-gradient(145deg, #171b22, #090a0d 75%);
+  box-shadow: 0 0 80px rgba(0, 0, 0, 0.9);
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
-  gap: 12px;
+  gap: 14px;
 }
+
+/* ── Header ──────────────────────────────────────────────────────────────── */
 header {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 16px;
+  padding: 4px 2px;
 }
+
 h1 {
-  margin: 2px 0;
-  font-size: clamp(1.8rem, 6vw, 2.8rem);
+  margin: 2px 0 0;
+  font-size: clamp(1.6rem, 5.5vw, 2.4rem);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  background: linear-gradient(135deg, #ffffff 40%, #c4cbd6);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
+
 .eyebrow {
-  color: #99a3b3;
+  color: var(--accent);
   text-transform: uppercase;
-  font-size: 0.72rem;
-  letter-spacing: 0.12em;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
   margin: 0;
 }
-.primary,
-.controls button {
-  border: 0;
-  border-radius: 12px;
-  color: #fff;
-  cursor: pointer;
-}
+
+/* ── Primary Action Button ───────────────────────────────────────────────── */
 .primary {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 12px 18px;
+  padding: 10px 18px;
+  border: 0;
+  border-radius: 12px;
   background: linear-gradient(135deg, #e84c32, #c0392b);
+  color: #ffffff;
   font-weight: 700;
-  box-shadow: 0 4px 14px rgba(232, 76, 50, 0.4);
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  font-size: 0.88rem;
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(232, 76, 50, 0.4);
+  transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease;
+  white-space: nowrap;
 }
+
 .primary:hover {
   transform: translateY(-1px);
   box-shadow: 0 6px 20px rgba(232, 76, 50, 0.55);
+  filter: brightness(1.1);
 }
+
+.primary:active {
+  transform: translateY(1px);
+}
+
 .header-icon {
   width: 18px;
   height: 18px;
 }
+
+/* ── Panels ──────────────────────────────────────────────────────────────── */
+.panel {
+  background: var(--panel);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid var(--panel-border);
+  border-radius: 16px;
+  padding: 16px 20px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.panel:hover {
+  border-color: rgba(255, 255, 255, 0.14);
+}
+
+.panel.compact {
+  padding: 14px 18px;
+}
+
+/* ── Form Controls & Labels ──────────────────────────────────────────────── */
 .settings-label {
   display: flex;
   align-items: center;
-  gap: 6px;
-  font-weight: 600;
+  gap: 8px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 8px;
 }
+
 .gps-label {
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-weight: 600;
+  gap: 10px;
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--text);
   cursor: pointer;
 }
+
 .settings-icon {
   width: 16px;
   height: 16px;
   color: var(--muted);
 }
+
+.panel p {
+  margin: 6px 0 0;
+  font-size: 0.78rem;
+  color: var(--muted);
+  line-height: 1.4;
+}
+
+/* Custom Dropdown Select */
+select {
+  width: 100%;
+  padding: 10px 14px;
+  margin-top: 4px;
+  background: #141922;
+  color: var(--text);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2099a3b3' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 36px;
+  transition: border-color 0.15s ease;
+}
+
+select:hover {
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+/* Custom Range Slider */
+input[type="range"] {
+  width: 100%;
+  height: 6px;
+  margin: 8px 0;
+  appearance: none;
+  background: #1f2633;
+  border-radius: 4px;
+  outline: none;
+  cursor: pointer;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 10px var(--accent-glow);
+  cursor: pointer;
+  transition: transform 0.12s ease;
+}
+
+input[type="range"]::-webkit-slider-thumb:hover {
+  transform: scale(1.15);
+}
+
+/* Custom Checkbox */
+input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+
+/* ── Keyboard Shortcuts Badge ────────────────────────────────────────────── */
 .key-shortcuts-badge {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
-  margin-top: 14px;
+  margin-top: 12px;
 }
+
 .shortcut-item {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  padding: 4px 10px;
-  background: rgba(255, 255, 255, 0.05);
+  gap: 5px;
+  padding: 5px 10px;
+  background: rgba(255, 255, 255, 0.04);
   border: 1px solid var(--line);
-  border-radius: 6px;
-  font-size: 0.75rem;
+  border-radius: 8px;
+  font-size: 0.74rem;
   color: var(--muted);
-}
-.shortcut-item strong {
-  color: var(--text);
-  font-weight: 700;
 }
 
-.controls {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 10px;
-  margin-top: 24px;
-}
-.control-btn {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  min-height: 105px;
-  padding: 12px 8px;
-  border: 1px solid var(--line);
-  border-radius: 14px;
-  background: linear-gradient(145deg, #1d2530, #141922);
+.shortcut-item strong {
   color: var(--text);
   font-weight: 800;
-  cursor: pointer;
-  touch-action: none;
-  transition: all 0.15s ease;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
 }
-.control-icon {
-  width: 24px;
-  height: 24px;
+
+/* ── Status Alert ────────────────────────────────────────────────────────── */
+.status {
+  padding: 10px 14px;
+  border: 1px solid rgba(231, 51, 51, 0.4);
+  border-radius: 10px;
+  background: rgba(58, 21, 21, 0.6);
+  color: #f78080;
+  font-size: 0.82rem;
+  font-weight: 600;
+  margin: 0;
 }
-.control-label {
-  font-size: 0.85rem;
-  font-weight: 700;
-}
-.control-badge {
-  font-size: 0.65rem;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--muted);
-}
-.controls .accelerate {
-  background: linear-gradient(135deg, #1b5e39, #124026);
-  border-color: #278853;
-  box-shadow: 0 4px 16px rgba(39, 136, 83, 0.35);
-}
-.controls .brake {
-  background: linear-gradient(135deg, #8b2525, #5a1717);
-  border-color: #be3535;
-  box-shadow: 0 4px 16px rgba(190, 53, 53, 0.35);
-}
-.controls .reset {
-  background: linear-gradient(135deg, #2c3542, #1d232c);
-  border-color: #3f4c5e;
-}
-.controls .control-btn:active,
-.controls .control-btn.active {
-  transform: translateY(2px);
-  filter: brightness(1.25);
-  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.6);
-}
-.controls button:focus-visible,
-.primary:focus-visible,
+
+/* ── Accessibility Focus Ring ────────────────────────────────────────────── */
+button:focus-visible,
 select:focus-visible,
 input:focus-visible {
   outline: 3px solid #f7b955;
   outline-offset: 3px;
 }
+
+/* ── Responsive ──────────────────────────────────────────────────────────── */
 @media (max-width: 600px) {
-  .telemetry,
-  .controls {
-    grid-template-columns: repeat(2, 1fr);
-  }
   header {
-    align-items: flex-start;
     flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
   }
-}
-
-:root {
-  --surface: #090a0d;
-  --panel: rgba(18, 21, 27, 0.85);
-  --line: rgba(255, 255, 255, 0.08);
-  --text: #f3f5f8;
-  --muted: #99a3b3;
-  --red: #e73333;
-  --green: #31a566;
-  --accent-glow: rgba(232, 76, 50, 0.25);
-}
-
-body {
-  background: var(--surface);
-}
-.shell {
-  background-color: var(--surface);
-  background-image:
-    radial-gradient(circle at 50% 0%, rgba(232, 76, 50, 0.08), transparent 45%),
-    repeating-linear-gradient(125deg, rgba(255, 255, 255, 0.015) 0 1px, transparent 1px 5px),
-    linear-gradient(145deg, #171b22, #090a0d 75%);
-  box-shadow: 0 0 60px rgba(0, 0, 0, 0.8);
-}
-.panel {
-  background: var(--panel);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid var(--line);
-  border-radius: 16px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.37);
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
-}
-.panel:hover {
-  border-color: rgba(255, 255, 255, 0.14);
-}
-.instrument-cluster {
-  position: relative;
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(110px, 145px);
-  align-items: center;
-  gap: 14px;
-  margin: 12px auto 6px;
-  max-width: 510px;
-}
-.tachometer {
-  width: 100%;
-  max-width: 300px;
-  filter: drop-shadow(0 12px 26px rgba(0, 0, 0, 0.6));
-}
-.tachometer svg {
-  display: block;
-  width: 100%;
-  height: auto;
-}
-.tachometer__outer {
-  fill: #050609;
-  stroke: #373d48;
-  stroke-width: 3;
-}
-.tachometer__face {
-  fill: #101216;
-  stroke: #1f252f;
-  stroke-width: 2;
-}
-.tachometer__redline {
-  fill: none;
-  stroke: var(--red);
-  stroke-width: 5;
-  stroke-linecap: round;
-}
-.tachometer__tick {
-  stroke: #d1d6df;
-  stroke-width: 2;
-}
-.tachometer__label {
-  fill: #d9dde3;
-  font-size: 14px;
-  font-weight: 700;
-  text-anchor: middle;
-  dominant-baseline: middle;
-}
-.tachometer__needle {
-  stroke: #ffffff;
-  stroke-width: 4;
-  stroke-linecap: round;
-}
-.tachometer__hub {
-  fill: #282e39;
-  stroke: #727b89;
-  stroke-width: 2;
-}
-.tachometer__rpm {
-  fill: var(--text);
-  font-size: 20px;
-  font-weight: 800;
-  text-anchor: middle;
-}
-.tachometer__rpm-caption {
-  fill: var(--muted);
-  font-size: 7px;
-  letter-spacing: 1.3px;
-  text-anchor: middle;
-}
-.digital-displays {
-  display: grid;
-  gap: 0;
-  width: 100%;
-  overflow: hidden;
-  border: 1px solid #3a4352;
-  border-radius: 10px;
-  background: rgba(9, 10, 13, 0.92);
-  box-shadow: 0 0 18px rgba(231, 51, 51, 0.08);
-}
-.gear-display,
-.speed-display {
-  display: grid;
-  justify-items: start;
-  min-width: 0;
-  padding: 12px;
-  background: transparent;
-}
-.speed-display {
-  border-top: 1px solid #3a4352;
-}
-.gear-display span,
-.speed-display span,
-.speed-display small {
-  color: var(--muted);
-  font-size: 0.68rem;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-}
-.gear-display strong {
-  color: var(--red);
-  font-size: 2.6rem;
-  line-height: 1;
-}
-.speed-display strong {
-  color: var(--text);
-  font-size: 2.1rem;
-  line-height: 1;
-}
-.speed-display em {
-  color: var(--muted);
-  font-size: 0.68rem;
-  font-style: normal;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-}
-.status-indicators {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(104px, 1fr));
-  gap: 8px;
-  max-width: 470px;
-  margin: 0 auto 34px;
-}
-.status-indicators p {
-  margin: 0;
-  padding: 9px;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  background: rgba(18, 21, 27, 0.86);
-  text-align: center;
-}
-.status-indicators span {
-  display: block;
-  color: var(--muted);
-  font-size: 0.65rem;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-}
-.status-indicators strong {
-  font-size: 0.8rem;
-  text-transform: capitalize;
-}
-.panel {
-  background: rgba(18, 21, 27, 0.9);
-}
-@media (prefers-reduced-motion: reduce) {
-  .tachometer__needle {
-    transition: none;
-  }
-}
-@media (max-width: 600px) {
-  .instrument-cluster {
-    grid-template-columns: minmax(0, 1fr) 100px;
-    gap: 8px;
-  }
-  .tachometer {
+  .primary {
     width: 100%;
-  }
-  .controls {
-    grid-template-columns: repeat(5, minmax(0, 1fr));
-    gap: 5px;
-    margin-top: 12px;
-  }
-  .controls button {
-    min-height: 76px;
-    padding: 4px;
-    font-size: 1.25rem;
-  }
-  .controls button small {
-    font-size: 0.54rem;
-    letter-spacing: 0.02em;
-  }
-  .status-indicators {
-    gap: 6px;
-  }
-  .status-indicators p {
-    padding: 8px 4px;
+    justify-content: center;
   }
 }
-.controls button > span {
-  display: block;
-}
-.controls button:not(.brake):not(.accelerate) {
-  background: #1d2530;
-  font-size: 1.35rem;
-}
-.controls .reset {
-  background: #303947;
-}
+
