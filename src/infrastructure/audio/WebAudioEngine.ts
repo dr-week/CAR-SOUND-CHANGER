@@ -79,11 +79,8 @@ export class WebAudioEngine implements EngineSoundOutput {
     if (!this.currentProfile) {
       this.currentProfile = state.profile;
     }
-    if (!this.context) {
+    if (!this.context || this.context.state !== "running") {
       return;
-    }
-    if (this.context.state === "suspended") {
-      void this.context.resume();
     }
     if (this.voices.length === 0 && this.currentProfile) {
       this.setProfile(this.currentProfile);
