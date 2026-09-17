@@ -22,9 +22,17 @@ export function useVehicleSimulator() {
   const accelerating = ref(false);
   const braking = ref(false);
 
-  const { audio, session, gps, keyboard, bluetooth } = createSimulatorRuntime(vehicle, greenScore, (status) => {
-    telemetryStatus.value = status;
-  });
+  const { audio, session, gps, keyboard, bluetooth } = createSimulatorRuntime(
+    vehicle,
+    greenScore,
+    (status) => {
+      telemetryStatus.value = status;
+    },
+    (action, active) => {
+      if (action === "accelerate") accelerating.value = active;
+      if (action === "brake") braking.value = active;
+    },
+  );
 
   const bluetoothStatus = ref<BluetoothStatus>(bluetooth.status);
   const bluetoothDeviceName = ref<string | null>(bluetooth.deviceName);

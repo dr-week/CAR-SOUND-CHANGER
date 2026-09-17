@@ -146,10 +146,28 @@ export class WebAudioEngine implements EngineSoundOutput {
   }
 
   async dispose(): Promise<void> {
-    this.exhaust?.source.stop();
-    this.body?.source.stop();
-    this.noise?.stop();
-    this.nodes.forEach((node) => node.disconnect());
+    try {
+      this.exhaust?.source.stop();
+    } catch {
+      // AudioScheduledSourceNode may already be stopped
+    }
+    try {
+      this.body?.source.stop();
+    } catch {
+      // AudioScheduledSourceNode may already be stopped
+    }
+    try {
+      this.noise?.stop();
+    } catch {
+      // AudioBufferSourceNode may already be stopped
+    }
+    this.nodes.forEach((node) => {
+      try {
+        node.disconnect();
+      } catch {
+        // Ignore disconnect failure on already closed context
+      }
+    });
     this.nodes = [];
     const context = this.context;
     this.context = null;
@@ -164,7 +182,11 @@ export class WebAudioEngine implements EngineSoundOutput {
     this.previousUpdate = null;
     this.changeAt = null;
     this.targets = new WeakMap();
-    await context?.close();
+    try {
+      await context?.close();
+    } catch {
+      // Ignore if context already closed
+    }
   }
 
   private target(param: AudioParam, value: number): void {

@@ -109,4 +109,55 @@ describe("DrivingSession", () => {
     session.shift(-1); // try to go below 1
     expect(vehicle.gear).toBe(1);
   });
+
+  it("infers throttle under positive GPS acceleration and auto-shifts gear", () => {
+    const vehicle = createVehicleState(CAR_PROFILES.brezza);
+    const sound = createSoundOutput();
+    const session = new DrivingSession(vehicle, createGreenScore(), sound);
+
+    // Initial fix at 10 km/h
+    session.setGpsSpeed(10, 1000);
+    session.step(0.1);
+
+    // Speed increases to 40 km/h after 1 second (+30 km/h/s acceleration)
+    session.setGpsSpeed(40, 2000);
+    session.step(0.1);
+
+    expect(vehicle.throttle).toBeGreaterThan(0.2);
+    expect(vehicle.brake).toBe(0);
+    expect(vehicle.gear).toBeGreaterThanOrEqual(2);
+  });
+
+  it("infers braking under sharp GPS deceleration", () => {
+    const vehicle = createVehicleState(CAR_PROFILES.brezza);
+    const sound = createSoundOutput();
+    const session = new DrivingSession(vehicle, createGreenScore(), sound);
+
+    session.setGpsSpeed(60, 1000);
+    session.step(0.1);
+
+    // Speed drops to 20 km/h after 1 second (-40 km/h/s deceleration)
+    session.setGpsSpeed(20, 2000);
+    session.step(0.1);
+
+    expect(vehicle.brake).toBeGreaterThan(0.2);
+    expect(vehicle.throttle).toBe(0);
+  });
+
+  it("permits manual gear shift override during GPS mode", () => {
+    const vehicle = createVehicleState(CAR_PROFILES.brezza);
+    const session = new DrivingSession(vehicle, createGreenScore(), createSoundOutput());
+
+    session.setGpsSpeed(50, 1000);
+    session.step(0.1);
+    expect(vehicle.gear).toBeGreaterThanOrEqual(2);
+
+    // Driver explicitly shifts into gear 1
+    session.shift(-1);
+    const manualGear = vehicle.gear;
+    session.step(0.1);
+    // Gear should stay at manual choice
+    expect(vehicle.gear).toBe(manualGear);
+  });
 });
+

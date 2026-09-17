@@ -53,3 +53,29 @@ export function stepVehicle(state: VehicleState, dt: number): void {
   const cappedDt = Math.min(dt, MAX_FRAME_DT_S);
   state.rpm += (Math.min(state.profile.redlineRpm, targetRpm) - state.rpm) * Math.min(1, response * cappedDt);
 }
+
+/**
+ * Automatically calculates the optimal transmission gear for a given road speed.
+ * Selects the highest gear that keeps RPM above minimum operational threshold
+ * while remaining within the profile's optimal cruising band.
+ */
+export function computeAutoGear(speedKph: number, profile: VehicleProfile): number {
+  if (!Number.isFinite(speedKph) || speedKph <= 2) return 1;
+  const maxGear = Math.max(1, Math.min(profile.gears, GEAR_RATIOS.length - 1));
+  let selectedGear = 1;
+  const minOperableRpm = Math.max(profile.idleRpm * 1.05, 1100);
+  const targetShiftRpm = Math.max(profile.shiftRpm, 2500);
+
+  for (let g = 1; g <= maxGear; g++) {
+    const ratio = GEAR_RATIOS[g] ?? 1;
+    const rpmAtSpeed = speedKph * RPM_SPEED_SCALE * ratio;
+    if (g === 1 || rpmAtSpeed >= minOperableRpm) {
+      selectedGear = g;
+      if (rpmAtSpeed <= targetShiftRpm) {
+        break;
+      }
+    }
+  }
+  return selectedGear;
+}
+

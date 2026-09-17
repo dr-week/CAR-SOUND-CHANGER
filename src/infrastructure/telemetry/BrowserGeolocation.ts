@@ -64,16 +64,24 @@ export class BrowserGeolocation {
       { enableHighAccuracy: true, maximumAge: 1_000, timeout: this.staleAfterMs },
     );
 
-    this.staleTimer = window.setInterval(() => {
+    this.staleTimer = setInterval(() => {
       if (this.lastFixAt !== null && Date.now() - this.lastFixAt > this.staleAfterMs) {
         this.onStatus("stale");
       }
-    }, 1_000);
+    }, 1_000) as unknown as number;
   }
 
   stop(): void {
-    if (this.watchId !== null) navigator.geolocation.clearWatch(this.watchId);
-    if (this.staleTimer !== null) window.clearInterval(this.staleTimer);
+    if (this.watchId !== null && typeof navigator !== "undefined" && navigator?.geolocation) {
+      try {
+        navigator.geolocation.clearWatch(this.watchId);
+      } catch {
+        // Ignore watch cleanup errors
+      }
+    }
+    if (this.staleTimer !== null) {
+      clearInterval(this.staleTimer);
+    }
     this.watchId = null;
     this.staleTimer = null;
     this.lastFixAt = null;
@@ -83,7 +91,7 @@ export class BrowserGeolocation {
 }
 
 /** Haversine formula to compute distance in meters between two lat/lon points */
-function calculateHaversineDistanceMeters(lat1: number, lon1: number, lat2: number, lon2: number): number {
+export function calculateHaversineDistanceMeters(lat1: number, lon1: number, lat2: number, lon2: number): number {
   const R = 6371000; // Earth's radius in meters
   const dLat = ((lat2 - lat1) * Math.PI) / 180;
   const dLon = ((lon2 - lon1) * Math.PI) / 180;

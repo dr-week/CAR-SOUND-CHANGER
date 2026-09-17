@@ -2,13 +2,17 @@
 import { computed, onBeforeUnmount, onMounted, ref, watch } from "vue";
 import { useVehicleSimulator } from "../application/composables/useVehicleSimulator";
 import GoogleMap from "../presentation/components/GoogleMap.vue";
+import CockpitTelemetry from "../presentation/components/CockpitTelemetry.vue";
+import HarmonicVisualizer from "../presentation/components/HarmonicVisualizer.vue";
+import SoundProfileCard from "../presentation/components/SoundProfileCard.vue";
 
-type View = "home" | "media" | "navigate" | "apps" | "engine" | "settings";
+type View = "home" | "engine" | "media" | "navigate" | "apps" | "settings";
 const simulator = useVehicleSimulator();
 const view = ref<View>("home");
 const now = ref(new Date());
 const playing = ref(true);
 const brightness = ref(74);
+const masterVolume = ref(80);
 const quickOpen = ref(false);
 const appSearch = ref("");
 const destinationQuery = ref("");
@@ -17,19 +21,30 @@ const engineVolume = ref(Number(localStorage.getItem("engine-volume") || 62));
 const engineZone = ref(localStorage.getItem("engine-zone") || "rear");
 const duckEngine = ref(localStorage.getItem("engine-duck") !== "false");
 const duckAmount = ref(Number(localStorage.getItem("engine-duck-amount") || 38));
+const audioSource = ref<"Bluetooth" | "FM Radio" | "Soundstage">("Bluetooth");
+const cameraActive = ref(false);
+const isOnline = ref(navigator.onLine);
+const batteryLevel = ref<number | null>(null);
+const notice = ref<string | null>(null);
+
 let clock: number | undefined;
+let noticeTimer: number | undefined;
 
 const nav = [
+  { id: "engine", label: "Sound Lab", icon: "car" },
   { id: "media", label: "Media", icon: "music" },
   { id: "navigate", label: "Navigate", icon: "nav" },
   { id: "apps", label: "All apps", icon: "grid" },
 ] as const;
+
 const apps = [
-  ["Phone", "phone", "blue"],
-  ["Radio", "radio", "amber"],
-  ["Bluetooth", "bluetooth", "violet"],
-  ["Engine", "car", "silver"],
-  ["Camera", "camera", "green"],
+  ["Sound Lab", "car", "silver", "engine"],
+  ["Phone", "phone", "blue", "phone"],
+  ["FM Radio", "radio", "amber", "radio"],
+  ["Bluetooth", "bluetooth", "violet", "bluetooth"],
+  ["Camera", "camera", "green", "camera"],
+  ["Navigation", "maps", "blue", "navigate"],
+  ["Settings", "settings", "silver", "settings"],
 ] as const;
 
 const time = computed(() =>
@@ -39,15 +54,15 @@ const date = computed(() => now.value.toLocaleDateString("en-IN", { weekday: "lo
 const greeting = computed(() =>
   now.value.getHours() < 12 ? "Good morning" : now.value.getHours() < 18 ? "Good afternoon" : "Good evening",
 );
-const filteredApps = computed(() => apps.filter((app) => app[0].toLowerCase().includes(appSearch.value.toLowerCase())));
+const filteredApps = computed(() =>
+  apps.filter((app) => app[0].toLowerCase().includes(appSearch.value.toLowerCase())),
+);
 const effectiveEngineVolume = computed(() =>
   playing.value && duckEngine.value
     ? Math.round(engineVolume.value * (1 - duckAmount.value / 100))
     : engineVolume.value,
 );
 const launcherStyle = computed(() => ({ "--ui-scale": `${uiScale.value / 100}` }));
-const notice = ref<string | null>(null);
-let noticeTimer: number | undefined;
 
 function showNotice(msg: string) {
   notice.value = msg;
@@ -57,18 +72,24 @@ function showNotice(msg: string) {
   }, 3500);
 }
 
-function openApp(name: string) {
-  if (name === "Engine") {
+function openApp(id: string) {
+  if (id === "engine") {
     view.value = "engine";
-  } else if (name === "Radio") {
+  } else if (id === "radio") {
+    audioSource.value = "FM Radio";
     view.value = "media";
-  } else if (name === "Bluetooth") {
-    view.value = "settings";
+    showNotice("FM Tuner: 98.3 FM Live");
+  } else if (id === "bluetooth") {
     simulator.connectBluetooth();
-  } else if (name === "Camera") {
-    showNotice("Reverse Camera: Requires native Android video-in / reverse gear trigger.");
-  } else if (name === "Phone") {
-    showNotice("Phone: Connect Bluetooth to make hands-free calls.");
+    showNotice("Web Bluetooth: Searching for head unit / audio device...");
+  } else if (id === "camera") {
+    cameraActive.value = true;
+  } else if (id === "phone") {
+    showNotice("Hands-free: Ready for incoming Bluetooth calls.");
+  } else if (id === "navigate") {
+    view.value = "navigate";
+  } else if (id === "settings") {
+    view.value = "settings";
   }
 }
 
@@ -76,13 +97,16 @@ async function toggleEngine() {
   await simulator.enableAudio();
   if (simulator.audioEnabled.value) {
     simulator.setGps(true);
+    showNotice("Engine ignited · GPS telemetry active");
   } else {
     simulator.setGps(false);
+    showNotice("Engine stopped");
   }
 }
 
 function toggleGps() {
   simulator.setGps(!simulator.gpsEnabled.value);
+  showNotice(simulator.gpsEnabled.value ? "GPS tracking started" : "GPS tracking paused");
 }
 
 function openGoogleDirections(destination = destinationQuery.value) {
@@ -97,20 +121,42 @@ function openGoogleDirections(destination = destinationQuery.value) {
   url.searchParams.set("travelmode", "driving");
   window.open(url.toString(), "_blank", "noopener,noreferrer");
 }
+
 watch(effectiveEngineVolume, (volume) => simulator.setVolume(volume), { immediate: true });
 watch(uiScale, (value) => localStorage.setItem("launcher-ui-scale", String(value)));
 watch(engineVolume, (value) => localStorage.setItem("engine-volume", String(value)));
 watch(engineZone, (value) => localStorage.setItem("engine-zone", value));
 watch(duckEngine, (value) => localStorage.setItem("engine-duck", String(value)));
 watch(duckAmount, (value) => localStorage.setItem("engine-duck-amount", String(value)));
+
 onMounted(() => {
   clock = window.setInterval(() => (now.value = new Date()), 1000);
+  window.addEventListener("online", () => (isOnline.value = true));
+  window.addEventListener("offline", () => (isOnline.value = false));
+
+  // Battery API (clean feature detection)
+  if ("getBattery" in navigator) {
+    (navigator as unknown as { getBattery: () => Promise<{ level: number; addEventListener: (type: string, fn: () => void) => void }> })
+      .getBattery?.()
+      .then((battery) => {
+        batteryLevel.value = Math.round(battery.level * 100);
+        battery.addEventListener("levelchange", () => {
+          batteryLevel.value = Math.round(battery.level * 100);
+        });
+      })
+      .catch(() => {});
+  }
 });
-onBeforeUnmount(() => window.clearInterval(clock));
+
+onBeforeUnmount(() => {
+  window.clearInterval(clock);
+  window.clearTimeout(noticeTimer);
+});
 </script>
 
 <template>
   <main class="launcher" :style="launcherStyle">
+    <!-- SVG Icon Symbols -->
     <svg class="symbols" aria-hidden="true">
       <symbol id="i-home" viewBox="0 0 24 24">
         <path d="m3 11 9-8 9 8v9a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1z" />
@@ -168,8 +214,9 @@ onBeforeUnmount(() => window.clearInterval(clock));
       <symbol id="i-play" viewBox="0 0 24 24"><path d="m8 5 11 7-11 7z" /></symbol>
     </svg>
 
-    <aside class="rail">
-      <button class="brand" :class="{ active: view === 'home' }" aria-label="Home" @click="view = 'home'">m</button>
+    <!-- Tactile Left Navigation Rail -->
+    <aside class="rail" aria-label="Launcher dock">
+      <button class="brand" :class="{ active: view === 'home' }" aria-label="Home Cockpit" @click="view = 'home'">m</button>
       <nav>
         <button
           v-for="item in nav"
@@ -179,7 +226,8 @@ onBeforeUnmount(() => window.clearInterval(clock));
           :aria-label="item.label"
           @click="view = item.id"
         >
-          <svg><use :href="`#i-${item.icon}`" /></svg><span>{{ item.label }}</span>
+          <svg><use :href="`#i-${item.icon}`" /></svg>
+          <span>{{ item.label }}</span>
         </button>
       </nav>
       <button
@@ -188,17 +236,28 @@ onBeforeUnmount(() => window.clearInterval(clock));
         aria-label="Settings"
         @click="view = 'settings'"
       >
-        <svg><use href="#i-settings" /></svg><span>Settings</span>
+        <svg><use href="#i-settings" /></svg>
+        <span>Settings</span>
       </button>
     </aside>
 
+    <!-- Main Stage -->
     <section class="stage">
+      <!-- Status Bar with Genuine Telemetry -->
       <header class="statusbar">
-        <div class="ready"><i></i><span class="sr-only">System ready</span>18°C</div>
-        <button class="clock" @click="quickOpen = !quickOpen">
-          <strong>{{ time }}</strong
-          ><small>{{ date }}</small>
+        <div class="ready">
+          <i :class="{ 'engine-live': simulator.audioEnabled.value }"></i>
+          <span class="sr-only">Engine status</span>
+          {{ simulator.audioEnabled.value ? 'ENGINE ON' : 'STANDBY' }}
+        </div>
+
+        <!-- Clock button with clear affordance -->
+        <button class="clock" :class="{ 'clock-open': quickOpen }" aria-label="Toggle quick controls" @click="quickOpen = !quickOpen">
+          <strong>{{ time }}</strong>
+          <small>{{ date }}</small>
+          <span class="quick-pill-dot" title="Quick Controls"></span>
         </button>
+
         <div class="system-status">
           <button
             type="button"
@@ -208,6 +267,7 @@ onBeforeUnmount(() => window.clearInterval(clock));
           >
             <svg :class="{ active: simulator.bluetoothStatus.value === 'connected' }"><use href="#i-bluetooth" /></svg>
           </button>
+
           <button
             type="button"
             class="status-btn gps-btn"
@@ -217,200 +277,161 @@ onBeforeUnmount(() => window.clearInterval(clock));
           >
             <b>GPS {{ Math.round(simulator.vehicle.speedKph) }}</b>
           </button>
-          <b class="battery">84</b>
+
+          <b v-if="batteryLevel !== null" class="battery">{{ batteryLevel }}%</b>
+          <b v-else class="net-status" :class="{ online: isOnline }">{{ isOnline ? 'ONLINE' : 'OFFLINE' }}</b>
         </div>
       </header>
 
+      <!-- Toast Feedback Bar -->
+      <transition name="toast-slide">
+        <div v-if="notice" class="launcher-toast" role="status">
+          <span>{{ notice }}</span>
+        </div>
+      </transition>
+
+      <!-- Quick Controls Drawer -->
       <aside v-if="quickOpen" class="quick-panel">
-        <p class="eyebrow">QUICK CONTROLS</p>
-        <label
-          ><svg><use href="#i-sun" /></svg
-          ><input v-model="brightness" type="range" min="10" max="100" aria-label="Brightness"
-        /></label>
-        <label
-          ><svg><use href="#i-volume" /></svg
-          ><input v-model="engineVolume" type="range" min="0" max="100" aria-label="Volume"
-        /></label>
+        <div class="quick-header">
+          <p class="eyebrow">QUICK CONTROLS</p>
+          <button class="quick-close" aria-label="Close" @click="quickOpen = false">✕</button>
+        </div>
+        <label>
+          <svg><use href="#i-sun" /></svg>
+          <input v-model="brightness" type="range" min="10" max="100" aria-label="Screen Brightness" />
+          <span>{{ brightness }}%</span>
+        </label>
+        <label>
+          <svg><use href="#i-volume" /></svg>
+          <input v-model="masterVolume" type="range" min="0" max="100" aria-label="Master Media Volume" />
+          <span>{{ masterVolume }}%</span>
+        </label>
+        <div class="quick-engine-toggle">
+          <span>Engine Sound</span>
+          <button
+            type="button"
+            class="quick-power-btn"
+            :class="{ on: simulator.audioEnabled.value }"
+            @click="toggleEngine"
+          >
+            {{ simulator.audioEnabled.value ? 'Active' : 'Ignite' }}
+          </button>
+        </div>
       </aside>
 
+      <!-- ── 1. HOME VIEW: FUSED AVANT-GARDE COCKPIT ── -->
       <div v-if="view === 'home'" class="page home-page">
-        <section class="welcome">
-          <h1>{{ greeting }},<br /><em>where shall we go?</em></h1>
-          <form class="destination" @submit.prevent="openGoogleDirections()">
-            <svg><use href="#i-search" /></svg>
-            <input
-              v-model="destinationQuery"
-              autocomplete="off"
-              enterkeyhint="go"
-              placeholder="Search a destination"
-              aria-label="Search a destination"
-              @focus="view = 'navigate'"
-            />
-            <button type="submit">GO</button>
-          </form>
-        </section>
-        <section class="map-card" aria-label="Google Maps preview">
-          <GoogleMap compact @open-navigation="view = 'navigate'" />
-          <div class="map-caption"><strong>Open map</strong></div>
-        </section>
-        <section class="media-card card">
-          <div class="album">NO.<br />07</div>
-          <div class="track">
-            <span>NOW PLAYING · BLUETOOTH</span>
-            <h2>Midnight City</h2>
-            <p>M83 · Hurry Up, We're Dreaming</p>
-            <i class="progress"></i>
+        <!-- Living Kinetic Telemetry Ribbon -->
+        <CockpitTelemetry
+          :rpm="simulator.vehicle.rpm"
+          :gear="simulator.vehicle.gear"
+          :speed-kph="simulator.vehicle.speedKph"
+          :profile="simulator.vehicle.profile"
+          :telemetry-status="simulator.telemetryStatus.value"
+          :green-score="simulator.greenScore.points"
+          :audio-enabled="simulator.audioEnabled.value"
+          :accelerating="simulator.accelerating.value"
+          :braking="simulator.braking.value"
+          @control="(action, active) => simulator.setControl(action, active)"
+          @shift="(delta) => simulator.shift(delta)"
+          @reset="simulator.reset()"
+        />
+
+        <div class="home-deck">
+          <!-- Left Column: Greeting, Unified Destination Search, Media Pill -->
+          <div class="home-left">
+            <section class="welcome">
+              <h1>{{ greeting }},<br /><em>where shall we go?</em></h1>
+              <form class="destination" @submit.prevent="openGoogleDirections()">
+                <svg><use href="#i-search" /></svg>
+                <input
+                  v-model="destinationQuery"
+                  autocomplete="off"
+                  enterkeyhint="go"
+                  placeholder="Search destination or place"
+                  aria-label="Search destination"
+                />
+                <button type="submit">GO</button>
+              </form>
+            </section>
+
+            <section class="media-card card" aria-label="Now playing media">
+              <div class="album">NO.<br />07</div>
+              <div class="track">
+                <span>NOW PLAYING · {{ audioSource.toUpperCase() }}</span>
+                <h2>Midnight City</h2>
+                <p>M83 · Hurry Up, We're Dreaming</p>
+                <i class="progress"></i>
+              </div>
+              <div class="controls">
+                <button type="button" aria-label="Previous track" @click="showNotice('Track: Midnight City')">
+                  <svg><use href="#i-back" /></svg>
+                </button>
+                <button class="play" :aria-label="playing ? 'Pause' : 'Play'" @click="playing = !playing">
+                  <i v-if="playing"></i><svg v-else><use href="#i-play" /></svg>
+                </button>
+                <button type="button" aria-label="Next track" @click="showNotice('Track: Outro')">
+                  <svg><use href="#i-next" /></svg>
+                </button>
+              </div>
+            </section>
           </div>
-          <div class="controls">
-            <button aria-label="Previous">
-              <svg><use href="#i-back" /></svg></button
-            ><button class="play" :aria-label="playing ? 'Pause' : 'Play'" @click="playing = !playing">
-              <i v-if="playing"></i><svg v-else><use href="#i-play" /></svg></button
-            ><button aria-label="Next">
-              <svg><use href="#i-next" /></svg>
-            </button>
-          </div>
-        </section>
-      </div>
 
-      <div v-else-if="view === 'apps'" class="page apps-page">
-        <div class="page-title">
-          <div>
-            <h1>All apps</h1>
-          </div>
-          <label
-            ><svg><use href="#i-search" /></svg
-            ><input v-model="appSearch" placeholder="Search apps" aria-label="Search apps"
-          /></label>
-        </div>
-        <div class="app-grid">
-          <button v-for="app in filteredApps" :key="app[0]" class="app" :class="app[2]" @click="openApp(app[0])">
-            <i
-              ><svg><use :href="`#i-${app[1]}`" /></svg></i
-            ><strong>{{ app[0] }}</strong>
-          </button>
+          <!-- Right Column: Living Google Map Card -->
+          <section class="map-card" aria-label="Google Maps preview">
+            <GoogleMap compact @open-navigation="view = 'navigate'" />
+            <div class="map-caption">
+              <strong>Open full navigation</strong>
+            </div>
+          </section>
         </div>
       </div>
 
-      <div v-else-if="view === 'media'" class="page media-page">
-        <p class="eyebrow">NOW PLAYING · BLUETOOTH</p>
-        <div class="album album-large">NO.<br />07</div>
-        <h1>Midnight City</h1>
-        <p>M83 · Hurry Up, We're Dreaming</p>
-        <i class="wide-progress"></i>
-        <div class="big-controls">
-          <button type="button" aria-label="Previous track" @click="showNotice('Track: Midnight City')">
-            <svg><use href="#i-back" /></svg></button
-          ><button
-            type="button"
-            class="play"
-            :aria-label="playing ? 'Pause' : 'Play'"
-            @click="playing = !playing"
-          >
-            <i v-if="playing"></i><svg v-else><use href="#i-play" /></svg></button
-          ><button type="button" aria-label="Next track" @click="showNotice('Next track requested')">
-            <svg><use href="#i-next" /></svg>
-          </button>
-        </div>
-      </div>
-
-      <div v-else-if="view === 'navigate'" class="page nav-page">
-        <div class="full-map">
-          <GoogleMap />
-        </div>
-        <section class="nav-sheet">
-          <p class="eyebrow">WHERE TO?</p>
-          <h1>Find a place</h1>
-          <form class="destination" @submit.prevent="openGoogleDirections()">
-            <svg><use href="#i-search" /></svg>
-            <input
-              v-model="destinationQuery"
-              autocomplete="off"
-              enterkeyhint="go"
-              placeholder="Search destination"
-              aria-label="Destination"
-            />
-            <button type="submit">GO</button>
-          </form>
-          <button @click="openGoogleDirections('Home')">
-            <strong>Home</strong><small>Saved place · Open in Google Maps</small>
-          </button>
-          <button @click="openGoogleDirections('Work')">
-            <strong>Work</strong><small>Recent · Open in Google Maps</small>
-          </button>
-        </section>
-      </div>
-
+      <!-- ── 2. SOUND LAB VIEW: ELEVATED ACOUSTIC STUDIO ── -->
       <div v-else-if="view === 'engine'" class="page engine-page">
         <div class="page-title">
           <div>
-            <h1>Engine sound</h1>
+            <p class="eyebrow">ACOUSTIC COCKPIT</p>
+            <h1>Sound Lab</h1>
           </div>
           <button class="power-button" :class="{ on: simulator.audioEnabled.value }" @click="toggleEngine">
-            <i></i>{{ simulator.audioEnabled.value ? "Running" : "Start engine" }}
+            <i></i>{{ simulator.audioEnabled.value ? "Running" : "Start ignition" }}
           </button>
         </div>
+
+        <!-- Vehicle Sound Profiles Carousel -->
+        <div class="sound-rack-section">
+          <p class="eyebrow">VEHICLE ACOUSTIC CHARACTER</p>
+          <SoundProfileCard
+            :profiles="simulator.profiles"
+            :active-profile-id="simulator.vehicle.profile.id"
+            @select="(id) => simulator.selectProfile(id)"
+          />
+        </div>
+
         <div class="engine-layout">
+          <!-- Left Hero: Dynamic Orbit & Harmonic Spectrum Wave -->
           <section class="engine-hero card">
-            <div class="engine-orbit">
-              <span>{{ simulator.vehicle.gear || "N" }}</span>
+            <div class="engine-orbit" :class="{ 'engine-orbit--on': simulator.audioEnabled.value }">
+              <span>{{ simulator.vehicle.gear > 0 ? simulator.vehicle.gear : "N" }}</span>
             </div>
             <p>{{ simulator.vehicle.profile.name }}</p>
-            <strong>{{ Math.round(simulator.vehicle.rpm).toLocaleString() }}</strong
-            ><small>RPM</small>
-            <div class="speed-stat">
-              <strong>{{ Math.round(simulator.vehicle.speedKph) }}</strong>
-              <small>KM/H</small>
-            </div>
-            <div class="engine-pedals">
-              <button
-                type="button"
-                class="touch-pedal brake"
-                :class="{ active: simulator.braking.value }"
-                aria-label="Brake"
-                @pointerdown.prevent="simulator.setControl('brake', true)"
-                @pointerup="simulator.setControl('brake', false)"
-                @pointercancel="simulator.setControl('brake', false)"
-                @lostpointercapture="simulator.setControl('brake', false)"
-              >
-                <span>BRAKE</span><small>Hold to stop</small>
-              </button>
-              <button
-                type="button"
-                class="touch-pedal gas"
-                :class="{ active: simulator.accelerating.value }"
-                aria-label="Rev / Accelerate"
-                @pointerdown.prevent="simulator.setControl('accelerate', true)"
-                @pointerup="simulator.setControl('accelerate', false)"
-                @pointercancel="simulator.setControl('accelerate', false)"
-                @lostpointercapture="simulator.setControl('accelerate', false)"
-              >
-                <span>REV / GAS</span><small>Hold to rev</small>
-              </button>
-            </div>
-            <div class="engine-shifts">
-              <button type="button" aria-label="Shift down" @click="simulator.shift(-1)">↓ Gear -</button>
-              <button type="button" aria-label="Shift up" @click="simulator.shift(1)">↑ Gear +</button>
-              <button type="button" aria-label="Reset simulation" @click="simulator.reset()">↺ Reset</button>
-            </div>
+            <strong>{{ Math.round(simulator.vehicle.rpm).toLocaleString() }}</strong>
+            <small>RPM</small>
+
+            <!-- Real-time harmonic frequency visualizer -->
+            <HarmonicVisualizer
+              :rpm="simulator.vehicle.rpm"
+              :profile="simulator.vehicle.profile"
+              :audio-enabled="simulator.audioEnabled.value"
+            />
           </section>
+
+          <!-- Right Controls: Engine Output, Soundstage, Ducking -->
           <div class="engine-controls">
             <section class="control-card card">
               <div>
-                <p class="eyebrow">CHARACTER</p>
-              </div>
-              <select
-                :value="simulator.vehicle.profile.id"
-                @change="simulator.selectProfile(($event.target as HTMLSelectElement).value)"
-              >
-                <option v-for="profile in simulator.profiles" :key="profile.id" :value="profile.id">
-                  {{ profile.name }}
-                </option>
-              </select>
-            </section>
-            <section class="control-card card">
-              <div>
-                <p class="eyebrow">ENGINE LEVEL</p>
+                <p class="eyebrow">ENGINE OUTPUT</p>
                 <h2>
                   {{ effectiveEngineVolume }}%
                   <small v-if="playing && duckEngine">ducked from {{ engineVolume }}%</small>
@@ -418,9 +439,10 @@ onBeforeUnmount(() => window.clearInterval(clock));
               </div>
               <input v-model="engineVolume" type="range" min="0" max="100" aria-label="Engine sound level" />
             </section>
+
             <section class="control-card card speaker-card">
               <div>
-                <p class="eyebrow">SPEAKERS</p>
+                <p class="eyebrow">SOUNDSTAGE</p>
               </div>
               <div class="zone-picker" role="group" aria-label="Engine speaker zone">
                 <button
@@ -433,19 +455,20 @@ onBeforeUnmount(() => window.clearInterval(clock));
                 </button>
               </div>
               <div class="car-plan" :class="`zone-${engineZone}`">
-                <span class="front-left"></span><span class="front-right"></span><i>FRONT</i><b></b
-                ><span class="rear-left"></span><span class="rear-right"></span><i>REAR</i>
+                <span class="front-left"></span><span class="front-right"></span><i>FRONT</i><b></b><span class="rear-left"></span><span class="rear-right"></span><i>REAR</i>
               </div>
             </section>
+
             <section class="control-card card duck-card">
               <div>
-                <p class="eyebrow">WHEN MUSIC PLAYS</p>
-                <h2>Reduce engine</h2>
+                <p class="eyebrow">ACOUSTIC DUCKING</p>
+                <h2>Reduce engine when music plays</h2>
               </div>
               <button
                 class="switch"
                 :class="{ on: duckEngine }"
                 :aria-pressed="duckEngine"
+                aria-label="Toggle engine ducking"
                 @click="duckEngine = !duckEngine"
               >
                 <i></i>
@@ -463,36 +486,145 @@ onBeforeUnmount(() => window.clearInterval(clock));
         </div>
       </div>
 
+      <!-- ── 3. MEDIA VIEW: NOW PLAYING STUDIO ── -->
+      <div v-else-if="view === 'media'" class="page media-page">
+        <div class="page-title">
+          <div>
+            <p class="eyebrow">NOW PLAYING</p>
+            <h1>Media Studio</h1>
+          </div>
+          <div class="source-pills">
+            <button
+              v-for="src in ['Bluetooth', 'FM Radio', 'Soundstage']"
+              :key="src"
+              type="button"
+              class="source-pill"
+              :class="{ active: audioSource === src }"
+              @click="audioSource = src as any"
+            >
+              {{ src }}
+            </button>
+          </div>
+        </div>
+
+        <div class="media-stage-deck">
+          <div class="album album-large">NO.<br />07</div>
+          <div class="media-info">
+            <span class="eyebrow">{{ audioSource.toUpperCase() }} AUDIO · STEREO</span>
+            <h2>Midnight City</h2>
+            <p>M83 · Hurry Up, We're Dreaming</p>
+            <i class="wide-progress"></i>
+
+            <div class="big-controls">
+              <button type="button" aria-label="Previous" @click="showNotice('Track: Midnight City')">
+                <svg><use href="#i-back" /></svg>
+              </button>
+              <button
+                type="button"
+                class="play"
+                :aria-label="playing ? 'Pause' : 'Play'"
+                @click="playing = !playing"
+              >
+                <i v-if="playing"></i><svg v-else><use href="#i-play" /></svg>
+              </button>
+              <button type="button" aria-label="Next" @click="showNotice('Track: Outro')">
+                <svg><use href="#i-next" /></svg>
+              </button>
+            </div>
+
+            <div class="ducking-indicator" :class="{ active: duckEngine && playing }">
+              <svg><use href="#i-car" /></svg>
+              <span>Engine ducking {{ duckEngine ? `active (-${duckAmount}%)` : 'off' }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── 4. NAVIGATE VIEW: DETAILED GOOGLE MAPS ── -->
+      <div v-else-if="view === 'navigate'" class="page nav-page">
+        <div class="full-map">
+          <GoogleMap />
+        </div>
+        <section class="nav-sheet">
+          <p class="eyebrow">NAVIGATION</p>
+          <h1>Find a place</h1>
+          <form class="destination" @submit.prevent="openGoogleDirections()">
+            <svg><use href="#i-search" /></svg>
+            <input
+              v-model="destinationQuery"
+              autocomplete="off"
+              enterkeyhint="go"
+              placeholder="Search destination"
+              aria-label="Destination"
+            />
+            <button type="submit">GO</button>
+          </form>
+          <button type="button" @click="openGoogleDirections('Home')">
+            <strong>Home</strong><small>Saved place · Open in Google Maps</small>
+          </button>
+          <button type="button" @click="openGoogleDirections('Work')">
+            <strong>Work</strong><small>Recent · Open in Google Maps</small>
+          </button>
+        </section>
+      </div>
+
+      <!-- ── 5. ALL APPS VIEW: SYSTEM DRAWER ── -->
+      <div v-else-if="view === 'apps'" class="page apps-page">
+        <div class="page-title">
+          <div>
+            <p class="eyebrow">APPLICATIONS</p>
+            <h1>All apps</h1>
+          </div>
+          <label>
+            <svg><use href="#i-search" /></svg>
+            <input v-model="appSearch" placeholder="Search apps" aria-label="Search apps" />
+          </label>
+        </div>
+        <div class="app-grid">
+          <button
+            v-for="app in filteredApps"
+            :key="app[0]"
+            type="button"
+            class="app"
+            :class="app[2]"
+            @click="openApp(app[3])"
+          >
+            <i><svg><use :href="`#i-${app[1]}`" /></svg></i>
+            <strong>{{ app[0] }}</strong>
+          </button>
+        </div>
+      </div>
+
+      <!-- ── 6. SETTINGS VIEW ── -->
       <div v-else class="page settings-page">
         <div class="page-title">
           <div>
+            <p class="eyebrow">SYSTEM PREFERENCES</p>
             <h1>Settings</h1>
           </div>
         </div>
         <div class="settings-grid">
           <section>
-            <i class="mint"
-              ><svg><use href="#i-sun" /></svg
-            ></i>
+            <i class="mint"><svg><use href="#i-sun" /></svg></i>
             <div>
               <h2>Display</h2>
               <p>Brightness · {{ brightness }}%</p>
-              <input v-model="brightness" type="range" min="10" max="100" />
+              <input v-model="brightness" type="range" min="10" max="100" aria-label="Brightness" />
             </div>
           </section>
+
           <section class="scale-setting">
             <i class="coral"><span class="type-icon">Aa</span></i>
             <div>
               <h2>Interface size</h2>
               <p>{{ uiScale }}% · Variable screen density</p>
               <input v-model="uiScale" type="range" min="100" max="130" step="5" aria-label="Interface size" />
-              <div class="scale-labels"><span>Default</span><span>Largest</span></div>
+              <div class="scale-labels"><span>Standard</span><span>130% Large</span></div>
             </div>
           </section>
+
           <section>
-            <i class="violet"
-              ><svg><use href="#i-bluetooth" /></svg
-            ></i>
+            <i class="violet"><svg><use href="#i-bluetooth" /></svg></i>
             <div>
               <h2>Bluetooth</h2>
               <p>{{ simulator.bluetoothDeviceName.value ? `Connected: ${simulator.bluetoothDeviceName.value}` : `Status: ${simulator.bluetoothStatus.value}` }}</p>
@@ -506,7 +638,20 @@ onBeforeUnmount(() => window.clearInterval(clock));
             </div>
           </section>
         </div>
-        <p class="note">English · 1024 × 600 landscape</p>
+        <p class="note">Car Sound Launcher · 1024 × 600 landscape automotive standard</p>
+      </div>
+
+      <!-- Reverse Camera Modal -->
+      <div v-if="cameraActive" class="camera-modal" role="dialog" aria-label="Rear parking camera">
+        <div class="camera-stream">
+          <div class="guidelines">
+            <span class="guide green-guide"></span>
+            <span class="guide yellow-guide"></span>
+            <span class="guide red-guide"></span>
+          </div>
+          <p class="camera-status">REVERSE CAMERA ACTIVE · CHECK SURROUNDINGS</p>
+          <button type="button" class="close-camera" @click="cameraActive = false">DISMISS</button>
+        </div>
       </div>
     </section>
     <aside v-if="notice" class="toast-banner" role="status">{{ notice }}</aside>

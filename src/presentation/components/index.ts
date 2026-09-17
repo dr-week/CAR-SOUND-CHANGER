@@ -6,3 +6,8 @@ export { default as GearDisplay } from "./GearDisplay.vue";
 export { default as SpeedometerGauge } from "./SpeedometerGauge.vue";
 export { default as StatusIndicators } from "./StatusIndicators.vue";
 export { default as VehicleTachometer } from "./VehicleTachometer.vue";
+export { default as GoogleMap } from "./GoogleMap.vue";
+export { default as CockpitTelemetry } from "./CockpitTelemetry.vue";
+export { default as HarmonicVisualizer } from "./HarmonicVisualizer.vue";
+export { default as SoundProfileCard } from "./SoundProfileCard.vue";
+

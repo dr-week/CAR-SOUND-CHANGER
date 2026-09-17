@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { CAR_PROFILES } from "../carProfiles";
-import { createVehicleState, stepVehicle } from "../vehiclePhysics";
+import { computeAutoGear, createVehicleState, stepVehicle } from "../vehiclePhysics";
 
 describe("vehicle physics", () => {
   it("limits sustained first-gear acceleration and permits more speed after upshift", () => {
@@ -65,4 +65,32 @@ describe("vehicle physics", () => {
     // RPM should be identical because capping is applied in both cases
     expect(vehicle.rpm).toBeCloseTo(vehicleCapped.rpm, 2);
   });
+
+  describe("computeAutoGear", () => {
+    it("returns gear 1 at standstill or low speed", () => {
+      expect(computeAutoGear(0, CAR_PROFILES.brezza)).toBe(1);
+      expect(computeAutoGear(2, CAR_PROFILES.brezza)).toBe(1);
+      expect(computeAutoGear(NaN, CAR_PROFILES.brezza)).toBe(1);
+    });
+
+    it("upshifts progressively as road speed increases", () => {
+      const g0 = computeAutoGear(10, CAR_PROFILES.brezza);
+      const g1 = computeAutoGear(35, CAR_PROFILES.brezza);
+      const g2 = computeAutoGear(65, CAR_PROFILES.brezza);
+      const g3 = computeAutoGear(90, CAR_PROFILES.brezza);
+      const g4 = computeAutoGear(120, CAR_PROFILES.brezza);
+
+      expect(g0).toBe(1);
+      expect(g1).toBeGreaterThanOrEqual(2);
+      expect(g2).toBeGreaterThanOrEqual(3);
+      expect(g3).toBeGreaterThanOrEqual(4);
+      expect(g4).toBe(CAR_PROFILES.brezza.gears);
+    });
+
+    it("never exceeds the maximum gears for the profile", () => {
+      expect(computeAutoGear(300, CAR_PROFILES.brezza)).toBe(CAR_PROFILES.brezza.gears);
+      expect(computeAutoGear(350, CAR_PROFILES.porsche)).toBe(CAR_PROFILES.porsche.gears);
+    });
+  });
 });
+

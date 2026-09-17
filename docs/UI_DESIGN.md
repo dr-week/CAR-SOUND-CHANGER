@@ -6,12 +6,12 @@ Design system documentation for the **Car Sound Changer & Infotainment Launcher*
 
 ## 🎨 Overview & Aesthetic Goals
 
-The launcher UI/UX is built specifically for **landscape 16:9 / 16:10 automotive touchscreens** (e.g. Blaupunkt, Android head units, tablets). It follows an **avant-garde, dark glassmorphic automotive aesthetic**:
+The launcher UI/UX is engineered specifically for **landscape 16:9 / 16:10 automotive touchscreens** (e.g. Blaupunkt, Android head units, tablets). It embodies an **avant-garde, dark glassmorphic automotive aesthetic**:
 
-1. **High Contrast Dark Palette**: Deep obsidian backgrounds (`#0B0E14`) paired with glowing cyan (`#00F2FE`), neon amber (`#FF9F0A`), and emerald green (`#34C759`) indicators.
-2. **Glanceable Safety Controls**: All main touch targets are **64px+** in size, ensuring effortless operation while parked or mounted in a vehicle.
-3. **100% English & Icon-Driven**: Clean iconography (Lucide icons) eliminates language barriers and minimizes textual clutter.
-4. **Smooth 60 FPS Micro-Animations**: Hardware-accelerated CSS transitions and smooth canvas/SVG gauge needles.
+1. **High Contrast Obsidian Palette**: Deep obsidian backgrounds (`#0B0F0D`) paired with luminous electric acid lime (`#D9FF78`), warm exhaust amber (`#E7BF76`), and crisp technical typography.
+2. **Glanceable Tactile Targets**: All primary touch targets adhere to a minimum of **64px** in height/width, ensuring effortless and safe operation in a moving or stationary vehicle.
+3. **Typographic Juxtaposition**: Bespoke pairing of editorial serif (`Playfair Display`) for greeting elegance, industrial monospace (`DM Mono`) for technical instrumentation, and neo-grotesque sans-serif (`Manrope`) for legible UI labels.
+4. **Hardware-Accelerated 60 FPS Micro-Animations**: Smooth SVG arc sweeps on tachometer/speedometer, real-time acoustic frequency harmonic pulses, and blur-filtered smoked glass surfaces (`backdrop-filter: blur(16px)`).
 
 ---
 
@@ -19,15 +19,18 @@ The launcher UI/UX is built specifically for **landscape 16:9 / 16:10 automotive
 
 ```
 ┌──────┬────────────────────────────────────────────────────────┐
-│      │ InfotainmentHeader.vue (56px)                          │
-│      │ [Clock · Date · GPS Speed · Bluetooth Status · Volume] │
-│      ├────────────────────────────────────────────────────────┤
-│ Side │                                                        │
+│      │ Status Bar (60px)                                      │
+│      │ [Ready · Clock (Tap for Quick Controls) · GPS · Net]   │
+│ Rail ├────────────────────────────────────────────────────────┤
 │ Dock │                                                        │
-│ 72px │ Main View Container (Dashboard / Google Map / Audio)   │
-│      │                                                        │
-│      │                                                        │
-│      │                                                        │
+│ 90px │ Dynamic Stage Views:                                   │
+│      │ • Home (Cockpit Telemetry HUD + Greeting + Map + Media)│
+│ [m]  │ • Sound Lab (Harmonic Visualizer + Profile Cards)      │
+│ Car  │ • Media Studio (Now Playing + Ducking Indicator)       │
+│ Music│ • Navigate (Google Maps + Directions Sheet)            │
+│ Nav  │ • All Apps (System Drawer + Parking Camera)            │
+│ Apps │ • Settings (Display Brightness + 100-130% UI Scaling)  │
+│ Sett.│                                                        │
 └──────┴────────────────────────────────────────────────────────┘
 ```
 
@@ -35,63 +38,71 @@ The launcher UI/UX is built specifically for **landscape 16:9 / 16:10 automotive
 
 ## 🧩 UI Components & Modules
 
-### 1. `SidebarDock.vue`
+### 1. `SidebarDock` (Left Navigation Rail)
 
-- **Position**: Fixed left navigation bar (72px width).
+- **Position**: Fixed left navigation rail (90px width).
 - **Tabs**:
-  - `Home`: Main Cockpit Instrument Dashboard.
-  - `Gauges`: Focused Speedometer & Tachometer view.
-  - `Media`: Interactive Music / Audio Engine Controls.
-  - `Sound Lab`: Vehicle Sound Profile Selector (Brezza, Mustang, Porsche, F1, Supra, etc.).
-  - `All Apps`: Triggers `AppDrawer.vue` modal grid.
-  - `Settings`: Launcher preferences and audio output controls.
+  - `Home` (`m` brand mark): Fused Cockpit Dashboard.
+  - `Sound Lab` (`car`): Vehicle Sound Synthesizer & Acoustic Studio.
+  - `Media` (`music`): Interactive Music / Soundstage Studio.
+  - `Navigate` (`nav`): Full-screen Google Maps Navigation.
+  - `All Apps` (`grid`): System Drawer and Application shortcuts.
+  - `Settings` (`settings`): Launcher preferences, UI scaling (100–130%), and Bluetooth.
 
-### 2. `InfotainmentHeader.vue`
+### 2. Status Bar
 
-- **Position**: Fixed top status bar (56px height).
+- **Position**: Fixed top status bar (60px height).
 - **Widgets**:
-  - Digital 24-hour clock and date.
-  - Live GPS Speed badge (`active` / `stale` / `inactive`).
-  - Web Bluetooth connectivity status and device name.
-  - Master volume control slider with instant mute toggle.
+  - Ignition / Engine readiness indicator (`STANDBY` vs `ENGINE ON`).
+  - Interactive digital clock & date with Quick Controls drawer trigger.
+  - Real-time Web Bluetooth connection toggle and device name.
+  - Real-time GPS telemetry status button with live speed readout.
+  - Genuine Web Battery API gauge with online/offline connectivity fallback.
 
-### 3. `InstrumentDashboard.vue`
+### 3. `CockpitTelemetry.vue`
 
-- **Dual Analog/Digital Cockpit Gauges**:
-  - **Tachometer (RPM)**: Live RPM readout, dynamic redline glow, gear shift indicator.
-  - **Speedometer (Km/h)**: GPS/simulated speed display with top speed scaling.
-  - **Drive Controls**: Touch acceleration/brake pedals and manual sequential gear shift up/down buttons.
-  - **Eco-Driving Score**: Real-time Green Driving score (0–100) with penalty breakdown.
+- **Fused Kinetic Cockpit HUD**:
+  - **Speedometer**: Digital readout with GPS vs Simulation telemetry source indicator.
+  - **Tachometer Arc**: 220-degree kinetic SVG arc with glowing redline threshold.
+  - **Gear Indicator**: Race-style engaged gear badge with dynamic `SHIFT ↑` light.
+  - **Green Eco-Driving Score**: Real-time score (0–100) with dynamic color rating.
+  - **Virtual Drive Pedals**: Optional expandable touch pedals (Throttle, Brake, Sequential Shift) for bench testing.
 
-### 4. `AppDrawer.vue`
+### 4. `HarmonicVisualizer.vue` & `SoundProfileCard.vue` (Sound Lab)
 
-- **Modal App Launcher Grid**:
-  - Displays icons for popular Android car apps: **Google Maps**, **Spotify**, **FM Radio**, **Phone / Bluetooth Call**, **Car Sound Lab**, **Settings**.
-  - Includes a quick search bar to filter installed applications.
+- **Living Acoustic Engine Studio**:
+  - **Harmonic Visualizer**: Real-time acoustic frequency spectrum computing 4-stroke firing frequency (`RPM × cylinders ÷ 120`) and harmonic resonance.
+  - **Sound Profile Selector**: Sculptural vehicle character cards (Suzuki Brezza, Ford Mustang V8, Porsche Flat-6, Formula V12, Supra Turbo, Skyline GT-R, Golf R, Civic Type R, Lamborghini V10).
+  - **Soundstage Zone Selector**: Multi-speaker routing (`front`, `rear`, `all`) with interactive illuminated vehicle blueprint.
+  - **Acoustic Music Ducking**: Automatic engine synthesis attenuation slider when media plays.
 
 ### 5. `GoogleMap.vue`
 
-- Embedded live Google Map with custom dark theme map styling (`mapId`), vehicle location marker, recenter button, and fallback offline map visualization.
+- Embedded Google Maps JavaScript API with custom dark cartography (`mapId`), GPS recentering, directions handoff, and fallback offline canvas map.
 
 ---
 
-## 🎨 Color Palette
+## 🎨 Design Tokens & Palette
 
-| Token             | Hex                      | Usage                                    |
-| ----------------- | ------------------------ | ---------------------------------------- |
-| `--bg-dark`       | `#0B0E14`                | Main screen background                   |
-| `--surface-glass` | `rgba(22, 28, 38, 0.75)` | Glassmorphic cards and modal overlays    |
-| `--accent-cyan`   | `#00F2FE`                | Primary active tab & speedometer accents |
-| `--accent-orange` | `#FF9F0A`                | Tachometer needle & redline warning      |
-| `--accent-green`  | `#34C759`                | Active GPS fix & Eco Green score         |
-| `--text-primary`  | `#F2F4F8`                | Primary readable text                    |
-| `--text-muted`    | `#8A94A6`                | Secondary labels and metadata            |
+| Token             | Value                    | Role & Usage                                   |
+| ----------------- | ------------------------ | ---------------------------------------------- |
+| `--bg`            | `#0B0F0D`                | Main screen background                         |
+| `--panel`         | `#151A17`                | Card background                                |
+| `--panel-glass`   | `rgba(21, 26, 23, 0.78)` | Smoked glassmorphic cards & overlays           |
+| `--line`          | `rgba(241, 239, 232, 0.11)`| Frosted structural borders                    |
+| `--acid`          | `#D9FF78`                | Electric lime active indicator, tachometer arc |
+| `--amber`         | `#E7BF76`                | Exhaust heat, shift warning, redline zone      |
+| `--ink` / `--text`| `#F1EFE8`                | Primary text and instrumentation figures       |
+| `--muted`         | `#89918B`                | Technical captions, subtitles, and units       |
+| `--blue`          | `#A9C8FF`                | City speed zone & navigation badges            |
+| `--green`         | `#34C759`                | Eco drive score & rear camera guide            |
+| `--red`           | `#FF453A`                | Critical alerts & stop boundary                |
 
 ---
 
 ## 📱 Landscape Responsiveness
 
-The launcher layout automatically scales to standard head unit display resolutions:
+The launcher automatically adapts across automotive screen sizes via `--ui-scale`:
 
 - **1024 × 600** (Standard 7-inch Android head unit)
 - **1280 × 720** (HD 9-inch / 10-inch Android head unit)

@@ -4,9 +4,8 @@
 
 export type { VehicleProfile, VehicleState } from "./types";
 export type { DriveAction } from "./controls";
-export { CAR_PROFILES, isProfileId } from "./carProfiles";
-export type { ProfileId } from "./carProfiles";
-export { createVehicleState, stepVehicle } from "./vehiclePhysics";
+export { CAR_PROFILES, isProfileId, type ProfileId } from "./carProfiles";
+export { createVehicleState, stepVehicle, computeAutoGear } from "./vehiclePhysics";
 export {
   GEAR_RATIOS,
   MAX_GPS_SPEED_KPH,

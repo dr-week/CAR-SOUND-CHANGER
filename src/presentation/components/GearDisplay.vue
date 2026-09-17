@@ -100,10 +100,10 @@ const isShiftTime = computed(() => {
 
 .shift-light--active {
   opacity: 1;
-  background: rgba(247, 185, 85, 0.25);
-  border-color: #f7b955;
-  color: #f7b955;
-  box-shadow: 0 0 12px rgba(247, 185, 85, 0.5);
+  background: rgba(231, 191, 118, 0.25);
+  border-color: var(--amber);
+  color: var(--amber);
+  box-shadow: 0 0 12px var(--amber-glow);
   animation: shift-flash 0.5s ease-in-out infinite alternate;
 }
 
