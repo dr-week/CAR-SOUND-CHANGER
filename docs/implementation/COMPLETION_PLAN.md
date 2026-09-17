@@ -236,6 +236,16 @@ Next required verification, in order:
 
 #### Sound, simulation, and UI correction pass
 
+##### Audio engineering follow-up
+
+- Isolated bass filtering from exhaust brightness; added bounded, amplitude-only idle unevenness that settles under load.
+- Resume clears stale voice gains; silent profile transitions now set the new frequencies before fading in, avoiding an old-to-new pitch slide.
+- Fade automation holds the current scheduled value where supported, with a capture-before-cancel fallback.
+- Failed graph construction closes/disconnects partial resources and allows retry. Disposal during asynchronous resume is detected safely.
+- Invalid/zero turbo time steps no longer trigger blow-off or mutate charged boost.
+- Unchanged audio parameter targets are not redundantly scheduled every frame; caches reset on profile changes, resume, and disposal.
+- Verification is automated for these changes; subjective sound quality and physical-speaker listening remain unverified in this follow-up. No UI or server changes.
+
 - Rebalanced exhaust versus bass; added cylinder-family body waveforms; filter follows firing frequency so high-RPM engines do not lose their fundamental. Deep pitch styling remains an artistic approximation.
 - Profile changes fade layer gains to zero before changing waveforms. Drive reset now resets audio/turbo history. Gear shifts also unload turbo pressure.
 - Application/domain corrections: brake overrides accelerator; profile selection clears held controls, old speed, score, and GPS mode; simulation caps elapsed time consistently and limits acceleration by gear redline and profile top speed without abruptly clamping existing overspeed.

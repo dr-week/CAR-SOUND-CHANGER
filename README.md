@@ -208,10 +208,22 @@ See [AUDIO_SYSTEM.md](./docs/AUDIO_SYSTEM.md) for implementation details.
 - Safari 14+
 - Works on mobile browsers with GPS support
 
+## Google Maps integration
+
+The launcher supports a live Google map, device-location recentering, and Google Maps driving directions. It keeps an artistic offline map when no key or network is available.
+
+1. Enable **Maps JavaScript API** in Google Cloud.
+2. Copy `.env.example` to `.env.local`.
+3. Set `VITE_GOOGLE_MAPS_API_KEY` to a browser key restricted to the Maps JavaScript API and the launcher's allowed origins.
+4. Optionally set `VITE_GOOGLE_MAPS_MAP_ID` for a Cloud-based map style.
+
+Do not commit `.env.local`. For the native Android launcher, use a separate Android-restricted key with the Maps SDK for Android rather than reusing the browser key.
+
 ## 🔐 Privacy & Security
 
-- ✅ No data collected or transmitted to servers
-- ✅ GPS data used locally only
+- ✅ The launcher has no first-party analytics or tracking
+- ⚠️ When Google Maps is configured, map requests are sent to Google under Google's Maps Platform terms
+- ✅ Device location is requested only for the visible map and is not stored by this project
 - ✅ Offline-capable (pre-loaded sounds)
 - ✅ Open source - inspect the code
 
@@ -277,4 +289,3 @@ MIT License - See [LICENSE](./LICENSE) for details.
 **⚠️ Safety Warning**: This is a simulation system for entertainment purposes only. Always prioritize safe driving practices. Never interact with the app while driving.
 
 **Made with ❤️ for car enthusiasts and developers**
-

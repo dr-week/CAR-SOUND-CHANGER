@@ -55,6 +55,8 @@ export class BluetoothManager {
   private _status: BluetoothStatus;
   private readonly _listeners = new Set<StatusListener>();
 
+  private _onDisconnectHandler: (() => void) | null = null;
+
   constructor() {
     this._status = this.isSupported ? 'idle' : 'unsupported';
   }
@@ -62,7 +64,7 @@ export class BluetoothManager {
   // ─── Public read-only state ───────────────────────────────────────────────
 
   get isSupported(): boolean {
-    return 'bluetooth' in navigator && navigator.bluetooth !== undefined;
+    return typeof navigator !== 'undefined' && 'bluetooth' in navigator && navigator.bluetooth !== undefined;
   }
 
   get connectedDevice(): BluetoothDevice | null {
@@ -92,25 +94,26 @@ export class BluetoothManager {
     this._emit('scanning');
 
     try {
-      // Request any device — audio routing is OS-level, not GATT-level
+      // Clean up previous listeners if any
+      this._cleanupCurrentDevice();
+
       const device = await navigator.bluetooth!.requestDevice({
         acceptAllDevices: true,
-        // Optionally add audio-specific services for future GATT work:
-        // optionalServices: ['0000110b-0000-1000-8000-00805f9b34fb'], // A2DP sink
       });
 
       this._device = device;
       this._emit('connected');
 
-      // Listen for the device disconnecting unexpectedly
-      device.addEventListener('gattserverdisconnected', () => {
+      this._onDisconnectHandler = () => {
         this._device = null;
+        this._onDisconnectHandler = null;
         this._emit('disconnected');
-      });
+      };
+
+      device.addEventListener('gattserverdisconnected', this._onDisconnectHandler);
     } catch (err) {
-      // User cancelled the picker — DOMException "User cancelled"
-      if (err instanceof DOMException && err.name === 'NotFoundError') {
-        this._emit('idle'); // Treat cancel as returning to idle
+      if (err instanceof DOMException && (err.name === 'NotFoundError' || err.name === 'AbortError')) {
+        this._emit('idle');
       } else {
         console.error('[BluetoothManager] requestDevice error:', err);
         this._emit('error');
@@ -122,11 +125,20 @@ export class BluetoothManager {
    * Disconnects the current device and resets state.
    */
   disconnect(): void {
-    if (this._device?.gatt?.connected) {
-      this._device.gatt.disconnect();
+    const dev = this._device;
+    this._cleanupCurrentDevice();
+    if (dev?.gatt?.connected) {
+      dev.gatt.disconnect();
+    }
+    this._emit('idle');
+  }
+
+  private _cleanupCurrentDevice(): void {
+    if (this._device && this._onDisconnectHandler) {
+      this._device.removeEventListener('gattserverdisconnected', this._onDisconnectHandler);
+      this._onDisconnectHandler = null;
     }
     this._device = null;
-    this._emit('idle');
   }
 
   // ─── Status observation ──────────────────────────────────────────────────

@@ -32,8 +32,10 @@ export function stepVehicle(state: VehicleState, dt: number): void {
   const ratio = GEAR_RATIOS[state.gear] ?? 1;
   const gearLimit = Math.min(state.profile.topSpeedKph, state.profile.redlineRpm / (RPM_SPEED_SCALE * ratio));
   const atLimit = activeSpeed >= gearLimit;
-  const throttle = state.brake > 0 ? 0 : state.throttle;
-  const acceleration = (atLimit ? 0 : throttle * THROTTLE_ACCEL) - state.brake * BRAKE_DECEL - drag;
+  const rawThrottle = Number.isFinite(state.throttle) ? Math.max(0, Math.min(1, state.throttle)) : 0;
+  const rawBrake = Number.isFinite(state.brake) ? Math.max(0, Math.min(1, state.brake)) : 0;
+  const throttle = rawBrake > 0 ? 0 : rawThrottle;
+  const acceleration = (atLimit ? 0 : throttle * THROTTLE_ACCEL) - rawBrake * BRAKE_DECEL - drag;
 
   if (state.gpsSpeedKph === null) {
     const nextSpeed = Math.max(0, state.speedKph + acceleration * dt);

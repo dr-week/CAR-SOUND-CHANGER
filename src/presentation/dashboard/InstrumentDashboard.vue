@@ -15,7 +15,7 @@ import GearDisplay from "../components/GearDisplay.vue";
 import StatusIndicators from "../components/StatusIndicators.vue";
 import DriveControls from "../components/DriveControls.vue";
 
-const props = defineProps<{
+defineProps<{
   rpm: number;
   gear: number;
   speedKph: number;

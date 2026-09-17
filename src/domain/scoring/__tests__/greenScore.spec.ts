@@ -48,4 +48,16 @@ describe("green score", () => {
     const summary = getGreenScoreSummary(score);
     expect(summary).toContain("2.5");
   });
+
+  it("ignores update when dt is non-positive or non-finite", () => {
+    const score = createGreenScore();
+    const vehicle = createVehicleState(CAR_PROFILES.brezza);
+    vehicle.throttle = 0.5;
+    updateGreenScore(score, vehicle, 0);
+    expect(score.earned).toBe(0);
+    updateGreenScore(score, vehicle, -1);
+    expect(score.earned).toBe(0);
+    updateGreenScore(score, vehicle, NaN);
+    expect(score.earned).toBe(0);
+  });
 });

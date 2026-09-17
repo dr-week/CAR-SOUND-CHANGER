@@ -26,6 +26,7 @@ export class WebAudioEngine implements EngineSoundOutput {
   private turboFilter: BiquadFilterNode | null = null;
   private previousUpdate: number | null = null;
   private changeAt: number | null = null;
+  private targets = new WeakMap<AudioParam, number>();
 
   get isSupported(): boolean {
     return typeof AudioContext !== "undefined";
@@ -40,12 +41,19 @@ export class WebAudioEngine implements EngineSoundOutput {
   async resume(): Promise<void> {
     if (!this.isSupported) throw new Error("Web Audio is unavailable.");
     if (!this.context) {
-      try { this.createGraph(); }
-      catch (error) { await this.dispose(); throw error; }
+      try {
+        this.createGraph();
+      } catch (error) {
+        await this.dispose();
+        throw error;
+      }
     }
     const context = this.context!;
     // The next simulation update supplies fresh RPM/load; never replay old gains.
     if (context.state !== "running") {
+      this.targets = new WeakMap();
+      this.previousGear = null;
+      this.shiftUntil = 0;
       for (const gain of [this.exhaust?.gain, this.body?.gain, this.intake, this.turboGain]) {
         if (!gain) continue;
         gain.gain.cancelScheduledValues(context.currentTime);
@@ -55,7 +63,8 @@ export class WebAudioEngine implements EngineSoundOutput {
       this.turboEnvelope.reset();
     }
     await context.resume();
-    if (this.context !== context || context.state !== "running") throw new Error("Audio did not start. Retry from a user gesture.");
+    if (this.context !== context || context.state !== "running")
+      throw new Error("Audio did not start. Retry from a user gesture.");
   }
 
   async suspend(): Promise<void> {
@@ -63,6 +72,7 @@ export class WebAudioEngine implements EngineSoundOutput {
   }
 
   setProfile(profile: VehicleProfile): void {
+    this.targets = new WeakMap();
     this.profile = profile;
     this.previousGear = null;
     this.shiftUntil = 0;
@@ -104,7 +114,10 @@ export class WebAudioEngine implements EngineSoundOutput {
       }
       // Switch pitch while silent instead of sliding across unrelated engines.
       const initial = engineSoundParameters(state);
-      for (const [voice, hz] of [[this.exhaust, initial.firingHz], [this.body, initial.bodyHz]] as const) {
+      for (const [voice, hz] of [
+        [this.exhaust, initial.firingHz],
+        [this.body, initial.bodyHz],
+      ] as const) {
         voice.source.frequency.cancelScheduledValues(now);
         voice.source.frequency.setValueAtTime(hz, now);
       }
@@ -150,12 +163,14 @@ export class WebAudioEngine implements EngineSoundOutput {
     this.turboEnvelope.reset();
     this.previousUpdate = null;
     this.changeAt = null;
+    this.targets = new WeakMap();
     await context?.close();
   }
 
   private target(param: AudioParam, value: number): void {
+    if (this.targets.get(param) === value) return;
+    this.targets.set(param, value);
     const now = this.context!.currentTime;
-    param.cancelScheduledValues(now);
     param.setTargetAtTime(value, now, 0.035);
   }
 

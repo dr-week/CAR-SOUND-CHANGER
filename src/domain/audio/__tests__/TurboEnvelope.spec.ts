@@ -5,6 +5,15 @@ import { CAR_PROFILES } from "../../vehicle/carProfiles";
 import { createVehicleState } from "../../vehicle/vehiclePhysics";
 
 describe("turbo sound envelope", () => {
+  it.each([NaN, Infinity, -1, 0])("does not release charged boost on invalid dt %s", (dt) => {
+    const envelope = new TurboEnvelope();
+    const state = createVehicleState(CAR_PROFILES.supra);
+    state.rpm = 3500;
+    state.throttle = 1;
+    for (let i = 0; i < 10; i++) envelope.update(state, 0.1);
+    state.throttle = 0;
+    expect(envelope.update(state, dt)).toEqual({ boost: 1, release: 0 });
+  });
   it("releases boost during a shift even with the accelerator held", () => {
     const envelope = new TurboEnvelope();
     const state = createVehicleState(CAR_PROFILES.supra);

@@ -21,11 +21,15 @@ function bounded(value: number, min: number, max: number): number {
 }
 
 export function engineSoundParameters(state: VehicleState, shifting = false, turbo = { boost: 0, release: 0 }) {
-  const rpm = bounded(state.rpm, state.profile.idleRpm, state.profile.redlineRpm);
+  const idleRpm = Math.max(100, state.profile.idleRpm);
+  const redlineRpm = Math.max(idleRpm + 100, state.profile.redlineRpm);
+  const rpm = bounded(state.rpm, idleRpm, redlineRpm);
   const load = bounded(state.throttle, 0, 1) * (1 - bounded(state.brake, 0, 1));
-  const normalized = rpm / state.profile.redlineRpm;
-  const revRange = (rpm - state.profile.idleRpm) / (state.profile.redlineRpm - state.profile.idleRpm);
-  const firingHz = (rpm * state.profile.cylinders) / 120;
+  const normalized = rpm / redlineRpm;
+  const revSpan = redlineRpm - idleRpm;
+  const revRange = revSpan > 0 ? (rpm - idleRpm) / revSpan : 0;
+  const cylinders = Math.max(1, state.profile.cylinders);
+  const firingHz = (rpm * cylinders) / 120;
   const cut = shifting ? 0.4 : 1;
   return {
     firingHz,

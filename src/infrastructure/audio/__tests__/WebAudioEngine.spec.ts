@@ -3,7 +3,7 @@ import { WebAudioEngine } from "../WebAudioEngine";
 import { CAR_PROFILES } from "../../../domain/vehicle/carProfiles";
 import { createVehicleState } from "../../../domain/vehicle/vehiclePhysics";
 
-function mockAudio() {
+function mockAudio(failBuffer = false) {
   const param = () => ({
     value: 0,
     cancelScheduledValues: vi.fn(),
@@ -52,7 +52,13 @@ function mockAudio() {
     createOscillator = node;
     createBufferSource = node;
     createPeriodicWave = vi.fn(() => ({}));
-    createBuffer = vi.fn(() => ({ getChannelData: () => new Float32Array(100) }));
+    createBuffer = vi.fn(() => {
+      if (failBuffer) {
+        failBuffer = false;
+        throw new Error("buffer allocation failed");
+      }
+      return { getChannelData: () => new Float32Array(100) };
+    });
   }
   const instances: Context[] = [];
   vi.stubGlobal(
@@ -68,6 +74,66 @@ function mockAudio() {
 }
 
 describe("Web Audio lifecycle", () => {
+  it("does not reschedule unchanged pitch each frame, but reapplies it after resume", async () => {
+    const { nodes, instances } = mockAudio();
+    const engine = new WebAudioEngine();
+    await engine.resume();
+    const state = createVehicleState(CAR_PROFILES.brezza);
+    engine.update(state);
+    instances[0].currentTime = 0.04;
+    engine.update(state);
+    const count = nodes.reduce((sum, node) => sum + node.frequency.setTargetAtTime.mock.calls.length, 0);
+    instances[0].currentTime = 0.06;
+    engine.update(state);
+    expect(nodes.reduce((sum, node) => sum + node.frequency.setTargetAtTime.mock.calls.length, 0)).toBe(count);
+    await engine.suspend();
+    await engine.resume();
+    engine.update(state);
+    expect(nodes.reduce((sum, node) => sum + node.frequency.setTargetAtTime.mock.calls.length, 0)).toBeGreaterThan(
+      count,
+    );
+    await engine.dispose();
+  });
+  it("rolls back a failed graph and permits a clean retry", async () => {
+    const { instances, nodes } = mockAudio(true);
+    const engine = new WebAudioEngine();
+    await expect(engine.resume()).rejects.toThrow("buffer allocation failed");
+    expect(instances[0].close).toHaveBeenCalledOnce();
+    // A buffer source allocated before the failure is unconnected; context.close releases it.
+    nodes.filter((n) => n.connect.mock.calls.length > 0).forEach((n) => expect(n.disconnect).toHaveBeenCalled());
+    await engine.resume();
+    expect(instances).toHaveLength(2);
+    await engine.dispose();
+  });
+  it("handles disposal while resume is awaiting browser permission", async () => {
+    const { instances } = mockAudio();
+    const engine = new WebAudioEngine();
+    await engine.resume();
+    await engine.suspend();
+    let finish!: () => void;
+    instances[0].resume.mockImplementationOnce(
+      () =>
+        new Promise<void>((resolve) => {
+          finish = resolve;
+        }),
+    );
+    const pending = engine.resume();
+    await engine.dispose();
+    finish();
+    await expect(pending).rejects.toThrow("Audio did not start");
+  });
+  it("silences stale gains before resuming and filters bass independently", async () => {
+    const { instances, nodes } = mockAudio();
+    const engine = new WebAudioEngine();
+    await engine.resume();
+    await engine.suspend();
+    nodes.forEach((n) => n.gain.setValueAtTime.mockClear());
+    await engine.resume();
+    expect(nodes.filter((n) => n.gain.setValueAtTime.mock.calls.length > 0)).toHaveLength(4);
+    expect(nodes.filter((n) => n.type === "lowpass").map((n) => n.frequency.value)).toEqual([280, 320]);
+    expect(instances).toHaveLength(1);
+    await engine.dispose();
+  });
   it("fades profile changes before applying new waveforms", async () => {
     const { nodes, instances } = mockAudio();
     const engine = new WebAudioEngine();
@@ -81,6 +147,7 @@ describe("Web Audio lifecycle", () => {
     instances[0].currentTime = 0.04;
     engine.update(state);
     expect(instances[0].createPeriodicWave).toHaveBeenCalledTimes(initial + 2);
+    expect(nodes.some((n) => n.frequency.setValueAtTime.mock.calls.some(([hz]) => hz === 40))).toBe(true);
     await engine.dispose();
   });
   afterEach(() => vi.unstubAllGlobals());

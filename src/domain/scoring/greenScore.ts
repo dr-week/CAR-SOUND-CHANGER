@@ -10,6 +10,7 @@ export function createGreenScore(): GreenScore {
   return { points: 100, earned: 0, penalties: { harshBrake: 0, highRpm: 0, harshThrottle: 0 }, previousThrottle: 0 };
 }
 export function updateGreenScore(score: GreenScore, vehicle: VehicleState, dt: number): void {
+  if (!Number.isFinite(dt) || dt <= 0) return;
   const throttleChange = Math.abs(vehicle.throttle - score.previousThrottle) / Math.max(dt, 0.016);
   const harshBrake = vehicle.brake > 0.8 && (vehicle.gpsSpeedKph ?? vehicle.speedKph) > 15;
   const highRpm = vehicle.rpm > vehicle.profile.shiftRpm + 1200;

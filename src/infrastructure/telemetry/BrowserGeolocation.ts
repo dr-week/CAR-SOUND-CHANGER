@@ -13,7 +13,7 @@ export class BrowserGeolocation {
   ) {}
 
   start(): void {
-    if (!navigator.geolocation) {
+    if (typeof navigator === "undefined" || !navigator.geolocation) {
       this.onStatus("unavailable");
       return;
     }
@@ -43,10 +43,16 @@ export class BrowserGeolocation {
           }
         }
 
-        this.lastCoords = { lat, lon, time: position.timestamp || now };
+        if (this.lastCoords === null) {
+          this.lastCoords = { lat, lon, time: position.timestamp || now };
+        } else if (position.coords.speed !== null || (position.timestamp - this.lastCoords.time) / 1_000 > 0.5) {
+          this.lastCoords = { lat, lon, time: position.timestamp || now };
+        }
 
         if (speedKph === null || !Number.isFinite(speedKph) || speedKph < 0 || speedKph > 450) {
-          this.onStatus("stale");
+          if (this.lastFixAt === null || Date.now() - this.lastFixAt > this.staleAfterMs) {
+            this.onStatus("stale");
+          }
           return;
         }
 
