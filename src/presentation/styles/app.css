@@ -1137,3 +1137,136 @@ select:focus-visible {
     transition-duration: 0.01ms !important;
   }
 }
+
+.speed-stat {
+  margin-top: 10px;
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  color: var(--acid);
+}
+.speed-stat strong {
+  font: 700 24px DM Mono, monospace;
+}
+.speed-stat small {
+  color: var(--muted);
+  font: 700 10px DM Mono, monospace;
+  letter-spacing: 0.1em;
+}
+
+.engine-pedals {
+  display: flex;
+  gap: 10px;
+  margin-top: 18px;
+  width: 100%;
+}
+.touch-pedal {
+  flex: 1;
+  min-height: 52px;
+  border-radius: 14px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--ink);
+  font-weight: 700;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  user-select: none;
+  touch-action: none;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.touch-pedal small {
+  font-size: 8px;
+  color: var(--muted);
+}
+.touch-pedal.gas {
+  background: rgba(217, 255, 120, 0.12);
+  border-color: rgba(217, 255, 120, 0.3);
+  color: var(--acid);
+}
+.touch-pedal.gas.active,
+.touch-pedal.gas:active {
+  background: var(--acid);
+  color: #121713;
+  transform: scale(0.97);
+}
+.touch-pedal.brake {
+  background: rgba(255, 71, 87, 0.12);
+  border-color: rgba(255, 71, 87, 0.3);
+  color: #ff4757;
+}
+.touch-pedal.brake.active,
+.touch-pedal.brake:active {
+  background: #ff4757;
+  color: #ffffff;
+  transform: scale(0.97);
+}
+.engine-shifts {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+  width: 100%;
+}
+.engine-shifts button {
+  flex: 1;
+  min-height: 38px;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.engine-shifts button:active {
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+  transform: scale(0.97);
+}
+.status-btn {
+  background: transparent;
+  border: 0;
+  padding: 0;
+  color: inherit;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+}
+.status-btn svg.active {
+  color: var(--acid);
+}
+.gps-btn b {
+  padding: 2px 6px;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+.gps-btn.active b {
+  border-color: var(--acid);
+  color: var(--acid);
+  background: rgba(217, 255, 120, 0.1);
+}
+.gps-btn.stale b {
+  border-color: var(--amber);
+  color: var(--amber);
+}
+.toast-banner {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 12px 24px;
+  background: rgba(18, 22, 20, 0.95);
+  border: 1px solid var(--acid);
+  color: #eef0e9;
+  border-radius: 99px;
+  font-size: 13px;
+  font-weight: 600;
+  z-index: 100;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+  animation: enter 0.2s ease;
+}

@@ -6,6 +6,8 @@ import type { DriveAction } from "../../domain/vehicle/controls";
 import { createVehicleState } from "../../domain/vehicle/vehiclePhysics";
 import { createSimulatorRuntime } from "../../composition/createSimulatorRuntime";
 
+import type { BluetoothStatus } from "../../infrastructure/bluetooth/BluetoothManager";
+
 export type AudioStatus = "inactive" | "active" | "unsupported" | "blocked";
 
 export function useVehicleSimulator() {
@@ -17,13 +19,28 @@ export function useVehicleSimulator() {
   const audioStatus = ref<AudioStatus>("inactive");
   const gpsEnabled = ref(false);
   const telemetryStatus = ref<TelemetryStatus>("inactive");
-  const { audio, session, gps, keyboard } = createSimulatorRuntime(vehicle, greenScore, (status) => {
+  const accelerating = ref(false);
+  const braking = ref(false);
+
+  const { audio, session, gps, keyboard, bluetooth } = createSimulatorRuntime(vehicle, greenScore, (status) => {
     telemetryStatus.value = status;
   });
+
+  const bluetoothStatus = ref<BluetoothStatus>(bluetooth.status);
+  const bluetoothDeviceName = ref<string | null>(bluetooth.deviceName);
+  const isBluetoothSupported = bluetooth.isSupported;
+  const stopBluetooth = bluetooth.onStatusChange((status) => {
+    bluetoothStatus.value = status;
+    bluetoothDeviceName.value = bluetooth.deviceName;
+  });
+
   let frameId = 0;
   let previous = 0;
   let stopKeyboard: () => void = () => {};
+
   function setControl(action: DriveAction, active: boolean): void {
+    if (action === "accelerate") accelerating.value = active;
+    if (action === "brake") braking.value = active;
     session.setControl(action, active);
   }
   function shift(delta: number): void {
@@ -33,6 +50,12 @@ export function useVehicleSimulator() {
     if (!isProfileId(id)) return;
     setGps(false);
     session.selectProfile(CAR_PROFILES[id as ProfileId]);
+  }
+  async function connectBluetooth(): Promise<void> {
+    await bluetooth.requestDevice();
+  }
+  function disconnectBluetooth(): void {
+    bluetooth.disconnect();
   }
   async function enableAudio(): Promise<void> {
     if (audioPending.value) return;
@@ -91,6 +114,7 @@ export function useVehicleSimulator() {
   onBeforeUnmount(() => {
     cancelAnimationFrame(frameId);
     stopKeyboard();
+    stopBluetooth();
     gps.stop();
     void audio.dispose();
   });
@@ -103,6 +127,13 @@ export function useVehicleSimulator() {
     audioStatus,
     gpsEnabled,
     telemetryStatus,
+    accelerating,
+    braking,
+    bluetoothStatus,
+    bluetoothDeviceName,
+    isBluetoothSupported,
+    connectBluetooth,
+    disconnectBluetooth,
     setControl,
     shift,
     selectProfile,

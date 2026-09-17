@@ -15,6 +15,8 @@ import GearDisplay from "../components/GearDisplay.vue";
 import StatusIndicators from "../components/StatusIndicators.vue";
 import DriveControls from "../components/DriveControls.vue";
 
+import type { BluetoothStatus } from "../../infrastructure/bluetooth/BluetoothManager";
+
 defineProps<{
   rpm: number;
   gear: number;
@@ -26,6 +28,7 @@ defineProps<{
   muted: boolean;
   telemetryStatus: TelemetryStatus;
   greenScore: number;
+  bluetoothStatus?: BluetoothStatus;
 }>();
 
 const emit = defineEmits<{
@@ -61,7 +64,7 @@ const emit = defineEmits<{
       :audio-status="audioStatus"
       :telemetry-status="telemetryStatus"
       :green-score="greenScore"
-      :bluetooth-status="'idle'"
+      :bluetooth-status="bluetoothStatus ?? 'idle'"
     />
 
     <!-- ── Drive Controls Pads ── -->

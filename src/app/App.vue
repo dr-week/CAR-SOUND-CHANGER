@@ -46,9 +46,45 @@ const effectiveEngineVolume = computed(() =>
     : engineVolume.value,
 );
 const launcherStyle = computed(() => ({ "--ui-scale": `${uiScale.value / 100}` }));
-function openApp(name: string) {
-  if (name === "Engine") view.value = "engine";
+const notice = ref<string | null>(null);
+let noticeTimer: number | undefined;
+
+function showNotice(msg: string) {
+  notice.value = msg;
+  window.clearTimeout(noticeTimer);
+  noticeTimer = window.setTimeout(() => {
+    if (notice.value === msg) notice.value = null;
+  }, 3500);
 }
+
+function openApp(name: string) {
+  if (name === "Engine") {
+    view.value = "engine";
+  } else if (name === "Radio") {
+    view.value = "media";
+  } else if (name === "Bluetooth") {
+    view.value = "settings";
+    simulator.connectBluetooth();
+  } else if (name === "Camera") {
+    showNotice("Reverse Camera: Requires native Android video-in / reverse gear trigger.");
+  } else if (name === "Phone") {
+    showNotice("Phone: Connect Bluetooth to make hands-free calls.");
+  }
+}
+
+async function toggleEngine() {
+  await simulator.enableAudio();
+  if (simulator.audioEnabled.value) {
+    simulator.setGps(true);
+  } else {
+    simulator.setGps(false);
+  }
+}
+
+function toggleGps() {
+  simulator.setGps(!simulator.gpsEnabled.value);
+}
+
 function openGoogleDirections(destination = destinationQuery.value) {
   const query = destination.trim();
   if (!query) {
@@ -164,7 +200,24 @@ onBeforeUnmount(() => window.clearInterval(clock));
           ><small>{{ date }}</small>
         </button>
         <div class="system-status">
-          <svg><use href="#i-bluetooth" /></svg><b>5G</b><b class="battery">84</b>
+          <button
+            type="button"
+            class="status-btn"
+            :title="`Bluetooth: ${simulator.bluetoothStatus.value}`"
+            @click="simulator.connectBluetooth()"
+          >
+            <svg :class="{ active: simulator.bluetoothStatus.value === 'connected' }"><use href="#i-bluetooth" /></svg>
+          </button>
+          <button
+            type="button"
+            class="status-btn gps-btn"
+            :class="simulator.telemetryStatus.value"
+            :title="`GPS: ${simulator.telemetryStatus.value} · ${Math.round(simulator.vehicle.speedKph)} km/h`"
+            @click="toggleGps"
+          >
+            <b>GPS {{ Math.round(simulator.vehicle.speedKph) }}</b>
+          </button>
+          <b class="battery">84</b>
         </div>
       </header>
 
@@ -246,10 +299,16 @@ onBeforeUnmount(() => window.clearInterval(clock));
         <p>M83 · Hurry Up, We're Dreaming</p>
         <i class="wide-progress"></i>
         <div class="big-controls">
-          <button>
+          <button type="button" aria-label="Previous track" @click="showNotice('Track: Midnight City')">
             <svg><use href="#i-back" /></svg></button
-          ><button class="play"><i></i></button
-          ><button>
+          ><button
+            type="button"
+            class="play"
+            :aria-label="playing ? 'Pause' : 'Play'"
+            @click="playing = !playing"
+          >
+            <i v-if="playing"></i><svg v-else><use href="#i-play" /></svg></button
+          ><button type="button" aria-label="Next track" @click="showNotice('Next track requested')">
             <svg><use href="#i-next" /></svg>
           </button>
         </div>
@@ -287,7 +346,7 @@ onBeforeUnmount(() => window.clearInterval(clock));
           <div>
             <h1>Engine sound</h1>
           </div>
-          <button class="power-button" :class="{ on: simulator.audioEnabled.value }" @click="simulator.enableAudio">
+          <button class="power-button" :class="{ on: simulator.audioEnabled.value }" @click="toggleEngine">
             <i></i>{{ simulator.audioEnabled.value ? "Running" : "Start engine" }}
           </button>
         </div>
@@ -299,6 +358,41 @@ onBeforeUnmount(() => window.clearInterval(clock));
             <p>{{ simulator.vehicle.profile.name }}</p>
             <strong>{{ Math.round(simulator.vehicle.rpm).toLocaleString() }}</strong
             ><small>RPM</small>
+            <div class="speed-stat">
+              <strong>{{ Math.round(simulator.vehicle.speedKph) }}</strong>
+              <small>KM/H</small>
+            </div>
+            <div class="engine-pedals">
+              <button
+                type="button"
+                class="touch-pedal brake"
+                :class="{ active: simulator.braking.value }"
+                aria-label="Brake"
+                @pointerdown.prevent="simulator.setControl('brake', true)"
+                @pointerup="simulator.setControl('brake', false)"
+                @pointercancel="simulator.setControl('brake', false)"
+                @lostpointercapture="simulator.setControl('brake', false)"
+              >
+                <span>BRAKE</span><small>Hold to stop</small>
+              </button>
+              <button
+                type="button"
+                class="touch-pedal gas"
+                :class="{ active: simulator.accelerating.value }"
+                aria-label="Rev / Accelerate"
+                @pointerdown.prevent="simulator.setControl('accelerate', true)"
+                @pointerup="simulator.setControl('accelerate', false)"
+                @pointercancel="simulator.setControl('accelerate', false)"
+                @lostpointercapture="simulator.setControl('accelerate', false)"
+              >
+                <span>REV / GAS</span><small>Hold to rev</small>
+              </button>
+            </div>
+            <div class="engine-shifts">
+              <button type="button" aria-label="Shift down" @click="simulator.shift(-1)">↓ Gear -</button>
+              <button type="button" aria-label="Shift up" @click="simulator.shift(1)">↑ Gear +</button>
+              <button type="button" aria-label="Reset simulation" @click="simulator.reset()">↺ Reset</button>
+            </div>
           </section>
           <div class="engine-controls">
             <section class="control-card card">
@@ -401,13 +495,20 @@ onBeforeUnmount(() => window.clearInterval(clock));
             ></i>
             <div>
               <h2>Bluetooth</h2>
-              <p>Phone connection</p>
-              <button>Manage</button>
+              <p>{{ simulator.bluetoothDeviceName.value ? `Connected: ${simulator.bluetoothDeviceName.value}` : `Status: ${simulator.bluetoothStatus.value}` }}</p>
+              <button
+                type="button"
+                :disabled="!simulator.isBluetoothSupported"
+                @click="simulator.bluetoothStatus.value === 'connected' ? simulator.disconnectBluetooth() : simulator.connectBluetooth()"
+              >
+                {{ simulator.bluetoothStatus.value === 'connected' ? 'Disconnect' : 'Connect / Pair' }}
+              </button>
             </div>
           </section>
         </div>
         <p class="note">English · 1024 × 600 landscape</p>
       </div>
     </section>
+    <aside v-if="notice" class="toast-banner" role="status">{{ notice }}</aside>
   </main>
 </template>

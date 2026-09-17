@@ -5,6 +5,8 @@ import { WebAudioEngine } from "../infrastructure/audio/WebAudioEngine";
 import { KeyboardInput } from "../infrastructure/input/KeyboardInput";
 import { BrowserGeolocation } from "../infrastructure/telemetry/BrowserGeolocation";
 
+import { BluetoothManager } from "../infrastructure/bluetooth/BluetoothManager";
+
 /** The only layer that connects browser adapters to application use cases. */
 export function createSimulatorRuntime(
   vehicle: VehicleState,
@@ -13,6 +15,7 @@ export function createSimulatorRuntime(
 ) {
   const audio = new WebAudioEngine();
   const session = new DrivingSession(vehicle, greenScore, audio);
+  const bluetooth = new BluetoothManager();
   const gps = new BrowserGeolocation((speed) => session.setGpsSpeed(speed), (status) => {
     if (status !== "active") session.clearGpsSpeed();
     onTelemetryStatus(status);
@@ -21,5 +24,5 @@ export function createSimulatorRuntime(
     (action, active) => session.setControl(action, active),
     (delta) => session.shift(delta),
   );
-  return { audio, session, gps, keyboard };
+  return { audio, session, gps, keyboard, bluetooth };
 }
