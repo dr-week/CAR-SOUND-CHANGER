@@ -4,3 +4,5 @@
 
 export * from "./vehicle/index";
 export * from "./scoring/index";
+export * from "./audio/index";
+

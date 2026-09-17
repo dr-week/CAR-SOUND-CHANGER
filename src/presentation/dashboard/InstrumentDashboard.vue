@@ -88,14 +88,16 @@ const emit = defineEmits<{
 
 .twin-cluster {
   display: grid;
-  grid-template-columns: 1fr 100px 1fr;
+  grid-template-columns: 1fr 110px 1fr;
   align-items: center;
-  gap: 12px;
-  padding: 14px 18px;
-  background: rgba(12, 15, 21, 0.88);
-  border: 1px solid var(--line);
-  border-radius: 16px;
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.45);
+  gap: 16px;
+  padding: 20px 24px;
+  background: var(--panel-glass);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--panel-border);
+  border-radius: 24px;
+  box-shadow: 0 16px 45px rgba(0, 0, 0, 0.55);
 }
 
 .tacho-wrapper,

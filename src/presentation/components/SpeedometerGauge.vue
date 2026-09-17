@@ -157,8 +157,8 @@ const ticks = computed(() => {
       <!-- Animated Needle -->
       <g transform="translate(100, 90)">
         <g :style="{ transform: `rotate(${needleAngle}deg)`, transition: 'transform 0.12s ease-out' }">
-          <polygon points="-2.5,0 0,-70 2.5,0" fill="#00f2fe" filter="drop-shadow(0 0 4px #00f2fe)" />
-          <circle cx="0" cy="0" r="7" fill="#141923" stroke="#00f2fe" stroke-width="2.5" />
+          <polygon points="-2.5,0 0,-70 2.5,0" fill="var(--acid)" filter="drop-shadow(0 0 6px var(--acid-glow))" />
+          <circle cx="0" cy="0" r="7" fill="#151a17" stroke="var(--acid)" stroke-width="2.5" />
           <circle cx="0" cy="0" r="2.5" fill="#ffffff" />
         </g>
       </g>

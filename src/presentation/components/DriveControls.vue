@@ -17,13 +17,13 @@ function keyboard(event: KeyboardEvent, action: DriveAction, active: boolean): v
 
 <template>
   <section class="controls" aria-label="Driving controls">
-    <button type="button" class="shift" aria-label="Upshift gear, keyboard 1" @click="emit('shift', 1)">
-      <span>↑ Upshift</span><kbd>1</kbd>
+    <button type="button" class="shift downshift shift-btn" aria-label="Downshift gear, keyboard 2" @click="emit('shift', -1)">
+      <span>↓ Downshift</span><kbd>2</kbd>
     </button>
     <button
       type="button"
-      class="pedal brake"
-      :class="{ active: braking }"
+      class="pedal brake drive-btn--brake"
+      :class="{ active: braking, 'drive-btn--active': braking }"
       :aria-pressed="braking"
       aria-label="Brake, hold S"
       @pointerdown.prevent="activate($event, 'brake')"
@@ -38,8 +38,8 @@ function keyboard(event: KeyboardEvent, action: DriveAction, active: boolean): v
     </button>
     <button
       type="button"
-      class="pedal accelerate"
-      :class="{ active: accelerating }"
+      class="pedal accelerate drive-btn--gas"
+      :class="{ active: accelerating, 'drive-btn--active': accelerating }"
       :aria-pressed="accelerating"
       aria-label="Accelerate, hold W"
       @pointerdown.prevent="activate($event, 'accelerate')"
@@ -52,10 +52,10 @@ function keyboard(event: KeyboardEvent, action: DriveAction, active: boolean): v
     >
       <span>Accelerate</span><kbd>W</kbd>
     </button>
-    <button type="button" class="shift downshift" aria-label="Downshift gear, keyboard 2" @click="emit('shift', -1)">
-      <span>↓ Downshift</span><kbd>2</kbd>
+    <button type="button" class="shift upshift shift-btn" aria-label="Upshift gear, keyboard 1" @click="emit('shift', 1)">
+      <span>↑ Upshift</span><kbd>1</kbd>
     </button>
-    <button type="button" class="reset" aria-label="Reset drive" @click="emit('reset')">↺ <span>Reset</span></button>
+    <button type="button" class="reset reset-btn" aria-label="Reset drive" @click="emit('reset')">↺ <span>Reset</span></button>
   </section>
 </template>
 
@@ -67,52 +67,74 @@ function keyboard(event: KeyboardEvent, action: DriveAction, active: boolean): v
 }
 button {
   min-width: 0;
-  min-height: 60px;
-  padding: 12px;
-  border: 1px solid #50594f;
-  border-radius: 3px;
-  background: #272e28;
-  color: #e8ece1;
+  min-height: 64px;
+  padding: 10px 14px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.035);
+  color: var(--ink);
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 8px;
-  font-size: 11px;
+  font: 700 11px var(--mono);
   touch-action: none;
   user-select: none;
+  transition: all 0.15s ease;
 }
 kbd {
-  border: 1px solid #657060;
-  border-radius: 3px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
   min-width: 22px;
-  padding: 4px;
+  padding: 3px 6px;
   font: 10px var(--mono);
   text-align: center;
+  background: rgba(0, 0, 0, 0.35);
+  color: var(--muted);
 }
 .accelerate {
-  background: #dec18b;
-  color: #292d24;
-  border-color: #dec18b;
+  background: rgba(217, 255, 120, 0.08);
+  color: var(--acid);
+  border-color: rgba(217, 255, 120, 0.25);
 }
 .accelerate kbd {
-  border-color: #9d8458;
+  border-color: rgba(217, 255, 120, 0.3);
+  color: var(--acid);
+}
+.accelerate.active,
+.accelerate:active {
+  background: var(--acid) !important;
+  color: #10140e !important;
+  box-shadow: 0 0 20px var(--acid-glow);
+  transform: translateY(1px);
 }
 .brake {
-  background: #373a31;
+  background: rgba(255, 69, 58, 0.08);
+  color: var(--red);
+  border-color: rgba(255, 69, 58, 0.25);
+}
+.brake kbd {
+  border-color: rgba(255, 69, 58, 0.3);
+  color: var(--red);
+}
+.brake.active,
+.brake:active {
+  background: var(--red) !important;
+  color: #ffffff !important;
+  box-shadow: 0 0 20px rgba(255, 69, 58, 0.4);
+  transform: translateY(1px);
 }
 button:hover {
-  border-color: #dfc28c;
-}
-button.active,
-button:active {
-  background: #e8d4ae;
-  color: #20251f;
-  transform: translateY(1px);
+  border-color: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.06);
 }
 .reset {
   justify-content: center;
   background: transparent;
-  color: #bdc5b9;
+  color: var(--muted);
+}
+.reset:hover {
+  color: var(--ink);
 }
 @media (max-width: 900px) {
   button {
@@ -146,7 +168,7 @@ button:active {
     grid-row: 2;
   }
   button {
-    min-height: 52px;
+    min-height: 64px;
   }
 }
 </style>

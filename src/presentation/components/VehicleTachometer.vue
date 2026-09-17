@@ -20,15 +20,15 @@ const redline = computed(() => {
 
 <template>
   <svg class="tachometer" viewBox="0 0 360 310" role="img" :aria-label="`Engine speed ${Math.round(rpm)} RPM`">
-    <circle cx="180" cy="160" r="144" fill="none" stroke="#353e36" stroke-width=".6" />
-    <path :d="redline" fill="none" stroke="#d88b71" stroke-width="4" />
+    <circle cx="180" cy="160" r="144" fill="none" stroke="rgba(241, 239, 232, 0.12)" stroke-width=".6" />
+    <path :d="redline" fill="none" stroke="var(--amber)" stroke-width="4" />
     <g v-for="tick in ticks" :key="tick">
       <line
         :x1="point(angle(tick * 250), 126).x"
         :y1="point(angle(tick * 250), 126).y"
         :x2="point(angle(tick * 250), tick % 4 === 0 ? 111 : 120).x"
         :y2="point(angle(tick * 250), tick % 4 === 0 ? 111 : 120).y"
-        :stroke="tick * 250 >= profile.redlineRpm ? '#d88b71' : '#a9b1a7'"
+        :stroke="tick * 250 >= profile.redlineRpm ? 'var(--amber)' : 'rgba(241, 239, 232, 0.4)'"
         :stroke-width="tick % 4 === 0 ? 1.8 : 1"
       />
       <text
@@ -41,9 +41,9 @@ const redline = computed(() => {
       </text>
     </g>
     <g :transform="`rotate(${needleAngle} 180 160)`">
-      <path d="M 178 174 L 180 44 L 182 174 Z" fill="#e6c893" />
+      <path d="M 178 174 L 180 44 L 182 174 Z" fill="var(--acid)" filter="drop-shadow(0 0 6px var(--acid-glow))" />
     </g>
-    <circle cx="180" cy="160" r="8" fill="#1c211f" stroke="#dec18b" stroke-width="2" />
+    <circle cx="180" cy="160" r="8" fill="#151a17" stroke="var(--acid)" stroke-width="2" />
     <text x="180" y="226" class="rpm-value">{{ Math.round(rpm).toLocaleString() }}</text>
     <text x="180" y="246" class="rpm-caption">REVOLUTIONS / MIN</text>
   </svg>

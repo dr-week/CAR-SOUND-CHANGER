@@ -5,8 +5,9 @@ import GoogleMap from "../presentation/components/GoogleMap.vue";
 import CockpitTelemetry from "../presentation/components/CockpitTelemetry.vue";
 import HarmonicVisualizer from "../presentation/components/HarmonicVisualizer.vue";
 import SoundProfileCard from "../presentation/components/SoundProfileCard.vue";
+import InstrumentDashboard from "../presentation/dashboard/InstrumentDashboard.vue";
 
-type View = "home" | "engine" | "media" | "navigate" | "apps" | "settings";
+type View = "home" | "gauges" | "engine" | "media" | "navigate" | "apps" | "settings";
 const simulator = useVehicleSimulator();
 const view = ref<View>("home");
 const now = ref(new Date());
@@ -23,6 +24,7 @@ const duckEngine = ref(localStorage.getItem("engine-duck") !== "false");
 const duckAmount = ref(Number(localStorage.getItem("engine-duck-amount") || 38));
 const audioSource = ref<"Bluetooth" | "FM Radio" | "Soundstage">("Bluetooth");
 const cameraActive = ref(false);
+const diagnosticsActive = ref(false);
 const isOnline = ref(navigator.onLine);
 const batteryLevel = ref<number | null>(null);
 const notice = ref<string | null>(null);
@@ -31,20 +33,20 @@ let clock: number | undefined;
 let noticeTimer: number | undefined;
 
 const nav = [
+  { id: "gauges", label: "Gauges", icon: "gauge" },
   { id: "engine", label: "Sound Lab", icon: "car" },
   { id: "media", label: "Media", icon: "music" },
   { id: "navigate", label: "Navigate", icon: "nav" },
   { id: "apps", label: "All apps", icon: "grid" },
 ] as const;
 
+// De-duplicated: secondary & dedicated automotive tools only
 const apps = [
-  ["Sound Lab", "car", "silver", "engine"],
-  ["Phone", "phone", "blue", "phone"],
-  ["FM Radio", "radio", "amber", "radio"],
-  ["Bluetooth", "bluetooth", "violet", "bluetooth"],
-  ["Camera", "camera", "green", "camera"],
-  ["Navigation", "maps", "blue", "navigate"],
-  ["Settings", "settings", "silver", "settings"],
+  ["Hands-Free Phone", "phone", "blue", "phone"],
+  ["FM Radio Tuner", "radio", "amber", "radio"],
+  ["360° / Rear Camera", "camera", "green", "camera"],
+  ["Vehicle Diagnostics", "car", "coral", "diagnostics"],
+  ["Bluetooth Pairing", "bluetooth", "violet", "bluetooth"],
 ] as const;
 
 const time = computed(() =>
@@ -73,23 +75,19 @@ function showNotice(msg: string) {
 }
 
 function openApp(id: string) {
-  if (id === "engine") {
-    view.value = "engine";
-  } else if (id === "radio") {
+  if (id === "radio") {
     audioSource.value = "FM Radio";
     view.value = "media";
     showNotice("FM Tuner: 98.3 FM Live");
   } else if (id === "bluetooth") {
     simulator.connectBluetooth();
-    showNotice("Web Bluetooth: Searching for head unit / audio device...");
+    showNotice("Web Bluetooth: Searching for devices...");
   } else if (id === "camera") {
     cameraActive.value = true;
+  } else if (id === "diagnostics") {
+    diagnosticsActive.value = true;
   } else if (id === "phone") {
-    showNotice("Hands-free: Ready for incoming Bluetooth calls.");
-  } else if (id === "navigate") {
-    view.value = "navigate";
-  } else if (id === "settings") {
-    view.value = "settings";
+    showNotice("Hands-free: Ready for incoming calls via Bluetooth.");
   }
 }
 
@@ -97,7 +95,7 @@ async function toggleEngine() {
   await simulator.enableAudio();
   if (simulator.audioEnabled.value) {
     simulator.setGps(true);
-    showNotice("Engine ignited · GPS telemetry active");
+    showNotice("Engine ignited · Telemetry active");
   } else {
     simulator.setGps(false);
     showNotice("Engine stopped");
@@ -134,7 +132,6 @@ onMounted(() => {
   window.addEventListener("online", () => (isOnline.value = true));
   window.addEventListener("offline", () => (isOnline.value = false));
 
-  // Battery API (clean feature detection)
   if ("getBattery" in navigator) {
     (navigator as unknown as { getBattery: () => Promise<{ level: number; addEventListener: (type: string, fn: () => void) => void }> })
       .getBattery?.()
@@ -160,6 +157,11 @@ onBeforeUnmount(() => {
     <svg class="symbols" aria-hidden="true">
       <symbol id="i-home" viewBox="0 0 24 24">
         <path d="m3 11 9-8 9 8v9a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1z" />
+      </symbol>
+      <symbol id="i-gauge" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="9" />
+        <path d="M12 12l3-5" />
+        <path d="M7 16a6 6 0 0 1 10 0" />
       </symbol>
       <symbol id="i-music" viewBox="0 0 24 24">
         <path d="M9 18V5l11-2v13" />
@@ -251,7 +253,6 @@ onBeforeUnmount(() => {
           {{ simulator.audioEnabled.value ? 'ENGINE ON' : 'STANDBY' }}
         </div>
 
-        <!-- Clock button with clear affordance -->
         <button class="clock" :class="{ 'clock-open': quickOpen }" aria-label="Toggle quick controls" @click="quickOpen = !quickOpen">
           <strong>{{ time }}</strong>
           <small>{{ date }}</small>
@@ -338,7 +339,6 @@ onBeforeUnmount(() => {
         />
 
         <div class="home-deck">
-          <!-- Left Column: Greeting, Unified Destination Search, Media Pill -->
           <div class="home-left">
             <section class="welcome">
               <h1>{{ greeting }},<br /><em>where shall we go?</em></h1>
@@ -377,7 +377,6 @@ onBeforeUnmount(() => {
             </section>
           </div>
 
-          <!-- Right Column: Living Google Map Card -->
           <section class="map-card" aria-label="Google Maps preview">
             <GoogleMap compact @open-navigation="view = 'navigate'" />
             <div class="map-caption">
@@ -387,7 +386,37 @@ onBeforeUnmount(() => {
         </div>
       </div>
 
-      <!-- ── 2. SOUND LAB VIEW: ELEVATED ACOUSTIC STUDIO ── -->
+      <!-- ── 2. GAUGES VIEW: DEDICATED FULL-SCREEN COCKPIT CLUSTER ── -->
+      <div v-else-if="view === 'gauges'" class="page gauges-page">
+        <div class="page-title">
+          <div>
+            <p class="eyebrow">COCKPIT INSTRUMENTATION</p>
+            <h1>Gauges Cluster</h1>
+          </div>
+          <button class="power-button" :class="{ on: simulator.audioEnabled.value }" @click="toggleEngine">
+            <i></i>{{ simulator.audioEnabled.value ? "Running" : "Start ignition" }}
+          </button>
+        </div>
+
+        <InstrumentDashboard
+          :rpm="simulator.vehicle.rpm"
+          :gear="simulator.vehicle.gear"
+          :speed-kph="simulator.vehicle.speedKph"
+          :profile="simulator.vehicle.profile"
+          :accelerating="simulator.accelerating.value"
+          :braking="simulator.braking.value"
+          :audio-status="simulator.audioStatus.value"
+          :muted="!simulator.audioEnabled.value"
+          :telemetry-status="simulator.telemetryStatus.value"
+          :green-score="simulator.greenScore.points"
+          :bluetooth-status="simulator.bluetoothStatus.value"
+          @control="(action, active) => simulator.setControl(action, active)"
+          @shift="(delta) => simulator.shift(delta)"
+          @reset="simulator.reset()"
+        />
+      </div>
+
+      <!-- ── 3. SOUND LAB VIEW: ELEVATED ACOUSTIC STUDIO ── -->
       <div v-else-if="view === 'engine'" class="page engine-page">
         <div class="page-title">
           <div>
@@ -399,7 +428,6 @@ onBeforeUnmount(() => {
           </button>
         </div>
 
-        <!-- Vehicle Sound Profiles Carousel -->
         <div class="sound-rack-section">
           <p class="eyebrow">VEHICLE ACOUSTIC CHARACTER</p>
           <SoundProfileCard
@@ -419,7 +447,6 @@ onBeforeUnmount(() => {
             <strong>{{ Math.round(simulator.vehicle.rpm).toLocaleString() }}</strong>
             <small>RPM</small>
 
-            <!-- Real-time harmonic frequency visualizer -->
             <HarmonicVisualizer
               :rpm="simulator.vehicle.rpm"
               :profile="simulator.vehicle.profile"
@@ -440,9 +467,10 @@ onBeforeUnmount(() => {
               <input v-model="engineVolume" type="range" min="0" max="100" aria-label="Engine sound level" />
             </section>
 
+            <!-- Elevated Sculptural Acoustic Blueprint -->
             <section class="control-card card speaker-card">
               <div>
-                <p class="eyebrow">SOUNDSTAGE</p>
+                <p class="eyebrow">ACOUSTIC SOUNDSTAGE BLUEPRINT</p>
               </div>
               <div class="zone-picker" role="group" aria-label="Engine speaker zone">
                 <button
@@ -454,8 +482,39 @@ onBeforeUnmount(() => {
                   {{ zone }}
                 </button>
               </div>
-              <div class="car-plan" :class="`zone-${engineZone}`">
-                <span class="front-left"></span><span class="front-right"></span><i>FRONT</i><b></b><span class="rear-left"></span><span class="rear-right"></span><i>REAR</i>
+
+              <!-- Sculptural SVG Soundstage Map -->
+              <div class="soundstage-canvas-wrap">
+                <svg viewBox="0 0 220 130" class="soundstage-svg" aria-label="Acoustic speaker map">
+                  <path d="M 60 22 C 80 18, 140 18, 160 22 C 175 28, 185 45, 185 65 C 185 85, 175 102, 160 108 C 140 112, 80 112, 60 108 C 45 102, 35 85, 35 65 C 35 45, 45 28, 60 22 Z" fill="rgba(255,255,255,0.02)" stroke="rgba(241, 239, 232, 0.2)" stroke-width="1.4" />
+                  <path d="M 75 36 C 95 32, 125 32, 145 36 C 155 42, 155 88, 145 94 C 125 98, 95 98, 75 94 C 65 88, 65 42, 75 36 Z" fill="rgba(21, 26, 23, 0.65)" stroke="rgba(241, 239, 232, 0.12)" stroke-width="1" />
+                  <line x1="110" y1="32" x2="110" y2="98" stroke="rgba(241,239,232,0.12)" stroke-dasharray="2 2" />
+
+                  <!-- Front Waves -->
+                  <g v-if="engineZone === 'front' || engineZone === 'all'">
+                    <circle cx="85" cy="42" r="12" fill="none" stroke="var(--acid)" stroke-width="1.2" opacity="0.6" class="acoustic-wave" />
+                    <circle cx="85" cy="42" r="20" fill="none" stroke="var(--acid)" stroke-width="1" opacity="0.3" class="acoustic-wave" />
+                    <circle cx="85" cy="88" r="12" fill="none" stroke="var(--acid)" stroke-width="1.2" opacity="0.6" class="acoustic-wave" />
+                    <circle cx="85" cy="88" r="20" fill="none" stroke="var(--acid)" stroke-width="1" opacity="0.3" class="acoustic-wave" />
+                  </g>
+
+                  <!-- Rear Waves -->
+                  <g v-if="engineZone === 'rear' || engineZone === 'all'">
+                    <circle cx="138" cy="42" r="12" fill="none" stroke="var(--acid)" stroke-width="1.2" opacity="0.6" class="acoustic-wave" />
+                    <circle cx="138" cy="42" r="20" fill="none" stroke="var(--acid)" stroke-width="1" opacity="0.3" class="acoustic-wave" />
+                    <circle cx="138" cy="88" r="12" fill="none" stroke="var(--acid)" stroke-width="1.2" opacity="0.6" class="acoustic-wave" />
+                    <circle cx="138" cy="88" r="20" fill="none" stroke="var(--acid)" stroke-width="1" opacity="0.3" class="acoustic-wave" />
+                  </g>
+
+                  <!-- Speaker Nodes -->
+                  <circle cx="85" cy="42" r="4.5" :fill="engineZone === 'front' || engineZone === 'all' ? 'var(--acid)' : '#505852'" />
+                  <circle cx="85" cy="88" r="4.5" :fill="engineZone === 'front' || engineZone === 'all' ? 'var(--acid)' : '#505852'" />
+                  <circle cx="138" cy="42" r="4.5" :fill="engineZone === 'rear' || engineZone === 'all' ? 'var(--acid)' : '#505852'" />
+                  <circle cx="138" cy="88" r="4.5" :fill="engineZone === 'rear' || engineZone === 'all' ? 'var(--acid)' : '#505852'" />
+
+                  <text x="46" y="68" fill="var(--muted)" font-size="7" font-weight="700" letter-spacing="1">FRONT</text>
+                  <text x="168" y="68" fill="var(--muted)" font-size="7" font-weight="700" letter-spacing="1">REAR</text>
+                </svg>
               </div>
             </section>
 
@@ -486,7 +545,7 @@ onBeforeUnmount(() => {
         </div>
       </div>
 
-      <!-- ── 3. MEDIA VIEW: NOW PLAYING STUDIO ── -->
+      <!-- ── 4. MEDIA VIEW: NOW PLAYING STUDIO ── -->
       <div v-else-if="view === 'media'" class="page media-page">
         <div class="page-title">
           <div>
@@ -540,7 +599,7 @@ onBeforeUnmount(() => {
         </div>
       </div>
 
-      <!-- ── 4. NAVIGATE VIEW: DETAILED GOOGLE MAPS ── -->
+      <!-- ── 5. NAVIGATE VIEW: DETAILED GOOGLE MAPS ── -->
       <div v-else-if="view === 'navigate'" class="page nav-page">
         <div class="full-map">
           <GoogleMap />
@@ -559,6 +618,14 @@ onBeforeUnmount(() => {
             />
             <button type="submit">GO</button>
           </form>
+
+          <!-- Smart Quick Category Pills -->
+          <div class="quick-nav-pills">
+            <button type="button" class="nav-pill" @click="openGoogleDirections('Petrol Pump / EV Charger')">⛽ Fuel / EV</button>
+            <button type="button" class="nav-pill" @click="openGoogleDirections('Parking')">🅿️ Parking</button>
+            <button type="button" class="nav-pill" @click="openGoogleDirections('Coffee')">☕ Coffee</button>
+          </div>
+
           <button type="button" @click="openGoogleDirections('Home')">
             <strong>Home</strong><small>Saved place · Open in Google Maps</small>
           </button>
@@ -568,12 +635,12 @@ onBeforeUnmount(() => {
         </section>
       </div>
 
-      <!-- ── 5. ALL APPS VIEW: SYSTEM DRAWER ── -->
+      <!-- ── 6. ALL APPS VIEW: SYSTEM DRAWER (DE-DUPLICATED) ── -->
       <div v-else-if="view === 'apps'" class="page apps-page">
         <div class="page-title">
           <div>
-            <p class="eyebrow">APPLICATIONS</p>
-            <h1>All apps</h1>
+            <p class="eyebrow">APPLICATIONS & UTILITIES</p>
+            <h1>Automotive Apps</h1>
           </div>
           <label>
             <svg><use href="#i-search" /></svg>
@@ -595,7 +662,7 @@ onBeforeUnmount(() => {
         </div>
       </div>
 
-      <!-- ── 6. SETTINGS VIEW ── -->
+      <!-- ── 7. SETTINGS VIEW ── -->
       <div v-else class="page settings-page">
         <div class="page-title">
           <div>
@@ -627,33 +694,88 @@ onBeforeUnmount(() => {
             <i class="violet"><svg><use href="#i-bluetooth" /></svg></i>
             <div>
               <h2>Bluetooth</h2>
-              <p>{{ simulator.bluetoothDeviceName.value ? `Connected: ${simulator.bluetoothDeviceName.value}` : `Status: ${simulator.bluetoothStatus.value}` }}</p>
-              <button
-                type="button"
-                :disabled="!simulator.isBluetoothSupported"
-                @click="simulator.bluetoothStatus.value === 'connected' ? simulator.disconnectBluetooth() : simulator.connectBluetooth()"
-              >
-                {{ simulator.bluetoothStatus.value === 'connected' ? 'Disconnect' : 'Connect / Pair' }}
-              </button>
+              <p>{{ simulator.bluetoothDeviceName.value || simulator.bluetoothStatus.value }}</p>
+              <button type="button" @click="simulator.connectBluetooth()">Connect</button>
             </div>
           </section>
         </div>
         <p class="note">Car Sound Launcher · 1024 × 600 landscape automotive standard</p>
       </div>
 
-      <!-- Reverse Camera Modal -->
+      <!-- ── REVERSE CAMERA HUD MODAL ── -->
       <div v-if="cameraActive" class="camera-modal" role="dialog" aria-label="Rear parking camera">
         <div class="camera-stream">
-          <div class="guidelines">
-            <span class="guide green-guide"></span>
-            <span class="guide yellow-guide"></span>
-            <span class="guide red-guide"></span>
+          <!-- Top Telemetry Header -->
+          <div class="cam-telemetry-header">
+            <div class="radar-tag">
+              <span class="radar-pulse"></span>
+              <strong>PARK ASSIST: RADAR ACTIVE</strong>
+            </div>
+            <span class="distance-metric">DISTANCE: 1.2M · ZONE CLEAR</span>
           </div>
-          <p class="camera-status">REVERSE CAMERA ACTIVE · CHECK SURROUNDINGS</p>
-          <button type="button" class="close-camera" @click="cameraActive = false">DISMISS</button>
+
+          <!-- Dynamic Parking Sensor Guidelines -->
+          <div class="guidelines">
+            <div class="traj-line left-traj"></div>
+            <div class="traj-line right-traj"></div>
+            <div class="guide-bars">
+              <span class="guide green-guide"></span>
+              <span class="guide yellow-guide"></span>
+              <span class="guide red-guide"></span>
+            </div>
+          </div>
+
+          <p class="camera-status">REVERSE CAMERA ACTIVE · CHECK SURROUNDINGS BEFORE MOVING</p>
+          <button type="button" class="close-camera" @click="cameraActive = false">DISMISS CAMERA</button>
+        </div>
+      </div>
+
+      <!-- ── VEHICLE DIAGNOSTICS MODAL ── -->
+      <div v-if="diagnosticsActive" class="diagnostics-modal" role="dialog" aria-label="Vehicle Diagnostics">
+        <div class="diag-card card">
+          <div class="diag-header">
+            <div>
+              <p class="eyebrow">TELEMETRY & OBD-II DIAGNOSTICS</p>
+              <h2>Vehicle Systems Inspector</h2>
+            </div>
+            <button type="button" class="quick-close" aria-label="Close" @click="diagnosticsActive = false">✕</button>
+          </div>
+          <div class="diag-grid">
+            <div class="diag-item">
+              <span>ACTIVE PROFILE</span>
+              <strong>{{ simulator.vehicle.profile.name }}</strong>
+            </div>
+            <div class="diag-item">
+              <span>ENGINE RPM</span>
+              <strong>{{ Math.round(simulator.vehicle.rpm) }} RPM</strong>
+            </div>
+            <div class="diag-item">
+              <span>VEHICLE SPEED</span>
+              <strong>{{ Math.round(simulator.vehicle.speedKph) }} KM/H ({{ simulator.telemetryStatus.value.toUpperCase() }})</strong>
+            </div>
+            <div class="diag-item">
+              <span>THROTTLE / BRAKE</span>
+              <strong>{{ Math.round(simulator.vehicle.throttle * 100) }}% / {{ Math.round(simulator.vehicle.brake * 100) }}%</strong>
+            </div>
+            <div class="diag-item">
+              <span>GREEN ECO SCORE</span>
+              <strong>{{ simulator.greenScore.points }}/100</strong>
+            </div>
+            <div class="diag-item">
+              <span>PENALTIES (HARSH DRIVING)</span>
+              <small>Brake: {{ simulator.greenScore.penalties.harshBrake.toFixed(1) }} | RPM: {{ simulator.greenScore.penalties.highRpm.toFixed(1) }} | Throttle: {{ simulator.greenScore.penalties.harshThrottle.toFixed(1) }}</small>
+            </div>
+            <div class="diag-item">
+              <span>AUDIO ENGINE STATUS</span>
+              <strong>{{ simulator.audioStatus.value.toUpperCase() }} (Sample Rate 44.1kHz)</strong>
+            </div>
+            <div class="diag-item">
+              <span>BLUETOOTH GATT</span>
+              <strong>{{ simulator.bluetoothDeviceName.value || simulator.bluetoothStatus.value.toUpperCase() }}</strong>
+            </div>
+          </div>
         </div>
       </div>
     </section>
-    <aside v-if="notice" class="toast-banner" role="status">{{ notice }}</aside>
   </main>
 </template>

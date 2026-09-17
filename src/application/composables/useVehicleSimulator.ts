@@ -102,6 +102,8 @@ export function useVehicleSimulator() {
     session.reset();
     gps.stop();
     gpsEnabled.value = false;
+    accelerating.value = false;
+    braking.value = false;
   }
   function setVolume(value: number): void {
     if (!Number.isFinite(value)) return;
