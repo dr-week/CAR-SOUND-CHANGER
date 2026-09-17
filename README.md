@@ -20,6 +20,7 @@ A GPS-based web app that simulates realistic engine sounds synchronized with you
 ## 🎯 Technical Specifications
 
 ### Gear Ratios (Suzuki Brezza)
+
 - **1st Gear**: 0-15 km/h (Shift at ~1500-2000 RPM)
 - **2nd Gear**: 15-30 km/h (Shift at ~1500-2000 RPM)
 - **3rd Gear**: 30-50 km/h (Shift at ~1500-2000 RPM)
@@ -27,6 +28,7 @@ A GPS-based web app that simulates realistic engine sounds synchronized with you
 - **5th Gear**: 70+ km/h (Cruising gear)
 
 ### RPM Ranges
+
 - Idle: 800-1000 RPM
 - Shift Point: 1500-2000 RPM
 - Max RPM per gear: 2000 RPM (before shift)
@@ -48,70 +50,35 @@ A GPS-based web app that simulates realistic engine sounds synchronized with you
 ```
 carSOUNDMOD/
 ├── src/
-│   ├── domain/                   # 🎯 Business Logic (Pure TypeScript)
-│   │   ├── vehicle/
-│   │   │   ├── types.ts         # Vehicle interfaces
-│   │   │   ├── vehiclePhysics.ts # Physics calculations
-│   │   │   ├── carProfiles.ts   # Car profiles
-│   │   │   └── controls.ts      # Control inputs
-│   │   └── scoring/
-│   │       └── greenScore.ts    # Green score calculation
-│   │
-│   ├── application/              # 🔄 Use Cases & Services
-│   │   ├── services/
-│   │   │   ├── DrivingSession.ts
-│   │   │   └── index.ts
-│   │   ├── ports/
-│   │   │   ├── EngineSoundOutput.ts
-│   │   │   └── TelemetryStatus.ts
-│   │   ├── composables/
-│   │   │   ├── useVehicleSimulator.ts
-│   │   │   └── index.ts
-│   │   └── bootstrap/
-│   │
+│   ├── app/                      # Main Vue application shell (App.vue)
+│   ├── application/              # 🔄 Application Services & Composables
+│   │   ├── services/             # DrivingSession.ts orchestrator
+│   │   ├── ports/                # EngineSoundOutput.ts & TelemetryStatus.ts
+│   │   └── composables/          # useVehicleSimulator.ts
+│   ├── composition/              # 🧱 Dependency injection & composition root
+│   │   └── createSimulatorRuntime.ts
+│   ├── domain/                   # 🎯 Pure Business Logic (Zero Framework Dependencies)
+│   │   ├── vehicle/              # Physics, car profiles, gear constants, controls
+│   │   ├── audio/                # Timbre profiles, engine sound parameters, turbo envelope
+│   │   └── scoring/              # Eco-driving green score algorithm
 │   ├── infrastructure/           # 🔌 External Adapters
-│   │   ├── audio/
-│   │   │   ├── WebAudioEngine.ts
-│   │   │   └── index.ts
-│   │   ├── input/
-│   │   │   ├── KeyboardInput.ts
-│   │   │   └── index.ts
-│   │   ├── gps/
-│   │   │   ├── GPSService.ts
-│   │   │   └── index.ts
-│   │   └── bluetooth/
-│   │       ├── BluetoothManager.ts
-│   │       └── index.ts
-│   │
-│   ├── presentation/             # 👁️ Vue Components
-│   │   ├── components/
-│   │   │   ├── RPMGauge.vue
-│   │   │   ├── SpeedDisplay.vue
-│   │   │   ├── GearIndicator.vue
-│   │   │   └── AudioControls.vue
-│   │   ├── views/
-│   │   │   ├── HomeView.vue
-│   │   │   ├── SettingsView.vue
-│   │   │   └── BluetoothView.vue
-│   │   └── styles/
-│   │       ├── main.css
-│   │       └── theme.css
-│   │
-│   ├── App.vue                  # Root component
-│   └── main.ts                  # Entry point
+│   │   ├── audio/                # WebAudioEngine.ts 4-voice oscillator synthesizer
+│   │   ├── telemetry/            # BrowserGeolocation.ts
+│   │   ├── input/                # KeyboardInput.ts
+│   │   └── bluetooth/            # BluetoothManager.ts
+│   ├── presentation/             # 👁️ Vue 3 Landscape Launcher UI
+│   │   ├── launcher/             # SidebarDock, InfotainmentHeader, AppDrawer
+│   │   ├── dashboard/            # InstrumentDashboard dual-gauge cockpit
+│   │   ├── components/           # GoogleMap component
+│   │   └── styles/               # Dark glassmorphic app.css
+│   └── shared/                   # Shared TypeScript constants and types
 │
-├── public/                       # Static assets
-│   └── sounds/                  # Audio files
-│       ├── engine/
-│       ├── effects/
-│       └── ambient/
-│
-├── docs/                         # Documentation
-├── __tests__/                   # Tests
-├── vite.config.ts               # Vite configuration
-├── tsconfig.json                # TypeScript configuration
-├── package.json                 # Dependencies
-└── index.html                   # HTML entry point
+├── docs/                         # 📚 Comprehensive System Documentation
+├── public/                       # 🎨 Static Web Assets
+├── vite.config.ts                # Vite build configuration
+├── tsconfig.json                 # TypeScript compiler setup
+├── package.json                  # Dependencies & scripts
+└── index.html                    # SPA HTML entry point
 ```
 
 ## 🚀 Quick Start
@@ -141,11 +108,13 @@ npm run lint
 ## 📖 Documentation
 
 ### 🚀 Getting Started
+
 - **[📋 Project Overview](./PROJECT_OVERVIEW.md)** - Complete project guide (START HERE!)
 - **[⚙️ Installation Guide](./INSTALLATION.md)** - Setup and installation
 - **[🤝 Contributing](./CONTRIBUTING.md)** - How to contribute
 
 ### 🏗️ Architecture & Development
+
 - **[🏛️ Architecture Overview](./docs/ARCHITECTURE.md)** - System design (DDD + Clean Architecture)
 - **[📁 Code Structure](./docs/MODULAR_STRUCTURE.md)** - Code organization
 - **[✂️ Code Division Rules](./docs/CODE_DIVISION_RULES.md)** - Manageable development
@@ -154,6 +123,7 @@ npm run lint
 - **[✅ Tasks & Roadmap](./docs/TASKS.md)** - Complete task list (8 phases)
 
 ### 🔧 Technical Guides
+
 - **[📍 GPS Integration](./docs/GPS_INTEGRATION.md)** - GPS and location tracking
 - **[🔊 Audio System](./docs/AUDIO_SYSTEM.md)** - NFS-style engine sounds
 - **[📻 Bluetooth Audio](./docs/BLUETOOTH_AUDIO.md)** - Bluetooth speaker setup
@@ -161,11 +131,14 @@ npm run lint
 - **[🎵 Sound Files](./docs/SOUND_FILES.md)** - Audio file specifications
 
 ### 🎨 UI & Testing
+
 - **[🎨 UI Design System](./docs/UI_DESIGN.md)** - Design patterns and components
+- **[🔎 UI/UX Audit](./docs/UX_AUDIT.md)** - Resolved mistakes and native-release risks
 - **[🧪 Testing Guide](./docs/TESTING.md)** - Testing strategy (Unit/Integration/E2E)
 - **[🔧 Troubleshooting](./docs/TROUBLESHOOTING.md)** - Common issues
 
 ### 📖 Reference
+
 - **[📚 Documentation Index](./docs/INDEX.md)** - All documentation navigation
 - **[🔌 API Reference](./docs/API_REFERENCE.md)** - Complete API documentation
 - **[⚙️ Configuration](./docs/CONFIGURATION.md)** - Configuration options
@@ -175,7 +148,9 @@ npm run lint
 ## ✨ Key Features Explained
 
 ### DDD/Clean Architecture
+
 Code is organized by layers (Domain → Application → Infrastructure → Presentation) rather than features. This provides:
+
 - Better testability (domain logic has no framework dependencies)
 - Easier to swap implementations
 - Clear separation of concerns
@@ -184,7 +159,9 @@ Code is organized by layers (Domain → Application → Infrastructure → Prese
 See [ARCHITECTURE.md](./docs/ARCHITECTURE.md) for detailed explanation.
 
 ### Suzuki Brezza Tuning
+
 The app is specifically tuned for Suzuki Brezza with:
+
 - Accurate gear ratio calculations based on speed
 - Shift points at 1500-2000 RPM (driver's preference)
 - Realistic RPM simulation
@@ -193,7 +170,9 @@ The app is specifically tuned for Suzuki Brezza with:
 See [GEAR_LOGIC.md](./docs/GEAR_LOGIC.md) for technical details.
 
 ### NFS-Style Audio
+
 Engine sounds are modulated like in Need for Speed:
+
 - Pitch changes with RPM
 - Gear-specific sound samples
 - Smooth transitions on gear shifts

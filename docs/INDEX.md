@@ -33,9 +33,9 @@ Complete documentation navigation for the Car Sound Changer project.
 
 ### 🎨 UI/UX
 
-1. [UI_DESIGN](./UI_DESIGN.md) - UI design system
-2. [COMPONENTS](./COMPONENTS.md) - Reusable components
-3. [THEME](./THEME.md) - Theming and styling
+1. [UI_DESIGN](./UI_DESIGN.md) - Active landscape launcher design system
+2. [UX_AUDIT](./UX_AUDIT.md) - Resolved mistakes, open risks, and acceptance gate
+3. [SOUND_AND_DESIGN_RESEARCH](./implementation/SOUND_AND_DESIGN_RESEARCH.md) - Engine-audio research and historical design decisions
 
 ### 📱 Android Specific
 
@@ -81,9 +81,8 @@ Complete documentation navigation for the Car Sound Changer project.
 
 ### UI & Components
 
-- [UI_DESIGN.md](./UI_DESIGN.md) - Design system and patterns
-- [COMPONENTS.md](./COMPONENTS.md) - Component library
-- [THEME.md](./THEME.md) - Theming guide
+- [UI_DESIGN.md](./UI_DESIGN.md) - Launcher hierarchy, components, typography, sizing, and states
+- [UX_AUDIT.md](./UX_AUDIT.md) - Duplication audit and native-release risks
 
 ### Development Process
 
@@ -133,11 +132,10 @@ docs/
 │   ├── BEST_PRACTICES.md
 │   └── REFACTORING_GUIDE.md
 │
-├── ui-ux/                        # UI documentation
-│   ├── UI_DESIGN.md
-│   ├── COMPONENTS.md
-│   ├── THEME.md
-│   └── ANIMATIONS.md
+├── UI_DESIGN.md                  # Active launcher design system
+├── UX_AUDIT.md                   # Findings and acceptance criteria
+├── implementation/
+│   └── SOUND_AND_DESIGN_RESEARCH.md
 │
 ├── testing/                       # Testing docs
 │   ├── TESTING.md
@@ -205,10 +203,9 @@ Reference these:
 
 Focus on:
 
-1. [UI_DESIGN](./UI_DESIGN.md) - Design system
-2. [COMPONENTS](./COMPONENTS.md) - Component specs
-3. [THEME](./THEME.md) - Theme configuration
-4. [ANIMATIONS](./ANIMATIONS.md) - Animation guidelines
+1. [UI_DESIGN](./UI_DESIGN.md) - Current launcher design system
+2. [UX_AUDIT](./UX_AUDIT.md) - Current mistakes and validation requirements
+3. [Android Design for Cars](https://developer.android.com/design/ui/cars) - External safety reference
 
 ### For QA/Tester
 
@@ -225,35 +222,34 @@ Essential reads:
 
 ### By Feature
 
-| Feature           | Documentation                                                    |
-| ----------------- | ---------------------------------------------------------------- |
-| GPS Tracking      | [GPS_INTEGRATION.md](./GPS_INTEGRATION.md)                       |
-| Engine Sounds     | [AUDIO_SYSTEM.md](./AUDIO_SYSTEM.md)                             |
-| Bluetooth Speaker | [BLUETOOTH_AUDIO.md](./BLUETOOTH_AUDIO.md)                       |
-| Gear Shifting     | [GEAR_LOGIC.md](./GEAR_LOGIC.md)                                 |
-| Background Mode   | [BACKGROUND_SERVICE.md](./BACKGROUND_SERVICE.md)                 |
-| UI Gauges         | [UI_DESIGN.md](./UI_DESIGN.md), [COMPONENTS.md](./COMPONENTS.md) |
+| Feature           | Documentation                                                |
+| ----------------- | ------------------------------------------------------------ |
+| GPS Tracking      | [GPS_INTEGRATION.md](./GPS_INTEGRATION.md)                   |
+| Engine Sounds     | [AUDIO_SYSTEM.md](./AUDIO_SYSTEM.md)                         |
+| Bluetooth Speaker | [BLUETOOTH_AUDIO.md](./BLUETOOTH_AUDIO.md)                   |
+| Gear Shifting     | [GEAR_LOGIC.md](./GEAR_LOGIC.md)                             |
+| Background Mode   | [BACKGROUND_SERVICE.md](./BACKGROUND_SERVICE.md)             |
+| Launcher UI       | [UI_DESIGN.md](./UI_DESIGN.md), [UX_AUDIT.md](./UX_AUDIT.md) |
 
 ### By Technology
 
 | Technology         | Documentation                                |
 | ------------------ | -------------------------------------------- |
-| React Native       | [ARCHITECTURE.md](./ARCHITECTURE.md)         |
-| TypeScript         | [DEV_RULES.md](./DEV_RULES.md)               |
-| Android Native     | [NATIVE_MODULES.md](./NATIVE_MODULES.md)     |
-| Zustand (State)    | [STATE_MANAGEMENT.md](./STATE_MANAGEMENT.md) |
-| react-native-sound | [AUDIO_SYSTEM.md](./AUDIO_SYSTEM.md)         |
-| Geolocation        | [GPS_INTEGRATION.md](./GPS_INTEGRATION.md)   |
+| Vue 3 + TypeScript | [ARCHITECTURE.md](./ARCHITECTURE.md)         |
+| Web Audio API      | [AUDIO_SYSTEM.md](./AUDIO_SYSTEM.md)         |
+| Web Bluetooth API  | [BLUETOOTH_AUDIO.md](./BLUETOOTH_AUDIO.md)   |
+| Web Geolocation    | [GPS_INTEGRATION.md](./GPS_INTEGRATION.md)   |
+| Clean Architecture | [ARCHITECTURE.md](./ARCHITECTURE.md)         |
+| Vitest Test Suite  | [TESTING.md](./TESTING.md)                   |
 
 ### By Problem
 
 | Problem                 | Solution Documentation                                                                             |
 | ----------------------- | -------------------------------------------------------------------------------------------------- |
 | App won't build         | [TROUBLESHOOTING.md](./TROUBLESHOOTING.md), [INSTALLATION.md](../INSTALLATION.md)                  |
-| GPS not working         | [TROUBLESHOOTING.md](./TROUBLESHOOTING.md), [ANDROID_PERMISSIONS.md](./ANDROID_PERMISSIONS.md)     |
-| Audio lag               | [PERFORMANCE.md](./PERFORMANCE.md), [BLUETOOTH_AUDIO.md](./BLUETOOTH_AUDIO.md)                     |
+| GPS not working         | [TROUBLESHOOTING.md](./TROUBLESHOOTING.md), [GPS_INTEGRATION.md](./GPS_INTEGRATION.md)             |
+| Audio lag               | [AUDIO_SYSTEM.md](./AUDIO_SYSTEM.md), [BLUETOOTH_AUDIO.md](./BLUETOOTH_AUDIO.md)                   |
 | Bluetooth won't connect | [BLUETOOTH_AUDIO.md](./BLUETOOTH_AUDIO.md), [TROUBLESHOOTING.md](./TROUBLESHOOTING.md)             |
-| Poor performance        | [PERFORMANCE.md](./PERFORMANCE.md)                                                                 |
 | Code organization       | [MODULAR_STRUCTURE.md](./MODULAR_STRUCTURE.md), [CODE_DIVISION_RULES.md](./CODE_DIVISION_RULES.md) |
 
 ---
@@ -262,21 +258,20 @@ Essential reads:
 
 | Document               | Status      | Last Updated | Priority    |
 | ---------------------- | ----------- | ------------ | ----------- |
-| README.md              | ✅ Complete | 2026-09-01   | 🔴 Critical |
-| INSTALLATION.md        | ✅ Complete | 2026-09-01   | 🔴 Critical |
-| ARCHITECTURE.md        | ✅ Complete | 2026-09-01   | 🔴 Critical |
-| MODULAR_STRUCTURE.md   | ✅ Complete | 2026-09-01   | 🔴 Critical |
-| CODE_DIVISION_RULES.md | ✅ Complete | 2026-09-01   | 🔴 Critical |
-| DEV_WORKFLOW.md        | ✅ Complete | 2026-09-01   | 🔴 Critical |
-| TASKS.md               | ✅ Complete | 2026-09-01   | 🔴 Critical |
-| AUDIO_SYSTEM.md        | ✅ Complete | 2026-09-01   | 🔴 Critical |
-| BLUETOOTH_AUDIO.md     | ✅ Complete | 2026-09-01   | 🟡 High     |
-| GPS_INTEGRATION.md     | 📋 Planned  | -            | 🔴 Critical |
-| GEAR_LOGIC.md          | 📋 Planned  | -            | 🔴 Critical |
-| UI_DESIGN.md           | 📋 Planned  | -            | 🟡 High     |
-| DEV_RULES.md           | 📋 Planned  | -            | 🟡 High     |
-| TESTING.md             | 📋 Planned  | -            | 🟡 High     |
-| ANDROID_PERMISSIONS.md | 📋 Planned  | -            | 🟡 High     |
+| README.md              | ✅ Complete | 2026-09-17   | 🔴 Critical |
+| INSTALLATION.md        | ✅ Complete | 2026-09-17   | 🔴 Critical |
+| ARCHITECTURE.md        | ✅ Complete | 2026-09-17   | 🔴 Critical |
+| MODULAR_STRUCTURE.md   | ✅ Complete | 2026-09-17   | 🔴 Critical |
+| CODE_DIVISION_RULES.md | ✅ Complete | 2026-09-17   | 🔴 Critical |
+| DEV_WORKFLOW.md        | ✅ Complete | 2026-09-17   | 🔴 Critical |
+| TASKS.md               | ✅ Complete | 2026-09-17   | 🔴 Critical |
+| AUDIO_SYSTEM.md        | ✅ Complete | 2026-09-17   | 🔴 Critical |
+| BLUETOOTH_AUDIO.md     | ✅ Complete | 2026-09-17   | 🟡 High     |
+| GPS_INTEGRATION.md     | ✅ Complete | 2026-09-17   | 🔴 Critical |
+| GEAR_LOGIC.md          | ✅ Complete | 2026-09-17   | 🔴 Critical |
+| UI_DESIGN.md           | ✅ Complete | 2026-09-17   | 🟡 High     |
+| DEV_RULES.md           | ✅ Complete | 2026-09-17   | 🟡 High     |
+| TESTING.md             | ✅ Complete | 2026-09-17   | 🟡 High     |
 
 ---
 
