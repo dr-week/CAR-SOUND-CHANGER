@@ -30,6 +30,14 @@ export class KeyboardInput {
 
   start(): () => void {
     const down = (event: KeyboardEvent) => {
+      if (event.defaultPrevented) return;
+      if (
+        event.code === "Space" &&
+        typeof HTMLElement !== "undefined" &&
+        event.target instanceof HTMLElement &&
+        event.target.closest("button, a")
+      )
+        return;
       if (
         typeof HTMLElement !== "undefined" &&
         event.target instanceof HTMLElement &&
@@ -43,20 +51,10 @@ export class KeyboardInput {
       const key = event.key;
 
       const isUpshift =
-        code === "Digit1" ||
-        code === "Numpad1" ||
-        code === "KeyQ" ||
-        key === "1" ||
-        key === "q" ||
-        key === "Q";
+        code === "Digit1" || code === "Numpad1" || code === "KeyQ" || key === "1" || key === "q" || key === "Q";
 
       const isDownshift =
-        code === "Digit2" ||
-        code === "Numpad2" ||
-        code === "KeyE" ||
-        key === "2" ||
-        key === "e" ||
-        key === "E";
+        code === "Digit2" || code === "Numpad2" || code === "KeyE" || key === "2" || key === "e" || key === "E";
 
       const action = CONTROL_BINDINGS[code] || CONTROL_BINDINGS[key];
 
@@ -110,4 +108,3 @@ export class KeyboardInput {
     };
   }
 }
-

@@ -4,10 +4,10 @@ Web Audio API adapter. Implements the `EngineSoundOutput` port from the applicat
 
 ## Files
 
-| File | Purpose |
-|---|---|
+| File                | Purpose                           |
+| ------------------- | --------------------------------- |
 | `WebAudioEngine.ts` | 4-voice additive synthesis engine |
-| `index.ts` | Barrel export |
+| `index.ts`          | Barrel export                     |
 
 ## How It Works
 

@@ -12,6 +12,7 @@ export function useVehicleSimulator() {
   const vehicle = reactive(createVehicleState(CAR_PROFILES.brezza));
   const greenScore = reactive(createGreenScore());
   const audioEnabled = ref(false);
+  const audioPending = ref(false);
   const volume = ref(50);
   const audioStatus = ref<AudioStatus>("inactive");
   const gpsEnabled = ref(false);
@@ -29,20 +30,24 @@ export function useVehicleSimulator() {
     session.shift(delta);
   }
   function selectProfile(id: string): void {
-    if (isProfileId(id)) session.selectProfile(CAR_PROFILES[id as ProfileId]);
+    if (!isProfileId(id)) return;
+    setGps(false);
+    session.selectProfile(CAR_PROFILES[id as ProfileId]);
   }
   async function enableAudio(): Promise<void> {
-    if (audioEnabled.value) {
-      await audio.suspend();
-      audioEnabled.value = false;
-      audioStatus.value = "inactive";
-      return;
-    }
+    if (audioPending.value) return;
     if (!audio.isSupported) {
       audioStatus.value = "unsupported";
       return;
     }
+    audioPending.value = true;
     try {
+      if (audioEnabled.value) {
+        await audio.suspend();
+        audioEnabled.value = false;
+        audioStatus.value = "inactive";
+        return;
+      }
       await audio.resume();
       audio.setProfile(vehicle.profile);
       audioEnabled.value = true;
@@ -50,6 +55,8 @@ export function useVehicleSimulator() {
     } catch {
       audioEnabled.value = false;
       audioStatus.value = "blocked";
+    } finally {
+      audioPending.value = false;
     }
   }
   function setGps(enabled: boolean): void {
@@ -66,6 +73,7 @@ export function useVehicleSimulator() {
     gpsEnabled.value = false;
   }
   function setVolume(value: number): void {
+    if (!Number.isFinite(value)) return;
     volume.value = Math.max(0, Math.min(100, value));
     audio.setVolume(volume.value / 100);
   }
@@ -91,6 +99,7 @@ export function useVehicleSimulator() {
     greenScore,
     profiles: CAR_PROFILES,
     audioEnabled,
+    audioPending,
     audioStatus,
     gpsEnabled,
     telemetryStatus,

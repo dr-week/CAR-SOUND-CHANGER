@@ -1,218 +1,82 @@
 <script setup lang="ts">
-/**
- * VehicleTachometer
- *
- * Pure SVG engine RPM tachometer.
- * Features 3 dynamic colored RPM zones (Green eco / Amber power / Red redline),
- * metallic bezel, dynamic needle rotation (-125deg to +125deg), and digital RPM readout.
- *
- * Uses pure SVG rendering without any D3 or canvas layout reflows,
- * preventing height collapse inside flex/grid containers.
- */
 import { computed } from "vue";
 import type { VehicleProfile } from "../../domain/vehicle/types";
-
-const props = defineProps<{
-  rpm: number;
-  profile: VehicleProfile;
-}>();
-
-/** Round redline up to nearest 1,000 for a clean max label */
-const maxRpm = computed(() => Math.ceil(props.profile.redlineRpm / 1_000) * 1_000);
-const currentRpm = computed(() => Math.max(0, Math.min(maxRpm.value, props.rpm)));
-
-/** Calculate needle angle from -125deg (0 RPM) to +125deg (maxRpm) */
-const needleAngle = computed(() => {
-  const fraction = currentRpm.value / maxRpm.value;
-  return -125 + fraction * 250;
-});
-
-/** Fraction positions for segment arc angles */
-const shiftFrac = computed(() => Math.min(1, props.profile.shiftRpm / maxRpm.value));
-const redlineStartFrac = computed(() => Math.min(1, (props.profile.redlineRpm - 1_000) / maxRpm.value));
-
-/** Convert polar angle to SVG Cartesian coordinate on radius R */
-function polarToCartesian(centerX: number, centerY: number, radius: number, angleInDegrees: number) {
-  const angleInRadians = (angleInDegrees * Math.PI) / 180.0;
-  return {
-    x: centerX + radius * Math.sin(angleInRadians),
-    y: centerY - radius * Math.cos(angleInRadians),
-  };
+const props = defineProps<{ rpm: number; profile: VehicleProfile }>();
+// Leave visible headroom so an exact-thousand redline still has a red zone.
+const maxRpm = computed(() => (Math.floor(props.profile.redlineRpm / 1000) + 1) * 1000);
+const ticks = computed(() => Array.from({ length: maxRpm.value / 250 + 1 }, (_, i) => i));
+const angle = (rpm: number) => -130 + Math.max(0, Math.min(1, rpm / maxRpm.value)) * 260;
+const needleAngle = computed(() => angle(Number.isFinite(props.rpm) ? props.rpm : 0));
+function point(degrees: number, radius: number) {
+  const a = (degrees * Math.PI) / 180;
+  return { x: 180 + radius * Math.sin(a), y: 160 - radius * Math.cos(a) };
 }
-
-/** Generate an SVG arc path string */
-function describeArc(x: number, y: number, radius: number, startAngle: number, endAngle: number) {
-  const start = polarToCartesian(x, y, radius, endAngle);
-  const end = polarToCartesian(x, y, radius, startAngle);
-  const largeArcFlag = endAngle - startAngle <= 180 ? "0" : "1";
-  return ["M", start.x, start.y, "A", radius, radius, 0, largeArcFlag, 0, end.x, end.y].join(" ");
-}
-
-/** Arc paths for green, amber, red zones */
-const greenArc = computed(() => {
-  const startA = -125;
-  const endA = -125 + shiftFrac.value * 250;
-  return describeArc(100, 90, 78, startA, endA);
-});
-
-const amberArc = computed(() => {
-  const startA = -125 + shiftFrac.value * 250;
-  const endA = -125 + redlineStartFrac.value * 250;
-  return describeArc(100, 90, 78, startA, endA);
-});
-
-const redArc = computed(() => {
-  const startA = -125 + redlineStartFrac.value * 250;
-  const endA = 125;
-  return describeArc(100, 90, 78, startA, endA);
-});
-
-/** Generate tick mark positions */
-const ticks = computed(() => {
-  const steps = 6;
-  const result = [];
-  for (let i = 0; i <= steps; i++) {
-    const value = Math.round((maxRpm.value / steps) * i);
-    const fraction = i / steps;
-    const angleRad = ((-125 + fraction * 250) * Math.PI) / 180;
-    const r1 = 62;
-    const r2 = 72;
-    const x1 = 100 + r1 * Math.sin(angleRad);
-    const y1 = 90 - r1 * Math.cos(angleRad);
-    const x2 = 100 + r2 * Math.sin(angleRad);
-    const y2 = 90 - r2 * Math.cos(angleRad);
-
-    const labelR = 50;
-    const lx = 100 + labelR * Math.sin(angleRad);
-    const ly = 90 - labelR * Math.cos(angleRad);
-
-    const labelText = value >= 1000 ? `${(value / 1000).toFixed(value % 1000 === 0 ? 0 : 1)}k` : `${value}`;
-
-    result.push({ value, labelText, x1, y1, x2, y2, lx, ly });
-  }
-  return result;
+const redline = computed(() => {
+  const start = point(angle(props.profile.redlineRpm), 134);
+  const end = point(130, 134);
+  return `M ${start.x} ${start.y} A 134 134 0 0 1 ${end.x} ${end.y}`;
 });
 </script>
 
 <template>
-  <div class="tachometer" :aria-label="`Engine speed ${Math.round(currentRpm)} RPM`">
-    <svg viewBox="0 0 200 135" class="tacho-svg">
-      <!-- Outer metallic bezel -->
-      <path
-        d="M 22 90 A 78 78 0 1 1 178 90"
-        fill="none"
-        stroke="#1a202c"
-        stroke-width="12"
-        stroke-linecap="round"
+  <svg class="tachometer" viewBox="0 0 360 310" role="img" :aria-label="`Engine speed ${Math.round(rpm)} RPM`">
+    <circle cx="180" cy="160" r="144" fill="none" stroke="#353e36" stroke-width=".6" />
+    <path :d="redline" fill="none" stroke="#d88b71" stroke-width="4" />
+    <g v-for="tick in ticks" :key="tick">
+      <line
+        :x1="point(angle(tick * 250), 126).x"
+        :y1="point(angle(tick * 250), 126).y"
+        :x2="point(angle(tick * 250), tick % 4 === 0 ? 111 : 120).x"
+        :y2="point(angle(tick * 250), tick % 4 === 0 ? 111 : 120).y"
+        :stroke="tick * 250 >= profile.redlineRpm ? '#d88b71' : '#a9b1a7'"
+        :stroke-width="tick % 4 === 0 ? 1.8 : 1"
       />
-
-      <!-- Zone 1: Eco (Green) -->
-      <path
-        :d="greenArc"
-        fill="none"
-        stroke="#31a566"
-        stroke-width="5"
-        stroke-linecap="round"
-        opacity="0.9"
-      />
-
-      <!-- Zone 2: Power Band (Amber) -->
-      <path
-        :d="amberArc"
-        fill="none"
-        stroke="#f7b955"
-        stroke-width="5"
-        stroke-linecap="round"
-        opacity="0.9"
-      />
-
-      <!-- Zone 3: Redline (Red) -->
-      <path
-        :d="redArc"
-        fill="none"
-        stroke="#e73333"
-        stroke-width="6"
-        stroke-linecap="round"
-        opacity="0.95"
-      />
-
-      <!-- Tick marks & numeric labels -->
-      <g class="tacho-ticks">
-        <line
-          v-for="tick in ticks"
-          :key="tick.value"
-          :x1="tick.x1"
-          :y1="tick.y1"
-          :x2="tick.x2"
-          :y2="tick.y2"
-          stroke="#525d6e"
-          stroke-width="2"
-          stroke-linecap="round"
-        />
-        <text
-          v-for="tick in ticks"
-          :key="'lbl-' + tick.value"
-          :x="tick.lx"
-          :y="tick.ly"
-          fill="#8d99ae"
-          font-size="8"
-          font-weight="700"
-          text-anchor="middle"
-          dominant-baseline="central"
-        >
-          {{ tick.labelText }}
-        </text>
-      </g>
-
-      <!-- Center digital RPM readout -->
-      <text x="100" y="78" fill="#f3f5f8" font-size="22" font-weight="900" text-anchor="middle">
-        {{ Math.round(currentRpm).toLocaleString() }}
+      <text
+        v-if="tick % 4 === 0"
+        :x="point(angle(tick * 250), 94).x"
+        :y="point(angle(tick * 250), 94).y"
+        class="tick-label"
+      >
+        {{ tick / 4 }}
       </text>
-      <text x="100" y="94" fill="#99a3b3" font-size="7" font-weight="700" letter-spacing="1" text-anchor="middle">
-        RPM
-      </text>
-
-      <!-- Animated Needle -->
-      <g transform="translate(100, 90)">
-        <g :style="{ transform: `rotate(${needleAngle}deg)`, transition: 'transform 0.12s ease-out' }">
-          <polygon points="-2.5,0 0,-70 2.5,0" fill="#ff4757" filter="drop-shadow(0 0 4px #ff4757)" />
-          <circle cx="0" cy="0" r="7" fill="#141923" stroke="#ff4757" stroke-width="2.5" />
-          <circle cx="0" cy="0" r="2.5" fill="#ffffff" />
-        </g>
-      </g>
-    </svg>
-
-    <p class="tacho-label" aria-hidden="true">
-      {{ profile.name }} · shift @ {{ profile.shiftRpm.toLocaleString() }} RPM
-    </p>
-  </div>
+    </g>
+    <g :transform="`rotate(${needleAngle} 180 160)`">
+      <path d="M 178 174 L 180 44 L 182 174 Z" fill="#e6c893" />
+    </g>
+    <circle cx="180" cy="160" r="8" fill="#1c211f" stroke="#dec18b" stroke-width="2" />
+    <text x="180" y="226" class="rpm-value">{{ Math.round(rpm).toLocaleString() }}</text>
+    <text x="180" y="246" class="rpm-caption">REVOLUTIONS / MIN</text>
+  </svg>
 </template>
 
 <style scoped>
 .tachometer {
   width: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-}
-
-.tacho-svg {
+  max-height: 310px;
   display: block;
-  width: 100%;
-  height: auto;
-  max-width: 220px;
-  filter: drop-shadow(0 8px 24px rgba(0, 0, 0, 0.5));
+  margin: 4px auto 0;
+  overflow: visible;
 }
-
-.tacho-label {
-  margin-top: -6px;
-  margin-bottom: 0;
-  color: var(--muted);
-  font-size: 0.68rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  text-align: center;
+.tick-label {
+  fill: #cdd2c9;
+  font: 12px var(--mono);
+  text-anchor: middle;
+  dominant-baseline: middle;
+}
+.rpm-value {
+  fill: #edece5;
+  font: 30px var(--mono);
+  text-anchor: middle;
+}
+.rpm-caption {
+  fill: #aab3ab;
+  font: 8px var(--mono);
+  letter-spacing: 1.5px;
+  text-anchor: middle;
+}
+@media (max-width: 700px) {
+  .tachometer {
+    max-height: 250px;
+  }
 }
 </style>

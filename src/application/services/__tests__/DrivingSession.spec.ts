@@ -10,6 +10,27 @@ function createSoundOutput(): EngineSoundOutput {
 }
 
 describe("DrivingSession", () => {
+  it("prioritizes braking and resets sound history with the drive", () => {
+    const vehicle = createVehicleState(CAR_PROFILES.supra);
+    const sound = createSoundOutput();
+    const session = new DrivingSession(vehicle, createGreenScore(), sound);
+    session.setControl("accelerate", true);
+    session.setControl("brake", true);
+    session.step(0.1);
+    expect(vehicle.throttle).toBe(0);
+    session.reset();
+    expect(sound.setProfile).toHaveBeenCalledWith(vehicle.profile);
+  });
+  it("clears old speed and held controls when choosing another car", () => {
+    const vehicle = createVehicleState(CAR_PROFILES.supra);
+    const session = new DrivingSession(vehicle, createGreenScore(), createSoundOutput());
+    vehicle.speedKph = 100;
+    session.setControl("accelerate", true);
+    session.selectProfile(CAR_PROFILES.brezza);
+    session.step(0.1);
+    expect(vehicle.speedKph).toBe(0);
+    expect(vehicle.throttle).toBe(0);
+  });
   it.each([NaN, Infinity, -1, 451])("rejects invalid GPS speed %s", (speed) => {
     const vehicle = createVehicleState(CAR_PROFILES.brezza);
     const session = new DrivingSession(vehicle, createGreenScore(), createSoundOutput());

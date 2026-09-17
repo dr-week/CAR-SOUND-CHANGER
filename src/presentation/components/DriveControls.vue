@@ -1,218 +1,152 @@
 <script setup lang="ts">
 import type { DriveAction } from "../../domain/vehicle/controls";
-
 defineProps<{ accelerating: boolean; braking: boolean }>();
-const emit = defineEmits<{
-  control: [action: DriveAction, active: boolean];
-  shift: [delta: number];
-  reset: [];
-}>();
-
+const emit = defineEmits<{ control: [action: DriveAction, active: boolean]; shift: [delta: number]; reset: [] }>();
 function activate(event: PointerEvent, action: DriveAction): void {
+  if (event.button !== 0) return;
   (event.currentTarget as HTMLElement).setPointerCapture(event.pointerId);
   emit("control", action, true);
 }
-
-function release(event: PointerEvent, action: DriveAction): void {
-  (event.currentTarget as HTMLElement)?.blur();
-  emit("control", action, false);
-}
-
-function handleShift(event: MouseEvent, delta: number): void {
-  (event.currentTarget as HTMLElement)?.blur();
-  emit("shift", delta);
-}
-
-function handleReset(event: MouseEvent): void {
-  (event.currentTarget as HTMLElement)?.blur();
-  emit("reset");
+function keyboard(event: KeyboardEvent, action: DriveAction, active: boolean): void {
+  if (event.code !== "Space" && event.code !== "Enter") return;
+  event.preventDefault();
+  event.stopPropagation();
+  if (!event.repeat) emit("control", action, active);
 }
 </script>
 
 <template>
   <section class="controls" aria-label="Driving controls">
-    <!-- Upshift button -->
-    <button
-      type="button"
-      class="control-btn control-btn--shift"
-      aria-label="Upshift gear, shortcut 1 or Q"
-      @click="handleShift($event, 1)"
-    >
-      <svg class="control-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M12 19V5M5 12l7-7 7 7"/>
-      </svg>
-      <span class="control-label">Upshift</span>
-      <small class="control-badge">1 · Q</small>
+    <button type="button" class="shift" aria-label="Upshift gear, keyboard 1" @click="emit('shift', 1)">
+      <span>↑ Upshift</span><kbd>1</kbd>
     </button>
-
-    <!-- Brake pedal button -->
     <button
       type="button"
-      class="control-btn brake"
+      class="pedal brake"
       :class="{ active: braking }"
-      aria-label="Brake, shortcut S or Down Arrow or Space"
+      :aria-pressed="braking"
+      aria-label="Brake, hold S"
       @pointerdown.prevent="activate($event, 'brake')"
-      @pointerup="release($event, 'brake')"
-      @pointercancel="release($event, 'brake')"
-      @lostpointercapture="release($event, 'brake')"
+      @pointerup="emit('control', 'brake', false)"
+      @pointercancel="emit('control', 'brake', false)"
+      @lostpointercapture="emit('control', 'brake', false)"
+      @keydown="keyboard($event, 'brake', true)"
+      @keyup="keyboard($event, 'brake', false)"
+      @blur="emit('control', 'brake', false)"
     >
-      <svg class="control-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <rect x="5" y="4" width="14" height="16" rx="3"/>
-        <line x1="9" y1="8" x2="15" y2="8"/>
-        <line x1="9" y1="12" x2="15" y2="12"/>
-        <line x1="9" y1="16" x2="15" y2="16"/>
-      </svg>
-      <span class="control-label">Brake</span>
-      <small class="control-badge">S · ▼</small>
+      <span>Brake</span><kbd>S</kbd>
     </button>
-
-    <!-- Accelerate pedal button -->
     <button
       type="button"
-      class="control-btn accelerate"
+      class="pedal accelerate"
       :class="{ active: accelerating }"
-      aria-label="Accelerate, shortcut W or Up Arrow"
+      :aria-pressed="accelerating"
+      aria-label="Accelerate, hold W"
       @pointerdown.prevent="activate($event, 'accelerate')"
-      @pointerup="release($event, 'accelerate')"
-      @pointercancel="release($event, 'accelerate')"
-      @lostpointercapture="release($event, 'accelerate')"
+      @pointerup="emit('control', 'accelerate', false)"
+      @pointercancel="emit('control', 'accelerate', false)"
+      @lostpointercapture="emit('control', 'accelerate', false)"
+      @keydown="keyboard($event, 'accelerate', true)"
+      @keyup="keyboard($event, 'accelerate', false)"
+      @blur="emit('control', 'accelerate', false)"
     >
-      <svg class="control-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
-      </svg>
-      <span class="control-label">Accelerate</span>
-      <small class="control-badge">W · ▲</small>
+      <span>Accelerate</span><kbd>W</kbd>
     </button>
-
-    <!-- Downshift button -->
-    <button
-      type="button"
-      class="control-btn control-btn--shift"
-      aria-label="Downshift gear, shortcut 2 or E"
-      @click="handleShift($event, -1)"
-    >
-      <svg class="control-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M12 5v14M19 12l-7 7-7-7"/>
-      </svg>
-      <span class="control-label">Downshift</span>
-      <small class="control-badge">2 · E</small>
+    <button type="button" class="shift downshift" aria-label="Downshift gear, keyboard 2" @click="emit('shift', -1)">
+      <span>↓ Downshift</span><kbd>2</kbd>
     </button>
-
-    <!-- Reset button -->
-    <button
-      type="button"
-      class="control-btn reset"
-      aria-label="Reset vehicle state"
-      @click="handleReset($event)"
-    >
-      <svg class="control-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
-        <path d="M3 3v5h5"/>
-      </svg>
-      <span class="control-label">Reset</span>
-      <small class="control-badge">Drive</small>
-    </button>
+    <button type="button" class="reset" aria-label="Reset drive" @click="emit('reset')">↺ <span>Reset</span></button>
   </section>
 </template>
 
 <style scoped>
 .controls {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 10px;
-  width: 100%;
+  grid-template-columns: 1fr 1fr 1.2fr 1fr auto;
+  gap: 8px;
 }
-
-.control-btn {
+button {
+  min-width: 0;
+  min-height: 60px;
+  padding: 12px;
+  border: 1px solid #50594f;
+  border-radius: 3px;
+  background: #272e28;
+  color: #e8ece1;
   display: flex;
-  flex-direction: column;
   align-items: center;
-  justify-content: center;
-  gap: 6px;
-  min-height: 96px;
-  padding: 10px 6px;
-  border: 1px solid var(--line);
-  border-radius: 14px;
-  background: linear-gradient(145deg, #1d2530, #141922);
-  color: var(--text);
-  font-weight: 800;
-  cursor: pointer;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 11px;
   touch-action: none;
   user-select: none;
-  transition: all 0.15s ease;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
 }
-
-.control-icon {
-  width: 22px;
-  height: 22px;
+kbd {
+  border: 1px solid #657060;
+  border-radius: 3px;
+  min-width: 22px;
+  padding: 4px;
+  font: 10px var(--mono);
+  text-align: center;
 }
-
-.control-label {
-  font-size: 0.82rem;
-  font-weight: 800;
-}
-
-.control-badge {
-  font-size: 0.64rem;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--muted);
-}
-
 .accelerate {
-  background: linear-gradient(135deg, #1b5e39, #124026);
-  border-color: #278853;
-  box-shadow: 0 4px 16px rgba(39, 136, 83, 0.35);
+  background: #dec18b;
+  color: #292d24;
+  border-color: #dec18b;
 }
-
+.accelerate kbd {
+  border-color: #9d8458;
+}
 .brake {
-  background: linear-gradient(135deg, #8b2525, #5a1717);
-  border-color: #be3535;
-  box-shadow: 0 4px 16px rgba(190, 53, 53, 0.35);
+  background: #373a31;
 }
-
+button:hover {
+  border-color: #dfc28c;
+}
+button.active,
+button:active {
+  background: #e8d4ae;
+  color: #20251f;
+  transform: translateY(1px);
+}
 .reset {
-  background: linear-gradient(135deg, #2c3542, #1d232c);
-  border-color: #3f4c5e;
+  justify-content: center;
+  background: transparent;
+  color: #bdc5b9;
 }
-
-.control-btn:hover {
-  filter: brightness(1.15);
-  transform: translateY(-1px);
+@media (max-width: 900px) {
+  button {
+    padding: 10px;
+  }
+  .reset span {
+    display: none;
+  }
 }
-
-.control-btn:active,
-.control-btn.active {
-  transform: translateY(2px);
-  filter: brightness(1.3);
-  box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.6);
-}
-
-.control-btn:focus-visible {
-  outline: 3px solid #f7b955;
-  outline-offset: 3px;
-}
-
-@media (max-width: 600px) {
+@media (max-width: 700px) {
   .controls {
-    grid-template-columns: repeat(5, 1fr);
-    gap: 6px;
+    grid-template-columns: 1fr 1fr 48px;
   }
-  .control-btn {
-    min-height: 80px;
-    padding: 6px 4px;
+  .brake {
+    grid-column: 1;
+    grid-row: 1;
   }
-  .control-icon {
-    width: 18px;
-    height: 18px;
+  .accelerate {
+    grid-column: 2 / 4;
+    grid-row: 1;
   }
-  .control-label {
-    font-size: 0.7rem;
+  .shift {
+    grid-column: 1;
+    grid-row: 2;
   }
-  .control-badge {
-    font-size: 0.52rem;
+  .downshift {
+    grid-column: 2;
+  }
+  .reset {
+    grid-column: 3;
+    grid-row: 2;
+  }
+  button {
+    min-height: 52px;
   }
 }
 </style>
-

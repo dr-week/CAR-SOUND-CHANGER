@@ -232,6 +232,36 @@ Next required verification, in order:
 
 ## Execution order
 
+### Sound and design checkpoint — 2026-09-17
+
+#### Sound, simulation, and UI correction pass
+
+- Rebalanced exhaust versus bass; added cylinder-family body waveforms; filter follows firing frequency so high-RPM engines do not lose their fundamental. Deep pitch styling remains an artistic approximation.
+- Profile changes fade layer gains to zero before changing waveforms. Drive reset now resets audio/turbo history. Gear shifts also unload turbo pressure.
+- Application/domain corrections: brake overrides accelerator; profile selection clears held controls, old speed, score, and GPS mode; simulation caps elapsed time consistently and limits acceleration by gear redline and profile top speed without abruptly clamping existing overspeed.
+- UI corrections: explicit zero-volume mute indication, disabled audio button during pending transitions, pedal-hold instructions, and larger settings/help text.
+- Existing architecture remains client-only; no server, database, uploads, or new production dependencies were added.
+- TypeScript, 61 tests across seven files, targeted lint, and production build pass. Browser verification exercises acceleration, simultaneous brake, profile reset, volume-zero feedback, and actual Web Audio output. Physical listening and Safari/iOS verification remain open.
+
+#### Listening feedback: deep sports exhaust
+
+- Added four turbo presets (Supra-inspired inline-six, Skyline-inspired twin turbo, Golf R-inspired four-cylinder, Civic Type R-inspired four-cylinder) and a naturally aspirated Lamborghini-inspired V10: nine choices total.
+- Turbo presets get a quiet, load-built spool layer and a short throttle-lift air release. Idle and naturally aspirated presets have no turbo layer. Envelope policy is isolated in `domain/audio/TurboEnvelope.ts` and covered by regression tests.
+- Names describe sound-inspired simulations; presets are not verified factory specifications or exact car recordings. Skyline's twin-turbo label uses the same simplified single boost envelope.
+
+- User rejected the earlier tone as too artificial/high-pitched.
+- Retuned all profiles toward bass: dominant 38–96 Hz rounded body pulses, quieter upper firing harmonics, 220–580 Hz low-pass range, and reduced low-frequency intake texture instead of hiss.
+- Preserved RPM response, load changes, shift dips, master volume, and gain headroom. Bass pitch compression is an intentional artistic effect, not an authentic model of each engine.
+- Added idle-to-redline bass/gain regression checks for every profile. Subjective approval and physical-speaker listening remain open; no UI changes in this pass.
+- Verification after turbo/profile additions: TypeScript check, 53 tests across seven files, targeted lint, and production build pass. Updated sound has not been subjectively listened to in this pass; vehicle selector now identifies turbo versus naturally aspirated profiles.
+
+- Implemented RPM-correct, load-sensitive layered sound; independent master volume; persistent audio graph; gear-change gain dip; explicit startup errors.
+- Redesigned the active dashboard with an ivory/charcoal editorial layout, one clear tachometer, digital speed/gear, accessible controls, and mobile two-row pedals.
+- Removed the misleading Bluetooth speaker picker from the active UI. Speaker routing stays in OS settings.
+- Updated colocated audio tests and repaired the lint command's stale `tests` directory reference.
+- Research, specific defects, architecture, verification evidence, and remaining listening/device gates are recorded in [Sound and design research](SOUND_AND_DESIGN_RESEARCH.md).
+- This checkpoint supersedes older sound/UI implementation claims, not the remaining release gates.
+
 `Milestone 1 → Milestone 2 → Milestone 3 → Milestone 4 → Milestone 5`
 
 Do not begin a new milestone until the prior exit gate passes. Each task must include tests when it changes domain/application behavior and must preserve the dependency rule: presentation and infrastructure cannot import each other directly.

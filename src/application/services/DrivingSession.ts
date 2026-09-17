@@ -26,9 +26,7 @@ export class DrivingSession {
 
   selectProfile(profile: VehicleProfile): void {
     this.vehicle.profile = profile;
-    this.vehicle.gear = 1;
-    this.vehicle.rpm = profile.idleRpm;
-    this.soundOutput.setProfile(profile);
+    this.reset();
   }
 
   setGpsSpeed(speedKph: number): void {
@@ -55,13 +53,14 @@ export class DrivingSession {
     this.greenScore.penalties.highRpm = 0;
     this.greenScore.penalties.harshThrottle = 0;
     this.greenScore.previousThrottle = 0;
+    this.soundOutput.setProfile(this.vehicle.profile);
   }
 
   step(dt: number): void {
     if (!Number.isFinite(dt) || dt <= 0) return;
     dt = Math.min(dt, 0.1);
-    this.vehicle.throttle = this.activeControls.has("accelerate") ? 1 : 0;
     this.vehicle.brake = this.activeControls.has("brake") ? 1 : 0;
+    this.vehicle.throttle = this.activeControls.has("accelerate") && !this.vehicle.brake ? 1 : 0;
     stepVehicle(this.vehicle, dt);
     updateGreenScore(this.greenScore, this.vehicle, dt);
     this.soundOutput.update(this.vehicle);

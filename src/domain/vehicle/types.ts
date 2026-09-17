@@ -8,6 +8,7 @@ export interface VehicleProfile {
   shiftRpm: number;
   baseTone: number;
   topSpeedKph: number;
+  induction?: "turbo";
 }
 export interface VehicleState {
   profile: VehicleProfile;

@@ -3,6 +3,23 @@ import { CAR_PROFILES } from "../carProfiles";
 import { createVehicleState, stepVehicle } from "../vehiclePhysics";
 
 describe("vehicle physics", () => {
+  it("limits sustained first-gear acceleration and permits more speed after upshift", () => {
+    const vehicle = createVehicleState(CAR_PROFILES.brezza);
+    vehicle.throttle = 1;
+    for (let i = 0; i < 1000; i++) stepVehicle(vehicle, 0.1);
+    const firstGearSpeed = vehicle.speedKph;
+    expect(firstGearSpeed).toBeLessThanOrEqual(6500 / (29 * 3.6));
+    vehicle.gear = 2;
+    for (let i = 0; i < 100; i++) stepVehicle(vehicle, 0.1);
+    expect(vehicle.speedKph).toBeGreaterThan(firstGearSpeed);
+  });
+  it.each([NaN, Infinity, -1])("ignores invalid dt %s", (dt) => {
+    const vehicle = createVehicleState(CAR_PROFILES.brezza);
+    vehicle.throttle = 1;
+    stepVehicle(vehicle, dt);
+    expect(vehicle.speedKph).toBe(0);
+    expect(vehicle.rpm).toBe(800);
+  });
   it("starts a selected car at its idle RPM in first gear", () => {
     const vehicle = createVehicleState(CAR_PROFILES.brezza);
     expect(vehicle).toMatchObject({ gear: 1, rpm: 800, speedKph: 0 });
