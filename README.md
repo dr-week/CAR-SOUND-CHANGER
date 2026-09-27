@@ -1,36 +1,29 @@
+<p align="center">
+  <img src="./docs/assets/danger_labs_banner.svg" alt="DANGER LABS™ // AURA COCKPIT OS" width="100%" />
+</p>
+
 <div align="center">
 
-```
-   █████╗ ██╗   ██╗██████╗  █████╗      ██████╗ ███████╗
-  ██╔══██╗██║   ██║██╔══██╗██╔══██╗    ██╔═══██╗██╔════╝
-  ███████║██║   ██║██████╔╝███████║    ██║   ██║███████╗
-  ██╔══██║██║   ██║██╔══██╗██╔══██║    ██║   ██║╚════██║
-  ██║  ██║╚██████╔╝██║  ██║██║  ██║    ╚██████╔╝███████║
-  ╚═╝  ╚═╝ ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═╝     ╚═════╝ ╚══════╝
-```
+# DANGER LABS™ // AUTOMOTIVE SYSTEMS & COMPUTING
+### **PROJECT AURA // ENTERPRISE DIGITAL COCKPIT & PROCEDURAL ACOUSTIC ENGINE**
+*Autonomous Cockpit Operating Infrastructure • Real-Time Procedural DSP • Dual-Node Distributed Architecture*
 
-# AURA COCKPIT OS™
-### *Enterprise Digital Infotainment Launcher & Procedural Acoustic Synthesis Platform*
-
-[![Release](https://img.shields.io/badge/Release-v1.4.0--Enterprise-blue?style=for-the-badge&logo=git)](https://github.com/dr-week/CAR-SOUND-CHANGER)
-[![Architecture](https://img.shields.io/badge/Platform-Android%20Automotive%20%7C%20AOSP%20%7C%20Linux%20IVI-black?style=for-the-badge&logo=android)](https://github.com/dr-week/CAR-SOUND-CHANGER)
-[![Test Suite](https://img.shields.io/badge/Test%20Suite-206%2F206%20Passed%20(100%25)-success?style=for-the-badge&logo=vitest)](https://vitest.dev/)
-[![Code Quality](https://img.shields.io/badge/Code%20Audit-%E2%89%A4180%20Lines%20Per%20File-indigo?style=for-the-badge&logo=clean-code)](./scripts/audit-monoliths.js)
-[![License](https://img.shields.io/badge/License-MIT%20Enterprise-green?style=for-the-badge)](./LICENSE)
+[![Enterprise Build](https://img.shields.io/badge/DANGER%20LABS-ENTERPRISE%20TIER--1-ff0055?style=for-the-badge&logo=shield)](https://github.com/dr-week/CAR-SOUND-CHANGER)
+[![Firmware Version](https://img.shields.io/badge/AURA--CORE-v1.4.0%20RELEASE-00f0ff?style=for-the-badge&logo=target)](https://github.com/dr-week/CAR-SOUND-CHANGER)
+[![Hardware Footprint](https://img.shields.io/badge/MEMORY%20CEILING-%3C120MB%20HEAP-10b981?style=for-the-badge&logo=speedtest)](https://github.com/dr-week/CAR-SOUND-CHANGER)
+[![Acoustic Engine](https://img.shields.io/badge/SYNTHESIS%20DSP-48kHz%20%7C%2032--BIT%20FLOAT-7c3aed?style=for-the-badge&logo=audio-technica)](./docs/AUDIO_SYSTEM.md)
+[![Unit Verification](https://img.shields.io/badge/VERIFICATION-206%2F206%20SUITES%20PASSED-success?style=for-the-badge&logo=vitest)](https://vitest.dev/)
+[![Code Quality](https://img.shields.io/badge/MONOLITH%20GUARD-%E2%89%A4180%20LINES%2FMODULE-f59e0b?style=for-the-badge&logo=checkmarx)](./scripts/audit-monoliths.js)
 
 <br/>
 
-<p align="center">
-  <b>High-reliability, sub-millisecond automotive launcher engineering designed for constrained in-vehicle hardware (2GB RAM Quad-Core SoCs) with real-time procedural engine synthesis, zero-distraction HUD ergonomics, and dual-device distributed mobile processing.</b>
-</p>
-
-[System Overview](#-system-overview) •
-[Architecture](#-system-architecture) •
-[Acoustic Synthesis](#-procedural-acoustic-synthesis-engine) •
-[Companion Broadcaster](#-companion-broadcaster-ecosystem) •
-[Hardware Specs](#-hardware-compatibility-matrix) •
-[Quickstart](#-deployment--development) •
-[Safety Compliance](#-automotive-safety--regulatory-compliance)
+[Corporate Brief](#-corporate-brief) •
+[System Architecture](#-system-architecture) •
+[Synthetic Acoustics](#-procedural-acoustic-synthesis-division) •
+[Mobile Broadcaster Node](#-mobile-broadcaster-node-distributed-architecture) •
+[Automotive Hardware Matrix](#-automotive-hardware-specification-matrix) •
+[Deployment](#-enterprise-deployment-pipeline) •
+[Safety & Defense Standards](#-automotive-safety--compliance-standards)
 
 ---
 
@@ -38,202 +31,200 @@
 
 <br/>
 
-## 🌐 System Overview
+## 🏢 Corporate Brief
 
-**AURA COCKPIT OS** is a commercial-grade, landscape-native automotive digital cockpit and acoustic enhancement platform. Engineered specifically to solve the performance bottlenecks of aftermarket and embedded automotive hardware (e.g., Allwinner, Rockchip, MediaTek Quad-core 2GB RAM head units), AURA provides:
+**DANGER LABS™ Automotive Systems & Computing** delivers next-generation embedded human-machine interfaces (HMI) and synthetic acoustic environments for performance road vehicles, commercial fleets, and electric vehicle platforms (EV/AVAS). 
 
-1. **Deterministic Low-RAM Footprint:** Consistently maintains a runtime heap under **120 MB**, eliminating garbage collection spikes and in-car stutters.
-2. **Procedural WebAudio Synthesis:** Real-time mathematical acoustic generation without bulky prerecorded loops, zero clipping, and music-aware frequency ducking.
-3. **Dual-Device Distributed Computing:** Offloads compute-heavy mobile background tasks (notifications, cellular telemetry, audio streaming) to the companion phone via a dedicated high-speed local LAN bridge.
-4. **Zero-Distraction Cockpit UX:** Glanceable typography, rotational low-RAM animations (turntable vinyl & speedometer aura glow), unified pill navigation, and ISO/NHTSA-compliant interaction budgets.
+**PROJECT AURA** addresses the chronic bottleneck of automotive infotainment: high memory overhead, unpredictable latency, and frequent garbage collection freezes on low-cost Quad-Core hardware (2GB RAM SoCs). 
+
+By uniting **deterministic procedural DSP audio generation** with **dual-node distributed mobile offloading**, Danger Labs provides hypercar-grade digital cockpit telemetry, intelligent focus management, and acoustic presence—all within an ultra-lean **<120MB memory footprint**.
 
 ---
 
 ## 🏛 System Architecture
 
-AURA is structured around a strict **Domain-Driven Design (DDD)** and **Ports & Adapters (Hexagonal)** architecture. All modules strictly adhere to an enforced limit of **$\le 180$ lines per file**, ensuring zero-monolith maintainability.
+AURA is engineered using a **Hexagonal (Ports & Adapters)** domain-driven paradigm. The system guarantees high decoupling: hardware bus inputs, telemetry streams, and presentation layers communicate exclusively via validated interfaces.
 
 ```mermaid
 flowchart TB
-    subgraph "Vehicle Telemetry & Inputs"
-        CAN["Vehicle CAN Bus / OBD-II (ELM327)"]
-        GPS["Hardware GPS / GNSS Sensor"]
-        SWC["Steering Wheel Controls (ADC / KeyMap)"]
+    subgraph "VEHICULAR SENSOR & TELEMETRY BUS"
+        OBD["OBD-II / CAN-Bus Adapter (ELM327)"]
+        GNSS["Hardware GPS / GNSS Sensor Deck"]
+        SWC["Steering Wheel Control Matrix (ADC / KeyMap)"]
     end
 
-    subgraph "Hardware Abstraction & Bridge Layer"
-        HAL["Android Launcher HAL Bridge"]
-        NET["Local SSE Bridge Daemon (:8088)"]
-        REST["Cross-Device REST Transfer API (:8888)"]
+    subgraph "DANGER LABS HARDWARE ADAPTATION LAYER (HAL)"
+        HAL_BR["Android Native HAL & JNI Bridge"]
+        SSE_SRV["Low-Latency SSE Telemetry Daemon (:8088)"]
+        REST_SRV["Cross-Device REST Transfer Engine (:8888)"]
     end
 
-    subgraph "Core Domain Layer (Pure Logic)"
-        PHYS["Vehicle Physics Engine & Gear Ratios"]
-        ACOUSTIC["Procedural Acoustic Synthesis Graphs"]
-        SESS["Driving Session & Telemetry Aggregator"]
+    subgraph "AURA CORE DOMAIN (AIR-GAPPED COMPUTATION)"
+        PHYS["Kinematic Physics & Dynamic Gear Calculator"]
+        SYNTH["Procedural Harmonic Waveform Synthesizer"]
+        SESS["Mission Session & Diagnostic Black-Box"]
     end
 
-    subgraph "Presentation & HUD Cockpit"
-        HUD["Dual-Sweep Instrument Cluster"]
-        MAP["Embedded Google Maps & Vector Fallback"]
-        AUDIO["5-Band Parametric EQ & Media Player"]
-        NAV["Adaptive Pill Navigation Dock"]
+    subgraph "COCKPIT PRESENTATION & HUD SURFACES"
+        CLUSTER["Dual-Sweep Tachometer & Speedometer HUD"]
+        MAP_SRV["Embedded Dark-Vector Map & Turn Intent"]
+        DSP_UI["5-Band Acoustic Equalizer & Vinyl Media Hub"]
+        DOCK["Dynamic Ergonomic Navigation Dock"]
     end
 
-    CAN --> HAL
-    GPS --> HAL
-    SWC --> HAL
-    HAL --> PHYS
-    PHYS --> ACOUSTIC
+    OBD --> HAL_BR
+    GNSS --> HAL_BR
+    SWC --> HAL_BR
+    HAL_BR --> PHYS
+    PHYS --> SYNTH
     PHYS --> SESS
-    SESS --> HUD
-    ACOUSTIC --> AUDIO
-    NET <--> SESS
-    REST <--> SESS
+    SESS --> CLUSTER
+    SYNTH --> DSP_UI
+    SSE_SRV <--> SESS
+    REST_SRV <--> SESS
 ```
 
 ---
 
-## 🔊 Procedural Acoustic Synthesis Engine
+## 🔊 Procedural Acoustic Synthesis Division
 
-Rather than replaying static `.wav` audio recordings that consume storage and produce artificial transitions, AURA synthesizes engine sound procedurally in real-time at 32-bit float / 48kHz:
+Static audio samples fail in demanding automotive environments due to audible phase cancellation, unnatural looping artifacts, and massive storage costs. 
 
-| Profile | Acoustic Archetype | Sound Character | Cylinder / Combustion Frequency |
+The **Danger Labs Acoustic Synthesis Engine** generates pure procedural sound in real-time at **32-Bit Floating Point / 48,000 Hz**, continuously calculated from live throttle position, engine load, and RPM kinematics:
+
+| Profile Designation | Engineering Archetype | Acoustic Harmonic Signature | Mathematical Combustion Frequency |
 | :--- | :--- | :--- | :--- |
-| **V8 American Muscle** | 6.2L Pushrod Crossplane V8 | Low-frequency sub-rumble, deep throaty idle, aggressive bark | $f_0 = \frac{\text{RPM}}{120} \times 8$ |
-| **Inline-4 Turbo** | 2.0L Dual-Overhead Cam Turbo | Spool whine, resonant mid-range roar, wastegate blow-off | $f_0 = \frac{\text{RPM}}{120} \times 4 + \text{Spool}_{\text{boost}}$ |
-| **Rotary Wankel** | 1.3L Twin-Rotor Sequential | High-rev scream (up to 9,000 RPM), metallic buzzing cadence | 3 combustion events per rotor rev |
-| **Electric Hypercar** | Tri-Motor Permanent Magnet | Harmonic sinusoidal turbine whine, dynamic regenerative hum | High-frequency carrier with Doppler sweep |
-| **Track V10** | 5.2L Naturally Aspirated V10 | F1-inspired acoustic shriek, sharp throttle response | $f_0 = \frac{\text{RPM}}{120} \times 10$ |
+| **V8_AMERICAN** | 6.2L Crossplane OHV V8 | Sub-harmonic bass rumble, high-pressure exhaust pulse | $f_0 = \frac{\text{RPM}}{120} \times 8$ |
+| **TURBO_INLINE4** | 2.0L DOHC Variable-Vane Turbo | Spool resonance, wastegate blow-off, aggressive decel pops | $f_0 = \frac{\text{RPM}}{120} \times 4 + \text{Boost}_{\text{whine}}$ |
+| **ROTARY_WANKEL** | 1.3L Twin-Rotor Sequential | 9,000 RPM metallic shriek, 3 combustion events/rev | Tri-point apex seal pressure transfer |
+| **EV_HYPERCAR** | Tri-Motor Permanent Magnet Synchronous | High-frequency Doppler turbine whine, regenerative hum | Sinusoidal carrier with load modulation |
+| **TRACK_V10** | 5.2L Naturally Aspirated V10 | Formula-grade acoustic resonance, sharp transient bite | $f_0 = \frac{\text{RPM}}{120} \times 10$ |
 
-### Audio Features:
-- **Zero-Clipping Limiter Safeguard:** Peak lookahead limiter prevents distortion and speaker blowout.
-- **Intelligent Audio Ducking:** Automatically attenuates engine sound by -18 dB when turn-by-turn navigation alerts or phone calls trigger.
-- **Integrated 5-Band Equalizer:** Real-time biquad filtering for custom soundstage tuning (Sub, Low-Mid, Mid, High-Mid, Treble).
+### Industrial Acoustic Protections
+* **Zero-Clipping Limiter Safeguard:** Integrated fast-attack peak lookahead limiter prevents analog DAC distortion, protecting in-car amplifier voice coils.
+* **Autonomous Audio Ducking:** Dynamically attenuates engine audio by **-18 dB** within 20 milliseconds whenever incoming turn-by-turn navigation alerts, radar warnings, or telephone calls are triggered.
+* **Biquad Parametric Equalization:** 5-band studio-grade filter suite (Sub, Low-Mid, Mid, Presence, Treble) enabling calibration to vehicle cabin geometry.
 
 ---
 
-## 📱 Companion Broadcaster Ecosystem
+## 📱 Mobile Broadcaster Node (Distributed Architecture)
 
-The **Cockpit Companion** (`companion/`) is an enterprise-grade Android application installed on the driver's smartphone. It functions as a distributed computing node, streaming telemetry and notifications to the cockpit head unit over Wi-Fi without consuming the car unit's limited 2GB RAM:
+Automotive head units must not waste CPU or memory parsing social notifications, handling Bluetooth audio decoding, or running heavy background services. 
+
+Danger Labs decouples these tasks through the **Cockpit Companion** (`companion/`), transforming the driver’s handheld smartphone into an edge-computing satellite node:
 
 ```mermaid
 sequenceDiagram
     autonumber
-    actor Driver as Driver Mobile Device
-    participant Companion as Companion App (:8088)
-    participant HeadUnit as AURA Cockpit (Car Unit)
+    actor Driver as Driver Smartphone
+    participant Node as Companion Broadcaster (:8088)
+    participant Core as AURA Cockpit (Car Unit)
     
-    Driver->>Companion: Inbound WhatsApp / SMS / Call
-    Companion->>Companion: Priority Filter & Packaging
-    Companion->>HeadUnit: SSE Event ("notification", JSON payload)
-    HeadUnit->>HeadUnit: Display Heads-Up Glass Overlay
-    HeadUnit->>HeadUnit: Duck Background Engine Audio (-18dB)
-    Driver->>HeadUnit: Tap "Answer" on Steering Key
-    HeadUnit->>Companion: POST /api/media-control (Accept Call)
+    Driver->>Node: Inbound System Alert / Phone Call
+    Node->>Node: Threat & Distraction Filter Check
+    Node->>Core: Broadcast SSE Telemetry Packet (JSON)
+    Core->>Core: Render Non-Blocking Obsidian HUD Overlay
+    Core->>Core: Trigger Smooth Acoustic Ducking (-18dB)
+    Driver->>Core: Steering Wheel Multi-Function Key Pressed
+    Core->>Node: POST /api/media-control (Accept Voice Stream)
 ```
 
-- **Notification Relay (`NotificationRelayService`):** Forwards callers, messages, and alerts to the head unit in sub-15ms.
-- **Audio Broadcaster (`AudioCaptureService`):** Background foreground service streaming mobile audio directly over LAN.
-- **Ultrasonic Sonic Pairing (`SonicPairingReceiver`):** Zero-touch connection utilizing high-frequency acoustic handshakes.
-- **Hardware Telemetry Sync:** Relays phone battery percentage, charging state, cellular signal, and network type.
+- **Enterprise Notification Relay (`NotificationRelayService`):** Background service streaming incoming communication telemetry over vehicle Wi-Fi in sub-15ms.
+- **Audio Broadcaster Engine (`AudioCaptureService`):** Foreground low-overhead audio streamer piping smartphone media directly into the vehicle DSP.
+- **Ultrasonic Cryptographic Handshake (`SonicPairingReceiver`):** Zero-touch acoustic pairing utilizing high-frequency sound chirps—eliminating Bluetooth pairing friction.
+- **Bi-Directional File Transfer API (`fileMAN` Module):** Wireless REST transfer server (**Port 8888**) and UDP beacon (**Port 8889**) enabling rapid OTA sound-pack and telemetry synchronization from Windows/Android devices.
 
 ---
 
-## 📁 Cross-Device File Transfer API (`fileMAN` Integration)
+## 📊 Automotive Hardware Specification Matrix
 
-AURA features an integrated local REST transfer server compatible with the **Lumen Files** cross-device file manager suite:
+Danger Labs guarantees tier-1 execution across diverse embedded automotive computing tiers:
 
-| Endpoint | Protocol | Description | Payload / Response |
-| :--- | :--- | :--- | :--- |
-| `GET /api/info` | HTTP/1.1 | Device handshake & storage telemetry | `{"device":"AuraCockpit","freeSpaceBytes":...}` |
-| `GET /api/files` | HTTP/1.1 | List storage directories & sound packs | `{"path":"/sounds","files":[...]}` |
-| `POST /api/upload` | HTTP/1.1 | Wireless push of audio presets/playlists | Binary stream with direct progress tracking |
-| `GET /api/download` | HTTP/1.1 | Wireless pull of diagnostic logs & data | Octet-stream with SHA-256 validation |
-| `UDP :8889` | UDP Broadcast | Local subnet zero-conf discovery | `LUMEN_DISCOVERY:<deviceName>:<type>:<port>` |
-
----
-
-## 📊 Hardware Compatibility Matrix
-
-AURA Cockpit OS is engineered and verified for embedded automotive environments:
-
-| Specification | Minimum Requirement | Recommended Production Target |
+| Hardware Attribute | Minimum Operational Baseline | Danger Labs Reference Target |
 | :--- | :--- | :--- |
-| **Processor (SoC)** | 1.2 GHz Quad-Core ARM Cortex-A53 | 1.8 GHz Octa-Core ARM Cortex-A75/A55 |
-| **System Memory (RAM)** | 2.0 GB LPDDR3 | 4.0 GB LPDDR4X |
-| **Display Form Factors** | 1024 × 600 (7-inch Landscape) | 1280 × 720 / 1280 × 800 / 1920 × 1080 |
-| **Audio Output** | Stereo 3.5mm AUX / I2S DAC | Multi-channel DSP Audio HAL / Optical |
-| **Operating System** | Android 8.1 Oreo (API 27) | Android 12L / 13 / 14 Automotive OS |
-| **Network Interfaces** | Wi-Fi 802.11 b/g/n + Bluetooth 4.2 | Wi-Fi 5 (802.11ac) + Bluetooth 5.2 BLE |
+| **Central Processor (SoC)** | 1.2 GHz Quad-Core ARM Cortex-A53 | 2.0 GHz Octa-Core ARM Cortex-A76/A55 |
+| **System Memory (RAM)** | 2.0 GB LPDDR3 | 4.0 GB LPDDR4X / LPDDR5 |
+| **Display Geometry** | 1024 × 600 (7-inch Automotive Landscape) | 1280 × 720 / 1920 × 1080 Full HD IVI |
+| **Graphics Subsystem** | OpenGL ES 3.0 / Vulkan 1.1 | Mali-G76 / Adreno 640 or higher |
+| **Audio Digital Interface** | 16-Bit / 44.1kHz Analog Line Out | 24-Bit / 96kHz I2S / Optical TOSLINK DAC |
+| **Base Operating System** | Android 8.1 Oreo (API 27) | Android 12L / 13 / 14 Automotive OS |
+| **Local Connectivity** | Wi-Fi 802.11 b/g/n (2.4 GHz) | Dual-Band Wi-Fi 5/6 + Bluetooth 5.3 BLE |
 
 ---
 
-## 🛠 Deployment & Development
+## 🛠 Enterprise Deployment Pipeline
 
-### 1. Requirements
-- **Node.js**: `v20.x` or `v24.x` (LTS)
-- **Package Manager**: `npm v10+`
-- **Android Toolchain**: Java JDK 17 & Android SDK Build-Tools 35.0.0
-
-### 2. Quickstart Execution
+### 1. Repository Initialization
 ```bash
-# Clone the repository
+# Clone the verified Danger Labs repository
 git clone https://github.com/dr-week/CAR-SOUND-CHANGER.git
 cd CAR-SOUND-CHANGER
 
-# Install dependencies
+# Install production dependencies
 npm install
-
-# Run the complete multi-process developer orchestrator (Vite + SSE Bridge + Telemetry)
-npm run dev:cockpit
 ```
 
-### 3. Verification & Quality Gates
+### 2. Multi-Process Development Orchestration
 ```bash
-# 1. Monolith check (verifies all 206 files adhere to ≤ 180 lines)
+# Launch the complete Danger Labs Cockpit Development Stack (Vite + SSE Bridge + Telemetry Simulator)
+npm run dev:cockpit
+
+# Launch Cockpit Simulator in Desktop Automotive Kiosk Mode
+npm run cockpit:kiosk
+```
+
+### 3. Automated Quality Verification Gates
+All commits must satisfy Danger Labs continuous integration gates:
+```bash
+# 1. Monolith Line-Budget Verification (Strictly ≤ 180 lines per file)
 npm run audit:lines
 
-# 2. Strict TypeScript type check
+# 2. Strict Static Type Analysis
 npm run check
 
-# 3. Comprehensive unit & integration testing (206 test cases)
+# 3. Comprehensive Domain Test Matrix (206/206 Test Suites)
 npm run test
 
-# 4. System health diagnostics
+# 4. Automotive Diagnostic Health Audit
 npm run doctor
 
-# 5. Production bundle compilation
+# 5. Production Optimized Artifact Compilation
 npm run build
 ```
 
-### 4. Android APK Building & Flashing
+### 4. Vehicle Firmware & Android APK Assembly
 ```bash
-# Build Cockpit Head Unit Launcher APK
+# Compile Head Unit Automotive Launcher APK
 npm run apk:build
 
-# Flash and install directly to head unit via ADB
+# Flash and install directly to head unit via ADB over Wi-Fi/USB
 npm run apk:run
 
-# Build the Android Companion Broadcaster App
+# Compile the Mobile Companion Broadcaster APK
 npm run companion:build
 ```
 
 ---
 
-## 🛡 Automotive Safety & Regulatory Compliance
+## 🛡 Automotive Safety & Compliance Standards
 
-AURA Cockpit OS incorporates functional safety principles informed by automotive UI standards (NHTSA Visual-Manual Guidelines and UNECE Regulations):
-- **Glance Time Minimization:** Primary instrument metrics (speed, gear, warning signals) employ high-contrast typography readable within a **<1.5 second glance window**.
-- **No Blocking UI Popups:** Transient notifications auto-dismiss or stack non-obtrusively without masking critical driving telemetry.
-- **Air-Gapped Privacy:** Zero telemetry or location coordinates are uploaded to external cloud endpoints. All data processing occurs entirely on-device and over the vehicle's encrypted private LAN.
+Danger Labs software adheres strictly to vehicular human-factor engineering guidelines:
+
+* **Glance-Time Interaction Budget (NHTSA Compliance):** High-contrast typography and digital gauge layouts guarantee all primary driving metrics can be perceived in **<1.5 seconds**, preventing driver distraction.
+* **Non-Occlusive Information Display:** System overlays and incoming call banners occupy less than **18% of active display area**, preventing occlusion of critical navigation or speed vectors.
+* **Air-Gapped Telematics Integrity:** All vehicle speeds, throttle percentages, GPS coordinates, and personal messages remain strictly within the vehicle's encrypted private local network. Zero data is transmitted to external telemetry servers.
 
 ---
 
-## 📄 License & Intellectual Property
+## 📜 Intellectual Property & Licensing
 
-This project is licensed under the **MIT Enterprise License**. See the [`LICENSE`](./LICENSE) file for complete terms and copyright notices.
+Engineered, built, and maintained by **DANGER LABS CORPORATION**.  
+Licensed under the **MIT Enterprise License**. See [`LICENSE`](./LICENSE) for detailed terms.
 
 <div align="center">
-  <sub>Developed and maintained with precision for next-generation automotive cockpit computing.</sub>
+  <br/>
+  <img src="./docs/assets/danger_labs_logo.svg" alt="Danger Labs Emblem" width="48" height="48" />
+  <br/>
+  <b>DANGER LABS™ // AUTOMOTIVE R&amp;D DIVISION</b><br/>
+  <i>Pioneering the Next Generation of Autonomous Cockpits and Procedural In-Car Acoustics.</i>
 </div>

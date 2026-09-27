@@ -1,0 +1,125 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 360" width="100%" height="100%">
+  <defs>
+    <!-- Gradients -->
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#050811" />
+      <stop offset="50%" stop-color="#090e1a" />
+      <stop offset="100%" stop-color="#04060d" />
+    </linearGradient>
+    <linearGradient id="hazardGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#ff0055" />
+      <stop offset="50%" stop-color="#ff5500" />
+      <stop offset="100%" stop-color="#00f0ff" />
+    </linearGradient>
+    <linearGradient id="cyanNeon" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00f0ff" />
+      <stop offset="100%" stop-color="#7000ff" />
+    </linearGradient>
+    <linearGradient id="textGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#ffffff" />
+      <stop offset="60%" stop-color="#e2e8f0" />
+      <stop offset="100%" stop-color="#94a3b8" />
+    </linearGradient>
+    <pattern id="techGrid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="rgba(0, 240, 255, 0.04)" stroke-width="1" />
+      <circle cx="40" cy="40" r="1" fill="rgba(0, 240, 255, 0.15)" />
+    </pattern>
+    <filter id="neonGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="6" result="blur" />
+      <feMerge>
+        <feMergeNode in="blur" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+    <filter id="hazardGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="8" result="blur" />
+      <feMerge>
+        <feMergeNode in="blur" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Background Layer -->
+  <rect width="1200" height="360" rx="16" fill="url(#bgGrad)" stroke="#1e293b" stroke-width="1.5" />
+  <rect width="1200" height="360" rx="16" fill="url(#techGrid)" />
+
+  <!-- Technical Corner Accents -->
+  <path d="M 20 50 L 20 20 L 50 20" stroke="#00f0ff" stroke-width="2" fill="none" opacity="0.8" />
+  <path d="M 1180 50 L 1180 20 L 1150 20" stroke="#00f0ff" stroke-width="2" fill="none" opacity="0.8" />
+  <path d="M 20 310 L 20 340 L 50 340" stroke="#00f0ff" stroke-width="2" fill="none" opacity="0.8" />
+  <path d="M 1180 310 L 1180 340 L 1150 340" stroke="#00f0ff" stroke-width="2" fill="none" opacity="0.8" />
+
+  <!-- Top Status Strip -->
+  <rect x="30" y="24" width="8" height="8" fill="#ff0055" filter="url(#hazardGlow)" />
+  <text x="46" y="32" font-family="'JetBrains Mono', 'SF Pro Display', monospace" font-size="11" fill="#ff0055" letter-spacing="2" font-weight="700">DANGER LABS R&amp;D // CLASSIFIED TIER-1</text>
+  <text x="1170" y="32" text-anchor="end" font-family="'JetBrains Mono', monospace" font-size="11" fill="#00f0ff" letter-spacing="2" opacity="0.8">SPEC: DL-AUTOSYS-2026 // BUILD 41B4</text>
+  <line x1="30" y1="42" x2="1170" y2="42" stroke="rgba(51, 65, 85, 0.4)" stroke-width="1" />
+
+  <!-- Central Brand Emblem / Hazard Diamond -->
+  <g transform="translate(130, 190)">
+    <!-- Outer Orbit Rings -->
+    <circle cx="0" cy="0" r="92" fill="none" stroke="rgba(0, 240, 255, 0.15)" stroke-width="1.5" stroke-dasharray="8 6" />
+    <circle cx="0" cy="0" r="78" fill="none" stroke="rgba(255, 0, 85, 0.2)" stroke-width="1" />
+
+    <!-- Hexagonal Chassis -->
+    <polygon points="0,-65 56,-32 56,32 0,65 -56,32 -56,-32" fill="rgba(15, 23, 42, 0.9)" stroke="url(#hazardGrad)" stroke-width="2.5" filter="url(#hazardGlow)" />
+
+    <!-- Danger Triangle Core -->
+    <polygon points="0,-42 36,24 -36,24" fill="none" stroke="#ff0055" stroke-width="3" />
+    
+    <!-- Exclamation Mark / Soundwave Pulse -->
+    <line x1="0" y1="-26" x2="0" y2="4" stroke="#ffffff" stroke-width="4" stroke-linecap="round" />
+    <circle cx="0" cy="14" r="2.5" fill="#ffffff" />
+    
+    <!-- Neon Waveforms -->
+    <path d="M -70 0 Q -45 -25 0 0 T 70 0" fill="none" stroke="#00f0ff" stroke-width="1.5" opacity="0.7" />
+  </g>
+
+  <!-- Typography & Corporation Badging -->
+  <g transform="translate(260, 120)">
+    <!-- Overline Tech Tag -->
+    <rect x="0" y="0" width="130" height="20" rx="4" fill="rgba(0, 240, 255, 0.12)" stroke="rgba(0, 240, 255, 0.3)" />
+    <text x="65" y="14" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="10" font-weight="700" fill="#00f0ff" letter-spacing="1.5">ENTERPRISE OS</text>
+    
+    <rect x="140" y="0" width="120" height="20" rx="4" fill="rgba(255, 0, 85, 0.12)" stroke="rgba(255, 0, 85, 0.3)" />
+    <text x="200" y="14" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="10" font-weight="700" fill="#ff0055" letter-spacing="1.5">AURA-CORE v1.4</text>
+
+    <!-- Main Title -->
+    <text x="0" y="68" font-family="'Inter', 'Montserrat', 'Helvetica Neue', sans-serif" font-size="52" font-weight="900" fill="url(#textGrad)" letter-spacing="1">
+      DANGER LABS<tspan fill="#ff0055">™</tspan>
+    </text>
+    <text x="445" y="68" font-family="'Inter', 'Montserrat', sans-serif" font-size="52" font-weight="300" fill="#00f0ff" letter-spacing="3">
+      // AURA
+    </text>
+
+    <!-- Subtitle -->
+    <text x="2" y="104" font-family="'Inter', 'Segoe UI', sans-serif" font-size="17" font-weight="500" fill="#94a3b8" letter-spacing="1.2">
+      Autonomous Cockpit Operating System &amp; Procedural Acoustic Synthesis Engine
+    </text>
+
+    <!-- Spec Badges Row -->
+    <g transform="translate(0, 132)">
+      <!-- Spec 1 -->
+      <rect x="0" y="0" width="165" height="30" rx="6" fill="#0f172a" stroke="rgba(0, 240, 255, 0.3)" stroke-width="1" />
+      <text x="12" y="19" font-family="'JetBrains Mono', monospace" font-size="11" fill="#cbd5e1">DSP // <tspan fill="#00f0ff" font-weight="700">48kHz 32-Bit</tspan></text>
+
+      <!-- Spec 2 -->
+      <rect x="175" y="0" width="175" height="30" rx="6" fill="#0f172a" stroke="rgba(255, 0, 85, 0.3)" stroke-width="1" />
+      <text x="187" y="19" font-family="'JetBrains Mono', monospace" font-size="11" fill="#cbd5e1">RAM // <tspan fill="#ff0055" font-weight="700">&lt; 120MB Heap</tspan></text>
+
+      <!-- Spec 3 -->
+      <rect x="360" y="0" width="180" height="30" rx="6" fill="#0f172a" stroke="rgba(16, 185, 129, 0.3)" stroke-width="1" />
+      <text x="372" y="19" font-family="'JetBrains Mono', monospace" font-size="11" fill="#cbd5e1">TESTS // <tspan fill="#10b981" font-weight="700">206/206 Passed</tspan></text>
+
+      <!-- Spec 4 -->
+      <rect x="550" y="0" width="180" height="30" rx="6" fill="#0f172a" stroke="rgba(245, 158, 11, 0.3)" stroke-width="1" />
+      <text x="562" y="19" font-family="'JetBrains Mono', monospace" font-size="11" fill="#cbd5e1">ARCH // <tspan fill="#f59e0b" font-weight="700">≤180 Lines/File</tspan></text>
+    </g>
+  </g>
+
+  <!-- Bottom Terminal Decorative Accent -->
+  <line x1="30" y1="325" x2="1170" y2="325" stroke="rgba(51, 65, 85, 0.4)" stroke-width="1" />
+  <text x="30" y="342" font-family="'JetBrains Mono', monospace" font-size="9" fill="#64748b" letter-spacing="1.5">ARCH: HEXAGONAL DOMAIN-DRIVEN // AIR-GAPPED PRIVACY // ZERO CLOUD DEPENDENCY</text>
+  <text x="1170" y="342" text-anchor="end" font-family="'JetBrains Mono', monospace" font-size="9" fill="#64748b" letter-spacing="1.5">© 2026 DANGER LABS CORPORATION. ALL RIGHTS RESERVED.</text>
+</svg>
