@@ -1,69 +1,60 @@
 # Architecture
 
-## Runtime today
+## Runtime split
 
-The current product is a Vue 3 + TypeScript PWA. Vite builds a small static bundle and service worker. Browser adapters provide Web Audio, geolocation, keyboard input, and optional Bluetooth state.
-
-```text
-Vue launcher
-    ↓ commands / rendered state
-Application services and ports
-    ↓ domain operations
-Vehicle, audio, and scoring domain
-    ↑ implementations
-Web Audio, geolocation, input, Maps
-```
-
-## Boundaries
-
-### Domain — `src/domain`
-
-Pure vehicle physics, engine-sound policy, profiles, controls, and scoring. It must not import Vue, DOM, Web Audio, Google Maps, or Android APIs.
-
-### Application — `src/application`
-
-Coordinates driving sessions and exposes ports such as `EngineSoundOutput`. Vue composables adapt application state for presentation.
-
-### Infrastructure — `src/infrastructure`
-
-Implements browser/device concerns: synthesized Web Audio output, geolocation, Bluetooth capability state, and keyboard input.
-
-### Composition — `src/composition`
-
-Creates concrete adapters and injects them into application services. Keep construction here instead of importing infrastructure directly into the domain.
-
-### Presentation — `src/app` and `src/presentation`
-
-Owns launcher navigation, components, Google Maps rendering, interaction states, and CSS. It may call application APIs but must not implement vehicle or audio algorithms.
-
-## Main flows
-
-### Engine audio
+The repository currently contains a Vue 3 PWA for rapid UI validation and an early Android bridge. The production direction is a lightweight native Kotlin/Jetpack Compose launcher. Domain rules remain independent; browser and Android capabilities live behind adapters.
 
 ```text
-input or GPS → DrivingSession → vehicle state → EngineSoundOutput → WebAudioEngine
+UI (Vue prototype / Compose production)
+  -> application use cases
+     -> pure vehicle and audio domain
+     -> capability ports
+        -> web adapters
+        -> portable Android adapters
+        -> optional vendor/device-profile adapters
 ```
 
-The launcher can leave the Engine screen while the application session continues. Music-aware reduction currently changes engine output volume in the launcher state. Native Android must replace this with audio-focus-aware behavior.
+## Ownership
 
-### Navigation
+- `src/domain`: pure vehicle and audio rules; no Vue, DOM, Web Audio, or Android imports.
+- `src/application`: sessions, use cases, capability ports, and state orchestration.
+- `src/infrastructure`: Web Audio, location, Bluetooth, media, and Android-facing adapters.
+- `src/presentation` and `src/app`: views and interaction only.
+- `android`: native launcher shell and bridge experiments.
+
+The launcher shell composes focused controllers: navigation, preferences, media, overlays, device state, and engine audio. `App.vue` wires them together; it must not reimplement their state or persistence.
+
+## Modular UI ownership
+
+`MediaPlayer.vue` is the stable composition entry point. Its private `components/media/` folder owns demo playlist data, `usePreviewPlayback` state/lifecycle, and scoped styles grouped by player, artwork, transport, and Home. The preview controller is not a native media adapter. Preserve existing props/events during extraction and run behavior tests before adding features.
+
+Follow the module-size review thresholds in CONTRIBUTING. Next structural debt: split `styles/app.css` by feature, then review the remaining large legacy components. Do not move unrelated code or create arbitrary numbered file chunks.
+
+`HomeView.vue` only composes and forwards events. `views/home/DriverPanel.vue` owns speed/map selection; `MediaPanel.vue` owns media/phone/apps selection; `PhoneWidget.vue` owns call presentation. `SwipeSurface.vue` owns gesture recognition. Styles are grouped by panel/widget, with layout owned by Home. No changes to these modules should alter the persistent right-side dock.
+
+Home always renders the speedometer face. Numeric speed and its needle require active telemetry and a finite nonnegative reading; otherwise use a dash and signal icon. Do not display simulated drivetrain values or fabricated heading. Missing call data never establishes phone connectivity. Native call command support remains a separate integration requirement. The prioritized UI work queue lives only in [UI/UX design](./UI_UX_DESIGN.md).
+
+## Native capability model
+
+`CapabilityRegistry` is the only UI entry point for device features. Suggested ports are `AppCatalog`, `MediaController`, `NavigationLauncher`, `AudioFocusController`, `RadioController`, `DspController`, `CameraController`, `SteeringKeySource`, `VehicleSignalSource`, and `AudioZoneController`.
+
+Each reports `available`, `launch-only`, `controllable`, or `unavailable`. This keeps guessed vendor behavior out of presentation code and lets one APK support multiple head units through small device profiles.
+
+## Core flows
 
 ```text
-launcher → lazy Google Maps loader → browser geolocation
-launcher → Google Maps api=1 URL → external directions
+Installed apps -> AppCatalog -> deduplicate/filter -> All Apps -> launch intent
+Active player -> MediaSession -> normalized now-playing -> Home/Media controls
+Engine start -> foreground service -> audio focus -> synth -> safe duck/pause
+Hardware action -> CapabilityRegistry -> verified adapter -> fallback/settings
 ```
 
-If the Maps key or network is unavailable, presentation renders the local fallback. `.env.local` is never committed.
+## Non-negotiable boundaries
 
-## State ownership
+- Home contains navigation context and current media, not engine or DSP controls.
+- Simulated data is visibly marked and never presented as live hardware state.
+- Vendor package names, broadcasts, MCU protocols, and privileged APIs belong only in tested device profiles.
+- Camera and safety functions remain owned by the stock system unless proven safe to integrate.
+- New durable knowledge updates an existing document; do not add one-off reports.
 
-- Domain state: vehicle, RPM, gear, profile, score.
-- Application state: session lifecycle and control intent.
-- Launcher state: active surface, UI scale, map query, engine mix preferences.
-- Native future state: installed apps, phone, media session, driving state, radio, camera, DSP, and system telemetry.
-
-Persist only user preferences. Do not persist precise location or fabricate device state.
-
-## Native migration
-
-Keep the domain and application boundaries. Replace browser infrastructure with Kotlin adapters and connect the UI through a small bridge or migrate presentation to Compose. Details are in [ANDROID.md](./ANDROID.md).
+See [Android integration](./ANDROID_INTEGRATION.md) for the implementation plan and [Audio system](./AUDIO_SYSTEM.md) for engine/EQ behavior.

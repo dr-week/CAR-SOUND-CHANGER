@@ -2,210 +2,159 @@
 /**
  * SpeedometerGauge
  *
- * Artistic pure SVG speedometer gauge.
- * Max speed dynamically adjusts based on VehicleProfile (e.g. 180, 240, 280, 360 km/h).
- * Features 3 dynamic colored speed zones (Blue city / Green cruise / Amber fast),
- * metallic bezel, dynamic needle rotation (-125deg to +125deg), and digital speed readout.
- *
- * Uses pure SVG rendering without any D3 or DOM layout reflows,
- * guaranteeing zero scroll shifts and smooth 60fps performance.
+ * Automotive-grade circular instrument cluster inspired by Mini Cooper center display.
+ * Pure SVG rendering with 270-degree sweep, dynamic neon luminescence,
+ * outer sports needle, and integrated digital cockpit hub.
  */
-import { computed } from "vue";
-
-const props = defineProps<{
+import { computed, ref, watch } from "vue";
+import { describeArc, generateSpeedTicks } from "./speedometer/gaugeMath";
+import SpeedometerCompassBezel from "./speedometer/SpeedometerCompassBezel.vue";
+import SpeedometerDigitalHub from "./speedometer/SpeedometerDigitalHub.vue";
+const props = withDefaults(defineProps<{
   speedKph: number;
   source: "GPS" | "Simulation";
   maxSpeedKph?: number;
-}>();
-
-const maxSpeed = computed(() => props.maxSpeedKph ?? 180);
+  hideCenterDigital?: boolean;
+  telemetryStatus?: string;
+  readingAvailable?: boolean;
+  headingDegrees?: number | null;
+}>(), { readingAvailable: true, maxSpeedKph: 200, telemetryStatus: undefined, headingDegrees: null });
+const hasReading = computed(() => props.readingAvailable !== false && Number.isFinite(props.speedKph) && props.speedKph >= 0);
+const maxSpeed = computed(() => props.maxSpeedKph ?? 200);
 const currentSpeed = computed(() => Math.max(0, Math.min(maxSpeed.value, props.speedKph)));
-
-/** Calculate needle angle from -125deg (0 km/h) to +125deg (maxSpeed) */
+const hasHeading = computed(
+  () => props.headingDegrees !== null && props.headingDegrees !== undefined && Number.isFinite(props.headingDegrees),
+);
+const compassRotation = ref(0);
+const compassReady = ref(false);
+watch(() => props.headingDegrees, (heading) => {
+  if (heading == null || !Number.isFinite(heading)) {
+    compassReady.value = false;
+    return;
+  }
+  const target = -((heading % 360 + 360) % 360);
+  if (!compassReady.value) compassRotation.value = target;
+  else compassRotation.value += ((target - compassRotation.value) % 360 + 540) % 360 - 180;
+  compassReady.value = true;
+}, { immediate: true });
+const cardinalDirections = ["N", "NE", "E", "SE", "S", "SW", "W", "NW"] as const;
+const cardinalHeading = computed(() => {
+  if (!hasHeading.value || props.headingDegrees === null || props.headingDegrees === undefined) return "";
+  const normalized = ((props.headingDegrees % 360) + 360) % 360;
+  const index = Math.round(normalized / 45) % 8;
+  return cardinalDirections[index];
+});
+const headingDisplay = computed(() => {
+  if (!hasHeading.value || props.headingDegrees === null || props.headingDegrees === undefined) return "";
+  const deg = Math.round(((props.headingDegrees % 360) + 360) % 360);
+  return `${cardinalHeading.value} · ${deg.toString().padStart(3, "0")}°`;
+});
+/** 270-degree sweep: from -135deg (0 km/h) to +135deg (maxSpeed) */
 const needleAngle = computed(() => {
   const fraction = currentSpeed.value / maxSpeed.value;
-  return -125 + fraction * 250;
+  return -135 + fraction * 270;
 });
-
-const sourceColour = computed(() =>
-  props.source === "GPS" ? "var(--green)" : "var(--muted)",
-);
-
-function polarToCartesian(centerX: number, centerY: number, radius: number, angleInDegrees: number) {
-  const angleInRadians = (angleInDegrees * Math.PI) / 180.0;
-  return {
-    x: centerX + radius * Math.sin(angleInRadians),
-    y: centerY - radius * Math.cos(angleInRadians),
-  };
-}
-
-function describeArc(x: number, y: number, radius: number, startAngle: number, endAngle: number) {
-  const start = polarToCartesian(x, y, radius, endAngle);
-  const end = polarToCartesian(x, y, radius, startAngle);
-  const largeArcFlag = endAngle - startAngle <= 180 ? "0" : "1";
-  return ["M", start.x, start.y, "A", radius, radius, 0, largeArcFlag, 0, end.x, end.y].join(" ");
-}
-
-/** 3 Dynamic speed zone arcs */
-const blueArc = computed(() => describeArc(100, 90, 78, -125, -125 + (1 / 3) * 250));
-const greenArc = computed(() => describeArc(100, 90, 78, -125 + (1 / 3) * 250, -125 + (2 / 3) * 250));
-const amberArc = computed(() => describeArc(100, 90, 78, -125 + (2 / 3) * 250, 125));
-
-/** Generate tick mark positions */
-const ticks = computed(() => {
-  const steps = 6;
-  const result = [];
-  for (let i = 0; i <= steps; i++) {
-    const value = Math.round((maxSpeed.value / steps) * i);
-    const fraction = i / steps;
-    const angleRad = ((-125 + fraction * 250) * Math.PI) / 180;
-    const r1 = 62;
-    const r2 = 72;
-    const x1 = 100 + r1 * Math.sin(angleRad);
-    const y1 = 90 - r1 * Math.cos(angleRad);
-    const x2 = 100 + r2 * Math.sin(angleRad);
-    const y2 = 90 - r2 * Math.cos(angleRad);
-
-    const labelR = 50;
-    const lx = 100 + labelR * Math.sin(angleRad);
-    const ly = 90 - labelR * Math.cos(angleRad);
-
-    result.push({ value, x1, y1, x2, y2, lx, ly });
-  }
-  return result;
+const bgTrackArc = computed(() => describeArc(150, 150, 118, -135, 135));
+const activeSpeedArc = computed(() => {
+  if (currentSpeed.value <= 0) return "";
+  const endAngle = Math.min(135, needleAngle.value);
+  if (endAngle <= -134) return "";
+  return describeArc(150, 150, 118, -135, endAngle);
 });
+const ticks = computed(() => generateSpeedTicks(maxSpeed.value, currentSpeed.value, hasReading.value));
 </script>
-
 <template>
-  <div class="speedo-gauge" :aria-label="`Current speed ${Math.round(currentSpeed)} km/h from ${source}`">
-    <svg viewBox="0 0 200 135" class="speedo-svg">
-      <!-- Outer metallic bezel -->
-      <path
-        d="M 22 90 A 78 78 0 1 1 178 90"
-        fill="none"
-        stroke="#1a202c"
-        stroke-width="12"
-        stroke-linecap="round"
+  <div class="speedo-gauge" role="img" :aria-label="hasReading ? `Current speed ${Math.round(currentSpeed)} km/h from ${source}` : `${source} speed unavailable`">
+    <svg viewBox="0 0 300 300" class="speedo-svg">
+      <defs>
+        <radialGradient id="spDialFaceGrad" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stop-color="#18221b" />
+          <stop offset="60%" stop-color="#101612" />
+          <stop offset="100%" stop-color="#080b09" />
+        </radialGradient>
+        <radialGradient id="spHubGrad" cx="40%" cy="35%" r="60%">
+          <stop offset="0%" stop-color="#232e27" />
+          <stop offset="55%" stop-color="#131915" />
+          <stop offset="100%" stop-color="#090d0b" />
+        </radialGradient>
+        <linearGradient id="spActiveGrad" x1="0%" y1="100%" x2="100%" y2="0%">
+          <stop offset="0%" stop-color="#22c55e" />
+          <stop offset="45%" stop-color="#d9ff78" />
+          <stop offset="80%" stop-color="#38bdf8" />
+          <stop offset="100%" stop-color="#f59e0b" />
+        </linearGradient>
+        <filter id="spNeonGlow" x="-20%" y="-20%" width="140%" height="140%">
+          <feGaussianBlur stdDeviation="3.5" result="blur" />
+          <feMerge>
+            <feMergeNode in="blur" />
+            <feMergeNode in="SourceGraphic" />
+          </feMerge>
+        </filter>
+      </defs>
+      <!-- 1. Outer Metallic Bezel Ring & Compass Orbit -->
+      <circle cx="150" cy="150" r="146" fill="#080b09" stroke="rgba(255, 255, 255, 0.08)" stroke-width="2" />
+      <circle cx="150" cy="150" r="142" fill="url(#spDialFaceGrad)" stroke="rgba(217, 255, 120, 0.08)" stroke-width="1.5" />
+      <circle cx="150" cy="150" r="132" fill="none" stroke="rgba(255, 255, 255, 0.08)" stroke-width="1" stroke-dasharray="2 4" />
+      <SpeedometerCompassBezel
+        :compass-rotation="compassRotation"
+        :has-heading="hasHeading"
+        :heading-degrees="headingDegrees"
       />
-
-      <!-- Zone 1: City 0-33% (Blue) -->
+      <!-- 2. Inactive Speed Track -->
+      <path :d="bgTrackArc" fill="none" stroke="#151d18" stroke-width="10" stroke-linecap="round" />
+      <!-- 3. Dynamic Active Speed Arc -->
       <path
-        :d="blueArc"
+        v-if="hasReading && activeSpeedArc"
+        :d="activeSpeedArc"
         fill="none"
-        stroke="#3b82f6"
-        stroke-width="5"
+        stroke="url(#spActiveGrad)"
+        stroke-width="10"
         stroke-linecap="round"
-        opacity="0.85"
+        filter="url(#spNeonGlow)"
       />
-
-      <!-- Zone 2: Cruising 33-66% (Green) -->
-      <path
-        :d="greenArc"
-        fill="none"
-        stroke="#31a566"
-        stroke-width="5"
-        stroke-linecap="round"
-        opacity="0.85"
-      />
-
-      <!-- Zone 3: Fast 66-100% (Amber) -->
-      <path
-        :d="amberArc"
-        fill="none"
-        stroke="#f7b955"
-        stroke-width="5"
-        stroke-linecap="round"
-        opacity="0.85"
-      />
-
-      <!-- Tick marks & numeric labels -->
+      <!-- 4. Precision Ticks & Numbers -->
       <g class="speedo-ticks">
         <line
           v-for="tick in ticks"
-          :key="tick.value"
+          :key="'tick-' + tick.value + '-' + tick.x1"
           :x1="tick.x1"
           :y1="tick.y1"
           :x2="tick.x2"
           :y2="tick.y2"
-          stroke="#525d6e"
-          stroke-width="2"
+          :stroke="tick.isActive ? '#d9ff78' : 'rgba(255, 255, 255, 0.22)'"
+          :stroke-width="tick.isMajor ? 2.2 : 1.2"
           stroke-linecap="round"
+          :filter="tick.isActive ? 'drop-shadow(0 0 4px rgba(217, 255, 120, 0.5))' : 'none'"
         />
         <text
-          v-for="tick in ticks"
+          v-for="tick in ticks.filter(t => t.isMajor)"
           :key="'lbl-' + tick.value"
           :x="tick.lx"
           :y="tick.ly"
-          fill="#8d99ae"
-          font-size="8"
-          font-weight="700"
+          :fill="tick.isActive ? '#ffffff' : '#64748b'"
+          font-size="9"
+          font-weight="800"
+          font-family="var(--mono)"
           text-anchor="middle"
           dominant-baseline="central"
         >
           {{ tick.value }}
         </text>
       </g>
-
-      <!-- Center digital speed display -->
-      <text x="100" y="80" fill="#f3f5f8" font-size="24" font-weight="900" text-anchor="middle">
-        {{ Math.round(currentSpeed) }}
-      </text>
-      <text x="100" y="94" fill="#99a3b3" font-size="7" font-weight="700" letter-spacing="1" text-anchor="middle">
-        KM/H
-      </text>
-
-      <!-- Animated Needle -->
-      <g transform="translate(100, 90)">
-        <g :style="{ transform: `rotate(${needleAngle}deg)`, transition: 'transform 0.12s ease-out' }">
-          <polygon points="-2.5,0 0,-70 2.5,0" fill="var(--acid)" filter="drop-shadow(0 0 6px var(--acid-glow))" />
-          <circle cx="0" cy="0" r="7" fill="#151a17" stroke="var(--acid)" stroke-width="2.5" />
-          <circle cx="0" cy="0" r="2.5" fill="#ffffff" />
-        </g>
+      <!-- 5. Sports Aerodynamic Needle -->
+      <g v-if="hasReading" :transform="`rotate(${needleAngle} 150 150)`" class="needle-rotator">
+        <polygon points="148,84 149.5,32 150,28 150.5,32 152,84" fill="#d9ff78" filter="url(#spNeonGlow)" />
+        <circle cx="150" cy="32" r="3.5" fill="#ffffff" filter="drop-shadow(0 0 6px #d9ff78)" />
       </g>
+      <!-- 6. Central Digital Instrument Hub -->
+      <SpeedometerDigitalHub
+        v-if="!hideCenterDigital"
+        :has-reading="hasReading"
+        :current-speed="currentSpeed"
+        :has-heading="hasHeading"
+        :heading-display="headingDisplay"
+      />
     </svg>
-
-    <!-- Speed source telemetry badge -->
-    <div class="speedo-telemetry" :style="{ color: sourceColour }">
-      <svg class="speedo-telemetry__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-        <circle cx="12" cy="12" r="3"/>
-        <path d="M12 2v3m0 14v3M2 12h3m14 0h3"/>
-      </svg>
-      <span>{{ source }} Telemetry</span>
-    </div>
   </div>
 </template>
-
-<style scoped>
-.speedo-gauge {
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-}
-
-.speedo-svg {
-  display: block;
-  width: 100%;
-  height: auto;
-  max-width: 220px;
-  filter: drop-shadow(0 8px 24px rgba(0, 0, 0, 0.5));
-}
-
-.speedo-telemetry {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  margin-top: -6px;
-  font-size: 0.68rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  transition: color 0.3s;
-}
-
-.speedo-telemetry__icon {
-  width: 11px;
-  height: 11px;
-}
-</style>
+<style scoped src="./speedometer/speedometerGauge.css"></style>

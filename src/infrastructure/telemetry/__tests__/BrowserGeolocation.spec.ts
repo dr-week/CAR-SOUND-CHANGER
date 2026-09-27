@@ -3,6 +3,29 @@ import { BrowserGeolocation, calculateHaversineDistanceMeters } from "../Browser
 import type { TelemetryStatus } from "../../../application/ports/TelemetryStatus";
 
 describe("BrowserGeolocation", () => {
+  it("reports travel heading only while moving and clears it on stop", () => {
+    let publish: (position: GeolocationPosition) => void = () => {};
+    vi.stubGlobal("navigator", { geolocation: {
+      watchPosition: (callback: typeof publish) => { publish = callback; return 7; },
+      clearWatch: vi.fn(),
+    } });
+    const onHeading = vi.fn();
+    const geo = new BrowserGeolocation(vi.fn(), vi.fn(), 5000, onHeading);
+    geo.start();
+    const fix = (speed: number, heading: number | null) => ({
+      coords: { latitude: 0, longitude: 0, accuracy: 5, altitude: null, altitudeAccuracy: null, speed, heading },
+      timestamp: Date.now(),
+    }) as GeolocationPosition;
+    publish(fix(10, 90));
+    expect(onHeading).toHaveBeenLastCalledWith(90);
+    publish(fix(0, 90));
+    expect(onHeading).toHaveBeenLastCalledWith(null);
+    publish(fix(10, null));
+    expect(onHeading).toHaveBeenLastCalledWith(null);
+    publish(fix(10, 359));
+    geo.stop();
+    expect(onHeading).toHaveBeenLastCalledWith(null);
+  });
   afterEach(() => {
     vi.unstubAllGlobals();
     vi.restoreAllMocks();

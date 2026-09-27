@@ -1,6 +1,7 @@
 import { createApp } from "vue";
 import App from "./app/App.vue";
 import "./presentation/styles/app.css";
+import "./presentation/styles/landscape.css";
 
 createApp(App).mount("#app");
 if (import.meta.env.PROD && "serviceWorker" in navigator) {

@@ -6,3 +6,4 @@ export {
   bodyTimbre,
   engineSoundParameters,
 } from "./engineSound";
+export * from "./EqualizerTypes";

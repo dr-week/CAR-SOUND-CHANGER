@@ -1,0 +1,154 @@
+.google-map,
+.google-map__canvas,
+.google-map__fallback {
+  position: absolute;
+  inset: 0;
+}
+.google-map {
+  overflow: hidden;
+  background: #0d120f;
+}
+.google-map__canvas {
+  z-index: 1;
+}
+.google-map__fallback {
+  background-color: #0e1310;
+  background-image:
+    radial-gradient(circle at 60% 40%, rgba(217, 255, 120, 0.05), transparent 45%),
+    linear-gradient(rgba(241, 239, 232, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(241, 239, 232, 0.04) 1px, transparent 1px);
+  background-size: 100% 100%, 36px 36px, 36px 36px;
+}
+.fallback-road {
+  position: absolute;
+  height: 12px;
+  width: 130%;
+  left: -15%;
+  top: 46%;
+  border-radius: 99px;
+  background: #1a221d;
+  box-shadow: 0 0 0 1px rgba(217, 255, 120, 0.12);
+}
+.road-a {
+  transform: rotate(-18deg);
+  background: linear-gradient(90deg, #18201a, #263329, #18201a);
+}
+.road-b {
+  transform: rotate(58deg);
+  top: 22%;
+  left: 20%;
+  height: 9px;
+}
+.road-c {
+  transform: rotate(40deg);
+  top: 70%;
+  height: 7px;
+}
+.fallback-pin {
+  position: absolute;
+  left: 54%;
+  top: 42%;
+  width: 18px;
+  height: 18px;
+  border: 3px solid var(--ink);
+  border-radius: 50%;
+  background: var(--acid);
+  box-shadow: 0 0 0 8px rgba(217, 255, 120, 0.25), 0 0 18px var(--acid-glow);
+}
+.compact-compass-hud {
+  position: absolute;
+  top: 16px;
+  right: 18px;
+  z-index: 2;
+}
+.compass-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  background: rgba(15, 19, 16, 0.85);
+  border: 1px solid var(--line);
+  border-radius: 99px;
+  backdrop-filter: blur(12px);
+}
+.compass-icon {
+  width: 22px;
+  height: 22px;
+}
+.compass-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.1;
+}
+.compass-text strong {
+  font: 700 calc(11px * var(--ui-scale)) var(--mono);
+  color: var(--acid);
+  letter-spacing: 0.05em;
+}
+.compass-text small {
+  font: 600 8px var(--mono);
+  color: var(--muted);
+  letter-spacing: 0.1em;
+}
+.map-provider {
+  position: absolute;
+  z-index: 3;
+  left: 18px;
+  top: 16px;
+  padding: 7px 10px;
+  border-radius: 99px;
+  background: rgba(15, 19, 16, 0.76);
+  color: #eef0e9;
+  font: 600 10px var(--sans);
+  letter-spacing: 0.03em;
+  backdrop-filter: blur(10px);
+}
+.map-provider.ready::before {
+  content: "";
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  margin-right: 6px;
+  border-radius: 50%;
+  background: #d9ff78;
+}
+.locate-button {
+  position: absolute;
+  z-index: 4;
+  right: 18px;
+  bottom: 20px;
+  min-height: 48px;
+  padding: 0 16px;
+  border: 0;
+  border-radius: 15px;
+  background: #121713;
+  color: #f1efe8;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-weight: 700;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+}
+.locate-button span {
+  width: 9px;
+  height: 9px;
+  border: 2px solid #d9ff78;
+  border-radius: 50%;
+  box-shadow: 0 0 0 3px rgba(217, 255, 120, 0.15);
+}
+.map-hit-area {
+  position: absolute;
+  z-index: 4;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  background: transparent;
+}
+.compact .map-provider {
+  display: none;
+}
+.compact :deep(.gm-style-cc),
+.compact :deep(.gmnoprint) {
+  display: none;
+}

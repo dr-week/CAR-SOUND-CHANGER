@@ -10,4 +10,9 @@ export { default as GoogleMap } from "./GoogleMap.vue";
 export { default as CockpitTelemetry } from "./CockpitTelemetry.vue";
 export { default as HarmonicVisualizer } from "./HarmonicVisualizer.vue";
 export { default as SoundProfileCard } from "./SoundProfileCard.vue";
-
+export { default as MediaPlayer } from "./MediaPlayer.vue";
+export { default as VehiclePersonaCard } from "./VehiclePersonaCard.vue";
+export { default as EqualizerModal } from "./EqualizerModal.vue";
+export { default as QuickControlsDrawer } from "./QuickControlsDrawer.vue";
+export { default as CameraHudModal } from "./CameraHudModal.vue";
+export { default as DiagnosticsModal } from "./DiagnosticsModal.vue";

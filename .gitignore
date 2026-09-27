@@ -3,3 +3,16 @@ dist/
 .vite/
 .env.local
 .env.*.local
+android/.gradle/
+android/.kotlin/
+android/**/build/
+android/local.properties
+android/toolchain.local.json
+companion/.gradle/
+companion/.kotlin/
+companion/**/build/
+companion/local.properties
+companion/toolchain.local.json
+*.log
+*.log.txt
+*.png

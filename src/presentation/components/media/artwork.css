@@ -1,0 +1,70 @@
+/* Launcher circular vinyl turntable instrument */
+.launcher-media {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  padding: 0;
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+}
+
+.launcher-media-stage {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 18px;
+  padding: 0;
+  flex: 0 1 auto;
+}
+
+.vinyl-hero-wrap {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.vinyl-disc {
+  width: clamp(170px, 30vh, 260px);
+  height: clamp(170px, 30vh, 260px);
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.12);
+  background:
+    repeating-radial-gradient(circle, #131815 0 3px, #1a221d 4px 5px),
+    radial-gradient(circle at 35% 25%, #2a352c, #141a16 55%, #0c100d 85%);
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.65), 0 0 0 6px rgba(217, 255, 120, 0.08);
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Static vinyl for low-power head units; class preserved for state hooks */
+.vinyl-disc--spinning {
+  animation: none;
+}
+
+.vinyl-center-label {
+  width: 48%;
+  height: 48%;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 25%, #252f28, #141a16 65%, #0d120f);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: var(--acid);
+  border: 1.5px solid rgba(217, 255, 120, 0.35);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.5), inset 0 0 14px rgba(217, 255, 120, 0.08);
+}
+
+.vinyl-num {
+  font: 800 calc(18px * var(--ui-scale)) var(--mono);
+  letter-spacing: 0.04em;
+  color: var(--acid);
+}

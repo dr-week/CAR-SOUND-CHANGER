@@ -6,12 +6,13 @@ const props = defineProps<{
   rpm: number;
   profile: VehicleProfile;
   audioEnabled: boolean;
+  frequencyData?: Uint8Array | null;
 }>();
 
 // Firing frequency in Hz: (RPM * cylinders) / 120 for a 4-stroke engine
 const firingFreq = computed(() => Math.round((props.rpm * props.profile.cylinders) / 120));
 
-// Generate 24 dynamic frequency bar heights reacting to harmonics
+// Generate 20 dynamic frequency bar heights reacting to harmonics / FFT bins
 const harmonics = computed(() => {
   if (!props.audioEnabled) {
     return Array.from({ length: 20 }, (_, i) => ({
@@ -20,6 +21,19 @@ const harmonics = computed(() => {
     }));
   }
 
+  // If live FFT data is present, scale FFT byte bins (0-255) to height (4-48px)
+  if (props.frequencyData && props.frequencyData.length > 0) {
+    const bins = props.frequencyData;
+    return Array.from({ length: 20 }, (_, i) => {
+      const binIdx = Math.floor((i / 20) * Math.min(bins.length, 28));
+      const rawVal = bins[binIdx] ?? 0;
+      const height = Math.min(48, Math.max(4, (rawVal / 255) * 48));
+      const active = height > 22;
+      return { height, active };
+    });
+  }
+
+  // Mathematical fallback reacting to RPM, cylinders, and harmonic waves
   const baseRatio = Math.min(1, Math.max(0.1, props.rpm / props.profile.redlineRpm));
   return Array.from({ length: 20 }, (_, i) => {
     const harmonicWeight = 1 / (1 + (i % 4) * 0.25);

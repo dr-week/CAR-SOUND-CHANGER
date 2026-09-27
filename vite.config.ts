@@ -13,8 +13,8 @@ export default defineConfig({
       "@": resolve(__dirname, "src"),
     },
   },
-  server: { host: "127.0.0.1", strictPort: true },
-  preview: { host: "127.0.0.1", strictPort: true },
+  server: { host: "0.0.0.0", port: 5173 },
+  preview: { host: "0.0.0.0", port: 5173 },
   test: {
     environment: "happy-dom",
   },

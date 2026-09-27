@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Cockpit Remote Companion</title>
+  <style>
+    :root {
+      --bg: #090d0b; --card: rgba(255, 255, 255, 0.04); --border: rgba(255, 255, 255, 0.08);
+      --acid: #d9ff78; --green: #34c759; --red: #ff453a; --text: #f1efe8; --muted: #88958d;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body { background: var(--bg); color: var(--text); padding: 16px; display: flex; flex-direction: column; gap: 12px; min-height: 100vh; }
+    header { display: flex; justify-content: space-between; align-items: center; padding-bottom: 10px; border-bottom: 1px solid var(--border); }
+    .brand { display: flex; align-items: center; gap: 8px; font-size: 15px; font-weight: 700; color: var(--text); }
+    .status-badge { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 600; color: var(--acid); background: rgba(217, 255, 120, 0.12); padding: 4px 10px; border-radius: 99px; }
+    .pulse { width: 7px; height: 7px; border-radius: 50%; background: var(--acid); box-shadow: 0 0 8px var(--acid); }
+    .card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 14px; display: flex; flex-direction: column; gap: 8px; }
+    .card-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); }
+    .btn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    button { background: rgba(255, 255, 255, 0.06); border: 1px solid var(--border); color: var(--text); padding: 11px; border-radius: 12px; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.15s; display: flex; align-items: center; justify-content: center; gap: 6px; }
+    button:active { transform: scale(0.96); background: var(--acid); color: #111; }
+    .scan-btn { background: rgba(217, 255, 120, 0.12); border-color: rgba(217, 255, 120, 0.3); color: var(--acid); }
+    .call-btn { background: rgba(52, 199, 89, 0.15); border-color: rgba(52, 199, 89, 0.3); color: #4ade80; }
+    .end-btn { background: rgba(255, 69, 58, 0.15); border-color: rgba(255, 69, 58, 0.3); color: #ff6b6b; }
+    .send-box { display: flex; gap: 6px; }
+    input { flex: 1; background: rgba(0, 0, 0, 0.3); border: 1px solid var(--border); color: #fff; padding: 9px 12px; border-radius: 10px; font-size: 12px; outline: none; }
+    input:focus { border-color: var(--acid); }
+    .send-btn { background: var(--acid); color: #111; padding: 9px 14px; border: none; font-weight: 700; }
+    .feedback { font-size: 12px; color: var(--acid); min-height: 16px; text-align: center; }
+    video { width: 100%; border-radius: 10px; display: none; margin-top: 6px; border: 1px solid var(--acid); }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand"><span>🚗</span><span>Cockpit Link</span></div>
+    <div class="status-badge"><span class="pulse"></span> LIVE SYNC</div>
+  </header>
+
+  <div class="card">
+    <span class="card-title">1. One-Tap QR Scanner</span>
+    <button class="scan-btn" onclick="startQrScan()">📷 Scan Car QR Code</button>
+    <video id="qr-video" playsinline></video>
+  </div>
+
+  <div class="card">
+    <span class="card-title">2. Instant Alerts</span>
+    <div class="btn-grid">
+      <button onclick="sendNotif('WhatsApp', 'Alex Miller', 'Arriving in 5 mins.')">💬 WhatsApp</button>
+      <button onclick="sendNotif('Messages', 'Bank Alert', 'OTP: 839-102')">📱 SMS Alert</button>
+      <button onclick="sendNotif('Google Maps', 'Route Guard', 'Alternate route active')">📍 Navigation</button>
+      <button onclick="sendNotif('Calendar', 'Meeting', 'Sync starting soon')">📅 Calendar</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <span class="card-title">3. Custom Transmission</span>
+    <input id="sender" type="text" placeholder="Sender Name" value="Sarah Connor" />
+    <div class="send-box">
+      <input id="msg" type="text" placeholder="Type notification..." value="Traffic clear. See you soon!" />
+      <button class="send-btn" onclick="sendCustom()">Push</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <span class="card-title">4. Telephony Remote</span>
+    <div class="btn-grid">
+      <button class="call-btn" onclick="startCall('Sarah Connor', '+1 (555) 839-2041')">📞 Call Car</button>
+      <button class="end-btn" onclick="endCall()">🛑 End Call</button>
+    </div>
+  </div>
+
+  <div class="feedback" id="feedback"></div>
+
+  <script>
+    function feedback(msg) {
+      const el = document.getElementById('feedback');
+      el.textContent = msg;
+      setTimeout(() => { if (el.textContent === msg) el.textContent = ''; }, 3500);
+    }
+    async function startQrScan() {
+      const video = document.getElementById('qr-video');
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+        video.srcObject = stream; video.style.display = 'block'; await video.play();
+        feedback('Scanning car QR code...');
+        if ('BarcodeDetector' in window) {
+          const detector = new BarcodeDetector({ formats: ['qr_code'] });
+          const timer = setInterval(async () => {
+            const codes = await detector.detect(video);
+            if (codes.length) {
+              clearInterval(timer); stream.getTracks().forEach(t => t.stop());
+              video.style.display = 'none';
+              feedback('✓ Connected to: ' + codes[0].rawValue);
+            }
+          }, 400);
+        } else {
+          feedback('Camera active. Point at head unit QR.');
+        }
+      } catch (e) { feedback('Camera unavailable: ' + e.message); }
+    }
+    async function sendNotif(app, sender, message, category = 'message') {
+      try {
+        await fetch('/api/notify', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ app, sender, message, category })
+        });
+        feedback('✓ Sent ' + app + ' alert to cockpit');
+      } catch (e) { feedback('✗ Failed to send: ' + e.message); }
+    }
+    async function sendCustom() {
+      const s = document.getElementById('sender').value || 'Phone Alert';
+      const m = document.getElementById('msg').value || 'Hello from phone';
+      await sendNotif('Handheld', s, m, 'message');
+    }
+    async function startCall(name, number) {
+      try {
+        await fetch('/api/call', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ callerName: name, callerNumber: number })
+        });
+        feedback('✓ Triggered incoming call on cockpit');
+      } catch (e) { feedback('✗ Failed: ' + e.message); }
+    }
+    async function endCall() {
+      try {
+        await fetch('/api/end-call', { method: 'POST' });
+        feedback('✓ Call ended on cockpit');
+      } catch (e) { feedback('✗ Failed: ' + e.message); }
+    }
+  </script>
+</body>
+</html>

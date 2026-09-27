@@ -17,8 +17,8 @@ function keyboard(event: KeyboardEvent, action: DriveAction, active: boolean): v
 
 <template>
   <section class="controls" aria-label="Driving controls">
-    <button type="button" class="shift downshift shift-btn" aria-label="Downshift gear, keyboard 2" @click="emit('shift', -1)">
-      <span>↓ Downshift</span><kbd>2</kbd>
+    <button type="button" class="shift upshift shift-btn" aria-label="Upshift gear, keyboard 1" @click="emit('shift', 1)">
+      <span>↑ Upshift</span><kbd>1</kbd>
     </button>
     <button
       type="button"
@@ -52,8 +52,8 @@ function keyboard(event: KeyboardEvent, action: DriveAction, active: boolean): v
     >
       <span>Accelerate</span><kbd>W</kbd>
     </button>
-    <button type="button" class="shift upshift shift-btn" aria-label="Upshift gear, keyboard 1" @click="emit('shift', 1)">
-      <span>↑ Upshift</span><kbd>1</kbd>
+    <button type="button" class="shift downshift shift-btn" aria-label="Downshift gear, keyboard 2" @click="emit('shift', -1)">
+      <span>↓ Downshift</span><kbd>2</kbd>
     </button>
     <button type="button" class="reset reset-btn" aria-label="Reset drive" @click="emit('reset')">↺ <span>Reset</span></button>
   </section>

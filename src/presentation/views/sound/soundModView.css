@@ -1,0 +1,92 @@
+.engine-page {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  height: 100%;
+  padding: 14px 24px 20px;
+  box-sizing: border-box;
+  overflow-y: auto;
+}
+
+.engine-layout {
+  display: grid;
+  grid-template-columns: minmax(260px, 1fr) minmax(280px, 1.15fr) minmax(260px, 1fr);
+  gap: 14px;
+  align-items: stretch;
+}
+
+.engine-hero {
+  min-height: 280px;
+  padding: 18px 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background:
+    radial-gradient(circle at 50% 35%, rgba(217, 255, 120, 0.09), transparent 42%),
+    linear-gradient(145deg, rgba(23, 29, 25, 0.88), rgba(12, 16, 14, 0.92));
+  border: 1px solid var(--line);
+  border-radius: 20px;
+}
+
+.engine-orbit {
+  width: 140px;
+  height: 140px;
+  border: 1px solid rgba(217, 255, 120, 0.25);
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  box-shadow:
+    inset 0 0 40px rgba(217, 255, 120, 0.03),
+    0 0 0 16px rgba(255, 255, 255, 0.015);
+  position: relative;
+}
+
+.engine-orbit::before,
+.engine-orbit::after {
+  content: "";
+  position: absolute;
+  inset: 12px;
+  border: 1px dashed rgba(217, 255, 120, 0.15);
+  border-radius: 50%;
+}
+
+.engine-orbit::after {
+  inset: 34px;
+  border-style: solid;
+}
+
+.engine-orbit span {
+  font: 500 52px var(--mono);
+  color: var(--acid);
+  z-index: 1;
+}
+
+.engine-hero > p {
+  margin: 12px 0 2px;
+  color: var(--muted);
+  font-size: calc(12px * var(--ui-scale));
+}
+
+.engine-hero > strong {
+  font: 500 28px var(--mono);
+  color: var(--ink);
+}
+
+.engine-hero > small {
+  margin: 2px 0 10px;
+  color: var(--muted);
+  font: calc(9px * var(--ui-scale)) var(--mono);
+  letter-spacing: 0.08em;
+}
+
+.engine-drive-tray {
+  margin-top: auto;
+  padding-top: 4px;
+}
+
+@media (max-width: 960px) {
+  .engine-layout {
+    grid-template-columns: 1fr;
+  }
+}

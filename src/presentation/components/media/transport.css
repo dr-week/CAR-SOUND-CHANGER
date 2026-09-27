@@ -1,0 +1,113 @@
+/* Launcher track typography and tactile transport controls */
+.launcher-track-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  gap: 14px;
+}
+
+.launcher-track-info {
+  text-align: center;
+  max-width: 100%;
+}
+
+.launcher-playback-eyebrow {
+  font: 700 calc(11px * var(--ui-scale)) var(--mono);
+  letter-spacing: 0.12em;
+  color: var(--acid);
+  text-transform: uppercase;
+}
+
+.launcher-track-title {
+  margin: 4px 0;
+  font-size: calc(32px * var(--ui-scale));
+  font-weight: 800;
+  color: #ffffff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  letter-spacing: -0.03em;
+  text-shadow: 0 4px 16px rgba(0, 0, 0, 0.7);
+}
+
+.launcher-track-artist {
+  margin: 0;
+  font-size: calc(18px * var(--ui-scale));
+  color: #94a3b8;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.launcher-transport-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  margin-top: 4px;
+}
+
+.launcher-controls {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+}
+
+.launcher-btn {
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  touch-action: manipulation;
+  transition: background-color 80ms, transform 80ms;
+}
+
+.launcher-btn:active {
+  background: rgba(217, 255, 120, 0.2);
+  transform: scale(0.95);
+}
+
+.launcher-btn-prev,
+.launcher-btn-next {
+  width: 74px;
+  height: 74px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--ink);
+}
+
+.launcher-btn-play {
+  width: 86px;
+  height: 86px;
+  background: var(--acid);
+  color: #111;
+  border: 0;
+  box-shadow: 0 8px 24px rgba(217, 255, 120, 0.35);
+}
+
+.launcher-btn svg {
+  width: 28px;
+  height: 28px;
+  display: block;
+}
+
+.launcher-btn-play svg {
+  width: 36px;
+  height: 36px;
+  fill: #111;
+  color: #111;
+}
+
+@media (max-height: 650px) {
+  .launcher-media-stage {
+    gap: 12px;
+  }
+  .launcher-track-col {
+    gap: 12px;
+  }
+  .launcher-track-title {
+    font-size: calc(26px * var(--ui-scale));
+  }
+}

@@ -4,4 +4,5 @@ import type { VehicleProfile, VehicleState } from "../../domain/vehicle/types";
 export interface EngineSoundOutput {
   setProfile(profile: VehicleProfile): void;
   update(state: VehicleState): void;
+  getFrequencyData?(): Uint8Array | null;
 }

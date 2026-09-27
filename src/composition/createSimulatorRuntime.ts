@@ -15,6 +15,7 @@ export function createSimulatorRuntime(
   greenScore: GreenScore,
   onTelemetryStatus: ConstructorParameters<typeof BrowserGeolocation>[1],
   onControl?: (action: DriveAction, active: boolean) => void,
+  onHeading?: (heading: number | null) => void,
 ) {
   const audio = new WebAudioEngine();
   const session = new DrivingSession(vehicle, greenScore, audio);
@@ -22,7 +23,7 @@ export function createSimulatorRuntime(
   const gps = new BrowserGeolocation((speed) => session.setGpsSpeed(speed), (status) => {
     if (status !== "active") session.clearGpsSpeed();
     onTelemetryStatus(status);
-  });
+  }, 5_000, onHeading);
   const keyboard = new KeyboardInput(
     (action, active) => {
       session.setControl(action, active);
@@ -32,4 +33,3 @@ export function createSimulatorRuntime(
   );
   return { audio, session, gps, keyboard, bluetooth };
 }
-

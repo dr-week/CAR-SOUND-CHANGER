@@ -1,0 +1,113 @@
+.home-panel {
+  display: flex;
+  flex-direction: column;
+  background: var(--panel-glass, rgba(21, 26, 23, 0.82));
+  border: 1px solid var(--panel-border, rgba(241, 239, 232, 0.09));
+  border-radius: var(--radius-squircle, 24px);
+  padding: 16px 20px 18px;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.4);
+  overflow: hidden;
+  position: relative;
+}
+
+.panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  flex-shrink: 0;
+}
+
+.panel-tag {
+  font: 700 calc(10px * var(--ui-scale)) var(--mono);
+  letter-spacing: 0.16em;
+  color: var(--muted);
+  opacity: 0.7;
+}
+
+.panel-tag-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.panel-tag-live {
+  font: 700 calc(9px * var(--ui-scale)) var(--mono);
+  letter-spacing: 0.12em;
+  color: #111;
+  background: var(--acid, #d9ff78);
+  padding: 2px 8px;
+  border-radius: 6px;
+  animation: pulse-live 1.5s infinite ease-in-out alternate;
+}
+
+@keyframes pulse-live {
+  from { opacity: 0.85; }
+  to { opacity: 1; box-shadow: 0 0 10px rgba(217, 255, 120, 0.6); }
+}
+
+.panel-tabs {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.panel-tab-btn {
+  position: relative;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--muted);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  touch-action: manipulation;
+  transition: all 0.15s ease;
+  padding: 0;
+}
+
+.panel-tab-dot {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--acid);
+  box-shadow: 0 0 8px var(--acid);
+}
+
+.panel-tab-icon {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  flex-shrink: 0;
+}
+
+.panel-tab-btn:hover {
+  color: var(--ink);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.panel-tab-btn.active {
+  background: rgba(217, 255, 120, 0.16);
+  border-color: rgba(217, 255, 120, 0.45);
+  color: var(--acid);
+  box-shadow: 0 0 12px rgba(217, 255, 120, 0.18);
+}
+
+.panel-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 0;
+  padding-top: 14px;
+}

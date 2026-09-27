@@ -1,0 +1,87 @@
+.setting-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 18px 22px;
+  border-radius: 20px;
+  background: var(--panel-glass, rgba(21, 26, 23, 0.75));
+  border: 1px solid var(--line);
+  backdrop-filter: blur(16px);
+}
+.setting-icon-badge {
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+.setting-icon-badge svg { width: 22px; height: 22px; }
+.mint { background: rgba(52, 199, 89, 0.12); color: #34c759; }
+.cyan { background: rgba(0, 199, 255, 0.12); color: #00c7ff; }
+.amber { background: rgba(255, 179, 0, 0.12); color: #ffb300; }
+.setting-content { flex: 1; display: flex; flex-direction: column; gap: 10px; }
+.setting-header-row { display: flex; justify-content: space-between; align-items: center; }
+.setting-content h2 { font-size: 14px; font-weight: 700; margin: 0; color: var(--ink); }
+.value-badge {
+  font: 700 11px var(--mono);
+  padding: 3px 10px;
+  border-radius: 99px;
+  background: rgba(217, 255, 120, 0.12);
+  color: var(--acid);
+}
+.setting-slider { width: 100%; accent-color: var(--acid); cursor: pointer; }
+.segmented-pills {
+  display: flex;
+  gap: 6px;
+  background: rgba(0, 0, 0, 0.35);
+  padding: 4px;
+  border-radius: 99px;
+  border: 1px solid var(--line);
+}
+.segmented-pill {
+  flex: 1;
+  padding: 6px 12px;
+  border-radius: 99px;
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  font: 600 11px var(--mono);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.segmented-pill.active {
+  background: var(--acid);
+  color: #111;
+  font-weight: 700;
+  box-shadow: 0 0 12px rgba(217, 255, 120, 0.3);
+}
+.toggle-switch-btn {
+  width: 48px;
+  height: 26px;
+  border-radius: 99px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.1);
+  padding: 2px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.toggle-switch-btn.active {
+  background: var(--acid);
+  border-color: var(--acid);
+  box-shadow: 0 0 12px rgba(217, 255, 120, 0.35);
+}
+.switch-knob {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #ffffff;
+  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+}
+.toggle-switch-btn.active .switch-knob {
+  transform: translateX(22px);
+  background: #111111;
+}

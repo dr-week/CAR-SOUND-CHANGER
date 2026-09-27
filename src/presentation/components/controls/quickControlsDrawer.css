@@ -1,0 +1,89 @@
+.quick-control-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 14px;
+}
+.quick-label-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--muted);
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.quick-label-row svg {
+  width: 18px;
+  height: 18px;
+}
+.quick-label-row strong {
+  margin-left: auto;
+  color: var(--ink);
+  font-family: var(--mono);
+  font-size: 15px;
+}
+.stepper-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.stepper-btn {
+  width: 52px;
+  height: 52px;
+  border-radius: 16px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--ink);
+  font-size: 26px;
+  font-weight: 600;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  touch-action: manipulation;
+  transition: transform 0.1s ease, background 0.1s ease, border-color 0.1s ease;
+}
+.stepper-btn:active {
+  transform: scale(0.93);
+  background: rgba(255, 255, 255, 0.16);
+  border-color: var(--acid);
+}
+.slider-touch-area {
+  flex: 1;
+  position: relative;
+  display: flex;
+  align-items: center;
+  height: 52px;
+}
+.slider-touch-area input[type="range"] {
+  width: 100%;
+  cursor: pointer;
+}
+.sim-actions-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.sim-action-btn {
+  min-height: 48px;
+  border-radius: 14px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--ink);
+  font: 600 12px var(--mono);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: all 0.15s ease;
+}
+.sim-action-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: var(--acid);
+}
+.sim-action-btn:active {
+  transform: scale(0.96);
+  background: var(--acid);
+  color: #111;
+}

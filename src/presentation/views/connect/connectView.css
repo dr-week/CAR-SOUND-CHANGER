@@ -1,0 +1,183 @@
+.connect-page {
+  padding: 24px 30px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.connect-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.connect-title-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.connect-title-group h1 {
+  font-size: 24px;
+  font-weight: 700;
+  margin: 0;
+  color: var(--ink, #f1efe8);
+}
+
+.connect-status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  border-radius: 99px;
+  font: 600 11px var(--mono);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--line);
+  color: var(--muted);
+}
+
+.connect-status-badge.connected {
+  background: rgba(52, 199, 89, 0.12);
+  border-color: rgba(52, 199, 89, 0.35);
+  color: #34c759;
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: currentColor;
+  box-shadow: 0 0 10px currentColor;
+}
+
+.connect-tabs { display: flex; gap: 10px; }
+.connect-tab-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  border-radius: 14px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--muted);
+  font: 600 12px var(--mono);
+  cursor: pointer;
+  transition: all 0.18s ease;
+}
+
+.connect-tab-btn svg { width: 18px; height: 18px; stroke: currentColor; }
+.connect-tab-btn.active {
+  background: var(--acid, #d9ff78);
+  border-color: var(--acid, #d9ff78);
+  color: #111;
+  font-weight: 700;
+  box-shadow: 0 0 20px rgba(217, 255, 120, 0.25);
+}
+
+.connect-body {
+  display: grid;
+  grid-template-columns: 1fr 340px;
+  gap: 20px;
+}
+
+.connect-card {
+  padding: 24px;
+  border-radius: var(--radius-squircle, 22px);
+  background: var(--panel-glass, rgba(21, 26, 23, 0.75));
+  border: 1px solid var(--line);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  min-height: 280px;
+}
+
+.connect-card-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 18px;
+  background: rgba(217, 255, 120, 0.1);
+  color: var(--acid);
+  display: grid;
+  place-items: center;
+  margin-bottom: 14px;
+  transition: all 0.3s ease;
+}
+
+.connect-card-icon.pulsing { animation: pulse-ring 1.2s infinite ease-out; }
+@keyframes pulse-ring {
+  0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(217, 255, 120, 0.6); }
+  70% { transform: scale(1.08); box-shadow: 0 0 0 16px rgba(217, 255, 120, 0); }
+  100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(217, 255, 120, 0); }
+}
+
+.connect-card-icon svg { width: 28px; height: 28px; stroke: currentColor; }
+.connect-card h2 { font-size: 17px; margin: 0 0 6px; }
+.connect-card p { font-size: 13px; color: var(--muted); margin: 0 0 18px; max-width: 320px; }
+
+.connect-action-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 22px;
+  border-radius: 99px;
+  background: var(--acid, #d9ff78);
+  color: #111;
+  font: 700 12px var(--mono);
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 0 16px rgba(217, 255, 120, 0.3);
+  transition: all 0.15s ease;
+}
+.connect-action-btn:active { transform: scale(0.96); }
+
+.connect-details-card {
+  padding: 24px;
+  border-radius: var(--radius-squircle, 22px);
+  background: var(--panel-glass, rgba(21, 26, 23, 0.75));
+  border: 1px solid var(--line);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.detail-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font: 500 12px var(--mono);
+  color: var(--muted);
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+.detail-row b { color: var(--ink); }
+
+.test-btn-group { display: flex; gap: 8px; margin-top: auto; }
+.test-btn {
+  flex: 1;
+  padding: 8px 12px;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--ink);
+  font: 600 11px var(--mono);
+  cursor: pointer;
+}
+
+.proximity-pin-box { display: flex; flex-direction: column; align-items: center; gap: 8px; margin-top: 14px; }
+.pin-label { font: 500 11px var(--mono); color: var(--muted); }
+.pin-digits { display: flex; gap: 8px; }
+.pin-digit {
+  width: 32px;
+  height: 40px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--line);
+  display: grid;
+  place-items: center;
+  font: 700 18px var(--mono);
+  color: var(--acid);
+}
+.gateway-code { color: var(--acid); font-size: 15px; font-weight: 700; font-family: var(--mono); }

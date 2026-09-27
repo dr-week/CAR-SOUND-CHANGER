@@ -10,9 +10,11 @@ export class BrowserGeolocation {
     private readonly onSpeed: (speedKph: number) => void,
     private readonly onStatus: (status: TelemetryStatus) => void,
     private readonly staleAfterMs = 5_000,
+    private readonly onHeading: (heading: number | null) => void = () => {},
   ) {}
 
   start(): void {
+    this.onHeading(null);
     if (typeof navigator === "undefined" || !navigator.geolocation) {
       this.onStatus("unavailable");
       return;
@@ -26,6 +28,10 @@ export class BrowserGeolocation {
         const now = Date.now();
         const lat = position.coords.latitude;
         const lon = position.coords.longitude;
+        // Course over ground is meaningful only with a moving, valid GPS fix.
+        const heading = position.coords.heading;
+        this.onHeading(position.coords.speed !== null && position.coords.speed > 0 &&
+          heading !== null && Number.isFinite(heading) && heading >= 0 && heading < 360 ? heading : null);
         let speedKph: number | null = null;
 
         if (position.coords.speed !== null && Number.isFinite(position.coords.speed) && position.coords.speed >= 0) {
@@ -60,18 +66,23 @@ export class BrowserGeolocation {
         this.onStatus("active");
         this.onSpeed(speedKph);
       },
-      (error) => this.onStatus(error.code === error.PERMISSION_DENIED ? "denied" : "error"),
+      (error) => {
+        this.onHeading(null);
+        this.onStatus(error.code === error.PERMISSION_DENIED ? "denied" : "error");
+      },
       { enableHighAccuracy: true, maximumAge: 1_000, timeout: this.staleAfterMs },
     );
 
     this.staleTimer = setInterval(() => {
       if (this.lastFixAt !== null && Date.now() - this.lastFixAt > this.staleAfterMs) {
+        this.onHeading(null);
         this.onStatus("stale");
       }
     }, 1_000) as unknown as number;
   }
 
   stop(): void {
+    this.onHeading(null);
     if (this.watchId !== null && typeof navigator !== "undefined" && navigator?.geolocation) {
       try {
         navigator.geolocation.clearWatch(this.watchId);

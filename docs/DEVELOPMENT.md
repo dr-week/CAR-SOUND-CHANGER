@@ -50,4 +50,17 @@ For UI changes, visually inspect Home and the affected surface in landscape. Cha
 
 `npm run build` creates `dist/`. The service worker is generated during the build. Validate a clean install, offline fallback, Maps failure state, audio activation, and preference persistence before publishing.
 
-The PWA is not a native Android launcher. APK packaging and head-unit validation follow [ANDROID.md](./ANDROID.md).
+### Android APK Build
+
+The native shell lives in `android/`. Use JDK 17, Gradle wrapper 8.13, and Android SDK platform/build-tools 35. Machine paths belong in ignored `android/local.properties` (`sdk.dir`) and `android/toolchain.local.json` (`javaHome`, `adb`), not global Windows settings.
+
+```bash
+npm run android:build
+npm run android:run
+```
+
+`android:build` packages fresh UI assets into `android/app/build/outputs/apk/debug/app-debug.apk`. Gradle runs the web build automatically, including from Android Studio. The APK loads bundled content without Chrome or Vite.
+
+`android:run` builds, updates with `adb install -r`, and restarts only this app on existing `emulator-5554`. It never creates a VM or clears app data. Override the target with `npm run android:run -- -Serial <serial>`.
+
+Source edits require rerunning this command; this is not hot reload. Android Studio Apply Changes still builds updates and does not support every change. A future debug-only live-server mode must remain separate from standalone APK verification. Head-unit validation follows [Android integration](./ANDROID_INTEGRATION.md).

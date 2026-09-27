@@ -19,6 +19,7 @@ export function useVehicleSimulator() {
   const audioStatus = ref<AudioStatus>("inactive");
   const gpsEnabled = ref(false);
   const telemetryStatus = ref<TelemetryStatus>("inactive");
+  const headingDegrees = ref<number | null>(null);
   const accelerating = ref(false);
   const braking = ref(false);
 
@@ -32,6 +33,7 @@ export function useVehicleSimulator() {
       if (action === "accelerate") accelerating.value = active;
       if (action === "brake") braking.value = active;
     },
+    (heading) => { headingDegrees.value = heading; },
   );
 
   const bluetoothStatus = ref<BluetoothStatus>(bluetooth.status);
@@ -137,6 +139,7 @@ export function useVehicleSimulator() {
     audioStatus,
     gpsEnabled,
     telemetryStatus,
+    headingDegrees,
     accelerating,
     braking,
     bluetoothStatus,
@@ -152,5 +155,6 @@ export function useVehicleSimulator() {
     reset,
     volume,
     setVolume,
+    getFrequencyData: () => audio.getFrequencyData(),
   };
 }

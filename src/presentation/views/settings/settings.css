@@ -1,0 +1,88 @@
+.settings-page {
+  padding: 24px 30px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.settings-page .page-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 0;
+}
+
+.settings-title-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.settings-title-icon {
+  width: 24px;
+  height: 24px;
+  color: var(--acid);
+  flex-shrink: 0;
+}
+
+.settings-title-group h1 {
+  font-size: 24px;
+  font-weight: 700;
+  margin: 0;
+  color: var(--ink, #f1efe8);
+  line-height: 1;
+}
+
+.settings-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.bt-music-settings-btn,
+.phone-settings-btn,
+.dsp-settings-btn,
+.system-settings-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: 99px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--ink);
+  font: 700 11px var(--mono);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.settings-action-icon {
+  width: 15px;
+  height: 15px;
+  stroke: currentColor;
+  fill: none;
+  flex-shrink: 0;
+}
+
+.bt-music-settings-btn:hover,
+.phone-settings-btn:hover,
+.dsp-settings-btn:hover,
+.system-settings-btn:hover {
+  background: rgba(217, 255, 120, 0.12);
+  border-color: var(--acid);
+  color: var(--acid);
+  box-shadow: 0 0 14px rgba(217, 255, 120, 0.2);
+}
+
+.settings-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+
+@media (max-width: 960px) {
+  .settings-grid {
+    grid-template-columns: 1fr;
+  }
+}

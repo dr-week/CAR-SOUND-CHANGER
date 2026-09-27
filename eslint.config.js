@@ -22,5 +22,10 @@ export default [
       "vue/html-indent": "off",
     },
   },
+  {
+    // Browser and Web Audio test doubles intentionally model partial platform objects.
+    files: ["src/**/__tests__/**/*.ts"],
+    rules: { "@typescript-eslint/no-explicit-any": "off" },
+  },
   { ignores: ["dist", "node_modules"] },
 ];

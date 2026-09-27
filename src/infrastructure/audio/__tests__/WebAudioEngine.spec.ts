@@ -2,78 +2,11 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { WebAudioEngine } from "../WebAudioEngine";
 import { CAR_PROFILES } from "../../../domain/vehicle/carProfiles";
 import { createVehicleState } from "../../../domain/vehicle/vehiclePhysics";
-
-function mockAudio(failBuffer = false) {
-  const param = () => ({
-    value: 0,
-    cancelScheduledValues: vi.fn(),
-    setTargetAtTime: vi.fn(),
-    setValueAtTime: vi.fn(),
-    linearRampToValueAtTime: vi.fn(),
-  });
-  function makeNode() {
-    const value = {
-      connect: vi.fn().mockReturnThis(),
-      disconnect: vi.fn(),
-      start: vi.fn(),
-      stop: vi.fn(),
-      gain: param(),
-      frequency: param(),
-      Q: param(),
-      setPeriodicWave: vi.fn(),
-      buffer: null,
-      loop: false,
-      type: "",
-    };
-    return value;
-  }
-  const nodes: ReturnType<typeof makeNode>[] = [];
-  function node() {
-    const value = makeNode();
-    nodes.push(value);
-    return value;
-  }
-  class Context {
-    state = "suspended";
-    currentTime = 0;
-    sampleRate = 44100;
-    destination = {};
-    resume = vi.fn(async () => {
-      this.state = "running";
-    });
-    suspend = vi.fn(async () => {
-      this.state = "suspended";
-    });
-    close = vi.fn(async () => {
-      this.state = "closed";
-    });
-    createGain = node;
-    createBiquadFilter = node;
-    createOscillator = node;
-    createBufferSource = node;
-    createPeriodicWave = vi.fn(() => ({}));
-    createBuffer = vi.fn(() => {
-      if (failBuffer) {
-        failBuffer = false;
-        throw new Error("buffer allocation failed");
-      }
-      return { getChannelData: () => new Float32Array(100) };
-    });
-  }
-  const instances: Context[] = [];
-  vi.stubGlobal(
-    "AudioContext",
-    class extends Context {
-      constructor() {
-        super();
-        instances.push(this);
-      }
-    },
-  );
-  return { nodes, instances };
-}
+import { mockAudio } from "./mockAudioContext";
 
 describe("Web Audio lifecycle", () => {
+  afterEach(() => vi.unstubAllGlobals());
+
   it("does not reschedule unchanged pitch each frame, but reapplies it after resume", async () => {
     const { nodes, instances } = mockAudio();
     const engine = new WebAudioEngine();
@@ -94,17 +27,18 @@ describe("Web Audio lifecycle", () => {
     );
     await engine.dispose();
   });
+
   it("rolls back a failed graph and permits a clean retry", async () => {
     const { instances, nodes } = mockAudio(true);
     const engine = new WebAudioEngine();
     await expect(engine.resume()).rejects.toThrow("buffer allocation failed");
     expect(instances[0].close).toHaveBeenCalledOnce();
-    // A buffer source allocated before the failure is unconnected; context.close releases it.
     nodes.filter((n) => n.connect.mock.calls.length > 0).forEach((n) => expect(n.disconnect).toHaveBeenCalled());
     await engine.resume();
     expect(instances).toHaveLength(2);
     await engine.dispose();
   });
+
   it("handles disposal while resume is awaiting browser permission", async () => {
     const { instances } = mockAudio();
     const engine = new WebAudioEngine();
@@ -122,6 +56,7 @@ describe("Web Audio lifecycle", () => {
     finish();
     await expect(pending).rejects.toThrow("Audio did not start");
   });
+
   it("silences stale gains before resuming and filters bass independently", async () => {
     const { instances, nodes } = mockAudio();
     const engine = new WebAudioEngine();
@@ -134,6 +69,7 @@ describe("Web Audio lifecycle", () => {
     expect(instances).toHaveLength(1);
     await engine.dispose();
   });
+
   it("fades profile changes before applying new waveforms", async () => {
     const { nodes, instances } = mockAudio();
     const engine = new WebAudioEngine();
@@ -150,7 +86,7 @@ describe("Web Audio lifecycle", () => {
     expect(nodes.some((n) => n.frequency.setValueAtTime.mock.calls.some(([hz]) => hz === 40))).toBe(true);
     await engine.dispose();
   });
-  afterEach(() => vi.unstubAllGlobals());
+
   it("does not create audio on profile selection, and reuses sources on profile changes", async () => {
     const { nodes, instances } = mockAudio();
     const engine = new WebAudioEngine();
@@ -170,6 +106,7 @@ describe("Web Audio lifecycle", () => {
     expect(instances[0].close).toHaveBeenCalledOnce();
     await engine.dispose();
   });
+
   it("keeps zero volume muted during updates and reports startup failure", async () => {
     const { nodes, instances } = mockAudio();
     const engine = new WebAudioEngine();
